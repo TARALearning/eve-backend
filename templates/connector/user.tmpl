@@ -1,0 +1,93 @@
+{{define "HttpRestConnectEVUser"}}
+var EVUserStorage = "{{.USER_STORAGE_URL}}"
+var EVUserStorageDB =  "{{.USER_STORAGE_DB}}"
+var EVUserStorageBucket = "{{.USER_STORAGE_BUCKET}}"
+
+func EVUserUid(email string) string {
+	return eve.Sha1(email)
+}
+
+func EVUserPassword(password string) string {
+	return eve.Sha1(password)
+}
+
+func EVUserValidateCredentials(email, password string) bool {
+    log.Println(email,password)
+	uid := EVUserUid(email)
+    res,err := EVUserGet(uid)
+    if err != nil{
+        log.Println(err)
+        return false
+    }
+    if res.StatusCode != 200 {
+        body,_ := eve.ResponseBodyAll(res)
+        log.Println(string(body))
+        return false
+    }
+    body,err := eve.ResponseBodyAll(res)
+    if err != nil{
+        log.Println(err)
+        return false
+    }
+    if string(body) == EVUserPassword(password){
+        return true
+    }
+    return false
+}
+
+func EVUserIsAllowed(w http.ResponseWriter, r *http.Request) bool {
+    // check for authenticatio token
+    if r.Header.Get("Authorization") != "" {
+        log.Println(r.Header.Get("Authorization"))
+        sp := new(EVSecretProvider)
+        enc, sig, err := sp.SecretGet()
+        if err != nil {
+            return false
+        }
+        token := strings.Split(r.Header.Get("Authorization")," ")
+        expired, err := eve.TokenIsExpired(token[1], enc, sig)
+        if err != nil {
+            return false
+        }
+        if ! expired {
+            return true
+        }
+    }
+    if (r.FormValue("email") != "" && r.FormValue("password") != "") {
+        if EVUserValidateCredentials(r.FormValue("email"), r.FormValue("password")){
+            return true
+        }
+    }
+
+    // if nothing works try if there is a valid cookie
+    c,err := r.Cookie("EVToken")
+    if err != nil {
+        return false
+    }
+    sp := new(EVSecretProvider)
+    enc, sig, err := sp.SecretGet()
+    if err != nil {
+        return false
+    }
+    expired, err := eve.TokenIsExpired(c.Value, enc, sig)
+    if err != nil {
+        return false
+    }
+    if ! expired {
+        return true
+    }
+    return false
+}
+
+func EVUserSave(id , message string) (*http.Response, error){
+    return eve.EVHttpSendForm(http.MethodPost, EVUserStorage, url.Values{"database": {EVUserStorageDB}, "bucket": {EVUserStorageBucket}, "key": {id}, "message": {message}, "evbolt.msgtype":{"string"}})
+}
+
+func EVUserGet(id string) (*http.Response,error){
+    return eve.EVHttpReceive(http.MethodGet, EVUserStorage, url.Values{"database":{EVUserStorageDB}, "bucket":{EVUserStorageBucket}, "evbolt.data":{"key"}, "evbolt.keytype":{"c"}, "key":{id}})
+}
+
+func EVUserDelete(id string)(*http.Response,error){
+    return eve.EVHttpReceive(http.MethodDelete, EVUserStorage, url.Values{"database":{EVUserStorageDB}, "bucket":{EVUserStorageBucket}, "evbolt.data":{"key"}, "evbolt.keytype":{"c"}, "key":{id}})
+}
+{{end}}

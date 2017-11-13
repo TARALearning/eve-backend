@@ -1,0 +1,10 @@
+{{define "EVRestHttpHandlerPrometheus"}}
+// collect requests counter for prometheus monitoring
+HttpResponsesTotal.WithLabelValues(r.Method, r.URL.Path).Inc()
+if r.Method == http.MethodGet {
+    if r.URL.Path == "{{.ROUTE_PATH_PREFIX}}metrics" {
+        PromHandler().ServeHTTP(w, r)
+        return
+    }
+}
+{{end}}

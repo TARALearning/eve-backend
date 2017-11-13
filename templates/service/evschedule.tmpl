@@ -1,0 +1,31 @@
+{{define "EVScheduleRestApi"}}
+if strings.Contains(r.URL.Path, "{{.ROUTE_PATH_PREFIX}}evschedule") {
+    switch r.Method {
+        case http.MethodGet:
+            err := EVSchedulerObj.RESTGetCommand(w, r)
+            if err != nil {
+                w.WriteHeader(500)
+                w.Write([]byte(err.Error()))
+            }
+        case http.MethodPost:
+            err := EVSchedulerObj.RESTAppendCommand(w, r)
+            if err != nil {
+                w.WriteHeader(500)
+                w.Write([]byte(err.Error()))
+            }
+        case http.MethodPut:
+            err := EVSchedulerObj.RESTUpdateCommand(w, r)
+            if err != nil {
+                w.WriteHeader(500)
+                w.Write([]byte(err.Error()))
+            }
+        case http.MethodDelete:
+            err := EVSchedulerObj.RESTDeleteCommand(w, r)
+            if err != nil {
+                w.WriteHeader(500)
+                w.Write([]byte(err.Error()))
+            }
+    }
+    return
+}
+{{end}}

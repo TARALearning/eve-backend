@@ -1,0 +1,78 @@
+{{define "EVRestHttpHandler"}}
+type RestHttpHandler struct{}
+
+{{if .USE_EVLOG}}
+    {{template "HttpRestConnectEVLog" .}}
+{{end}}
+
+{{if .USE_EVUSER}}
+    {{template "HttpRestConnectEVUser" .}}
+{{end}}
+
+{{if .USE_EVSESSION}}
+    {{template "HttpRestConnectEVSession" .}}
+{{end}}
+
+{{if .USE_EVTOKEN}}
+    {{template "HttpRestConnectEVToken" .}}
+{{end}}
+
+{{if .USE_EVSECRET}}
+    {{template "HttpRestConnectEVSecret" .}}
+{{end}}
+
+{{if .USE_BOLT}}
+    {{template "HttpRestConnectBolt" .}}
+{{end}}
+
+{{if .USE_PROMETHEUS}}
+    {{template "EVRestPrometheus" .}}
+{{end}}
+
+{{if .USE_EVSCHEDULE}}
+    {{template "EVRestSchedule" .}}
+{{end}}
+
+func (hh *RestHttpHandler) ServeHTTP(w http.ResponseWriter, r *http.Request){
+    {{if .ENABLE_CROSS_ORIGIN}}
+        w.Header().Add("Access-Control-Allow-Headers", "*")
+	    w.Header().Add("Access-Control-Allow-Origin", "*")
+    {{end}}
+    {{if .DEBUG}}
+        log.Println("eve","::",r.Method, r.URL.Path)
+        {{if .USE_EVLOG}}
+            // log only to the evlog api if it is not the api call itself
+            // otherwise it will create a endless requests loop
+            if r.URL.Path != "{{.ROUTE_PATH_PREFIX}}evlog"{
+                {{if not .USE_EVLOG_API}}
+                    defer EVLogPublish()
+                {{end}}
+                eve.EVLogPrintln("EVLogger","::",r.Method, r.URL.Path)
+            }
+        {{end}}
+    {{end}}
+    {{if .USE_PROMETHEUS}}
+        {{template "EVRestHttpHandlerPrometheus" .}}
+    {{end}}
+    {{template "EVRestHttpHandlerHelp" .}}
+    {{if .USE_EVBOLT_API}}
+        {{template "EVBoltRestApi" .}}
+    {{end}}
+    {{if .USE_EVLOG_API}}
+        {{template "EVLogRestApi" .}}
+    {{end}}
+    {{if .USE_LOGIN_API}}
+        {{template "EVAuthRestApi" .}}
+    {{end}}
+    {{if .USE_EVSCHEDULE_API}}
+        {{template "EVScheduleRestApi" .}}
+    {{end}}
+
+    w.WriteHeader(404)
+    w.Write([]byte("404 page not found"))
+}
+
+func NewRestHttpHandler() http.Handler {
+	return &RestHttpHandler{}
+}
+{{end}}

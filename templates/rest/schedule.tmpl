@@ -1,0 +1,84 @@
+{{define "EVRestSchedule"}}
+type Scheduler struct {
+    EVSched *eve.Scheduler
+}
+// RESTGetCommand will return the command details for the given command Id
+func (s *Scheduler) RESTGetCommand(w http.ResponseWriter, r *http.Request) error {
+	if eve.MuxValue(r, "command") == "" {
+		return errors.New("you have to specify a command")
+	}
+	// todo implementation
+	return nil
+}
+
+// RESTAddCommand will add a command to the running scheduler object Running map
+func (s *Scheduler) RESTAppendCommand(w http.ResponseWriter, r *http.Request) error {
+	{{if .DEBUG}}
+		fmt.Println(r.FormValue("Id"))
+		fmt.Println(r.FormValue("Cmd"))
+		fmt.Println(r.FormValue("Args"))
+	{{end}}
+	return s.EVSched.AppendCmd(r.FormValue("Id"), r.FormValue("Cmd"), r.FormValue("Owner"), r.Form["Args"])
+}
+
+// RESTUpdateCommand will update a running command in the Scheduler Running map
+func (s *Scheduler) RESTUpdateCommand(w http.ResponseWriter, r *http.Request) error {
+	switch r.FormValue("Mode") {
+	case "Replace.Process":
+		return s.EVSched.ReplaceCmd(r.FormValue("Id"), r.FormValue("Cmd"), r.FormValue("Owner"), r.Form["Args"])
+	case "Kill.Process":
+		return s.RESTKillProcess(w, r)
+	case "Kill.Processes":
+		return s.RESTKillAllProcesses(w, r)
+	case "Start.Process":
+		return s.RESTStartProcess(w, r)
+	case "Start.Processes":
+		return s.RESTStartAllProcesses(w, r)
+	case "Shutdown":
+		return s.RESTShutdown(w, r)
+	}
+	return errors.New("No Mode was choosen please use one the following modes: Replace.Process|Kill.Process|Kill.Processes|Start.Process|Start.Processes|Shutdown")
+}
+
+// RESTDeleteCommand will delete a command from the Scheduler Running map
+func (s *Scheduler) RESTDeleteCommand(w http.ResponseWriter, r *http.Request) error {
+	return s.EVSched.DeleteCmd(r.FormValue("Id"))
+}
+
+// RESTKillProcess will kill a process from the Scheduler Running map
+func (s *Scheduler) RESTKillProcess(w http.ResponseWriter, r *http.Request) error {
+	return s.EVSched.KillCmd(r.FormValue("Id"))
+}
+
+// RESTKillAllProcesses will kill all processes from the Scheduler Running map
+func (s *Scheduler) RESTKillAllProcesses(w http.ResponseWriter, r *http.Request) error {
+	return s.EVSched.KillAllCmds()
+}
+
+// RESTStartProcess will start a process from the Scheduler Running map
+func (s *Scheduler) RESTStartProcess(w http.ResponseWriter, r *http.Request) error {
+	{{if .DEBUG}}
+		fmt.Println("start process with id", r.FormValue("Id"))
+	{{end}}
+	return s.EVSched.StartProcess(r.FormValue("Id"))
+}
+
+// RESTStartAllProcessess will start all processes from the Scheduler Running map
+func (s *Scheduler) RESTStartAllProcesses(w http.ResponseWriter, r *http.Request) error {
+	return s.EVSched.StartAllProcesses()
+}
+
+// RESTShutdown will kill all processes from the Scheduler Running map and stop the scheduler itself
+func (s *Scheduler) RESTShutdown(w http.ResponseWriter, r *http.Request) error {
+	return s.EVSched.Shutdown()
+}
+
+func (s *Scheduler) Run() error {
+	return s.EVSched.Run()
+}
+
+var EVSchedulerObj *Scheduler = &Scheduler{
+    EVSched: eve.NewScheduler(),
+}
+
+{{end}}

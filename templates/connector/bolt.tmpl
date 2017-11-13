@@ -1,0 +1,27 @@
+{{define "HttpRestConnectBolt"}}
+
+var EVBoltStorage = "{{.STORAGE_URL}}"
+var EVBoltStorageDB =  "{{.STORAGE_DB}}"
+var EVBoltStorageBucket = "{{.STORAGE_BUCKET}}"
+
+func EVBoltGet(key string, values url.Values)(*http.Response, error){
+    return eve.EVHttpReceive(http.MethodGet, EVBoltStorage, values)
+}
+
+func EVBoltSaveValue(val string) (*http.Response, error){
+	return eve.EVHttpSendForm(http.MethodPost, EVBoltStorage, url.Values{"database": {EVBoltStorageDB}, "bucket": {EVBoltStorageBucket}, "evbolt.keytype":{"a"}, "message": {val}, "evbolt.msgtype":{"string"}})
+}
+
+func EVBoltSave(key , val string) (*http.Response, error){
+    return eve.EVHttpSendForm(http.MethodPost, EVBoltStorage, url.Values{"database": {EVBoltStorageDB}, "bucket": {EVBoltStorageBucket}, "evbolt.keytype":{"c"}, "key": {key}, "message": {val}, "evbolt.msgtype":{"string"}})
+}
+
+func EVBoltUpdate(key, val string) (*http.Response, error){
+    return eve.EVHttpSendForm(http.MethodPut, EVBoltStorage, url.Values{"database": {EVBoltStorageDB}, "bucket": {EVBoltStorageBucket}, "evbolt.keytype":{"c"}, "key": {key}, "message": {val}, "evbolt.msgtype":{"string"}})
+}
+
+func EVBoltDelete(key string, values url.Values)(*http.Response, error){
+    return eve.EVHttpReceive(http.MethodDelete, EVBoltStorage, values)
+}
+
+{{end}}

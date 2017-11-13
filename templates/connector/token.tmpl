@@ -1,0 +1,75 @@
+{{define "HttpRestConnectEVToken"}}
+var EVTokenStorage = "{{.TOKEN_STORAGE_URL}}"
+var EVTokenStorageDB =  "{{.TOKEN_STORAGE_DB}}"
+var EVTokenStorageBucket = "{{.TOKEN_STORAGE_BUCKET}}"
+
+func EVTokenSave(id , message string) (*http.Response, error){
+    return eve.EVHttpSendForm(http.MethodPost, EVTokenStorage, url.Values{"database": {EVTokenStorageDB}, "bucket": {EVTokenStorageBucket}, "key": {id}, "message": {base64.StdEncoding.EncodeToString([]byte(message))}, "evbolt.msgtype":{"base64"}})
+}
+
+func EVTokenGet(id string) (*http.Response,error){
+    return eve.EVHttpReceive(http.MethodGet, EVTokenStorage, url.Values{"database":{EVTokenStorageDB}, "bucket":{EVTokenStorageBucket}, "evbolt.data":{"key"}, "evbolt.keytype":{"c"}, "key":{id}})
+}
+
+func EVTokenDelete(id string)(*http.Response,error){
+    return eve.EVHttpReceive(http.MethodDelete, EVTokenStorage, url.Values{"database":{EVTokenStorageDB}, "bucket":{EVTokenStorageBucket}, "evbolt.data":{"key"}, "evbolt.keytype":{"c"}, "key":{id}})
+}
+
+func EVTokenToStringFromRequest(r *http.Request, tokenHandler eve.TokenSecretHandler) (string, error) {
+	bearer := r.Header.Get("Authorization")
+	if bearer != "" {
+		hValues := strings.Split(bearer, " ")
+		token := hValues[(len(hValues) - 1)]
+		encSecret, _, err := tokenHandler.SecretGet()
+		if err != nil {
+			return "", err
+		}
+		return eve.TokenToString(token, encSecret)
+	}
+	return "", errors.New("EVTokenToStringFromRequest :: no token found to be converted to string!")
+}
+
+func EVTokenCheck(r *http.Request, tokenHandler eve.TokenSecretHandler) (bool, error) {
+	bearer := r.Header.Get("Authorization")
+	if bearer != "" {
+		hValues := strings.Split(bearer, " ")
+		token := hValues[(len(hValues) - 1)]
+		encSecret, sigSecret, err := tokenHandler.SecretGet()
+		if err != nil {
+			return false, err
+		}
+		ok, err := eve.TokenCheck(token, encSecret, sigSecret)
+		if err != nil {
+			return false, err
+		}
+		if ok {
+			expired, err := eve.TokenIsExpired(token, encSecret, sigSecret)
+			if err != nil {
+				return false, err
+			}
+			if !expired {
+				return true, nil
+			}
+			return false, errors.New("EVTokenCheck :: the given token for the resource: " + r.URL.Path + " is already expired")
+		}
+		return ok, errors.New("EVTokenCheck :: can not validate the token signature for the given token for the resource: " + r.URL.Path)
+	}
+	return false, errors.New("EVTokenCheck :: the given request is not authorized to access the resource: " + r.URL.Path)
+}
+
+func EVTokenIsAllowed(w http.ResponseWriter, r *http.Request, tokenHandler eve.TokenSecretHandler) (bool, error) {
+	allowed, err := EVTokenCheck(r, tokenHandler)
+	if err != nil {
+		w.WriteHeader(500)
+		w.Write([]byte(err.Error()))
+		return false, err
+	}
+	if !allowed {
+		w.WriteHeader(403)
+		w.Write([]byte("EVTokenIsAllowed :: permission denied: you are not allowed for this service request"))
+		return false, err
+	}
+	return true, nil
+}
+
+{{end}}

@@ -1,0 +1,31 @@
+{{define "EVRestPrometheus"}}
+var (
+	PromNamespace      = "production"
+	PromSubsystem      = "evrest"
+	HttpResponsesTotal = prometheus.NewCounterVec(
+		prometheus.CounterOpts{
+			Namespace: PromNamespace,
+			Subsystem: PromSubsystem,
+			Name:      "http_responses_total",
+			Help:      "The count of http responses issued, classified by method and path.",
+		},
+		[]string{"method", "path"},
+	)
+	registeredProm = false
+	EVPromHandler http.Handler = nil
+)
+
+func PromInit() {
+	if !registeredProm {
+		prometheus.MustRegister(HttpResponsesTotal)
+		registeredProm = true
+	}
+	EVPromHandler = promhttp.Handler()
+}
+
+func PromHandler() http.Handler {
+	return EVPromHandler
+}
+
+{{end}}
+

@@ -1,0 +1,9 @@
+{{define "EVRestHttpHandlerHelp"}}
+if r.Method == "GET" {
+    if r.URL.Path == "{{.ROUTE_PATH_PREFIX}}help" {
+        w.WriteHeader(200)
+        w.Write([]byte(`{{commandUsage .Commands .}}`))
+        return
+    }
+}
+{{end}}

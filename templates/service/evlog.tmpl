@@ -1,0 +1,22 @@
+{{define "EVLogRestApi"}}
+if r.URL.Path == "{{.ROUTE_PATH_PREFIX}}evlog" {
+    if r.Method == http.MethodPost {    
+        body, err := eve.RequestBodyAll(r)
+        if err != nil {
+            {{if .DEBUG}}
+                log.Println(err)
+            {{end}}
+            w.WriteHeader(500)
+            w.Write([]byte("500"))
+        }
+        fmt.Println(string(body))
+        return
+    }
+    {{if .DEBUG}}
+        log.Println("405 method not allowed")
+    {{end}}
+    w.WriteHeader(405)
+    w.Write([]byte("405 method not allowed"))
+    return
+}
+{{end}}

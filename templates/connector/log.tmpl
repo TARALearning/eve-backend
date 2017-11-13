@@ -1,0 +1,10 @@
+{{define "HttpRestConnectEVLog"}}
+
+var EVLogUrl = "{{.EVLOG_URL}}"
+
+func EVLogPublish()(*http.Response, error){
+    defer func() {eve.EVLogger = log.New(eve.EVLogBuffer, "", log.LstdFlags)}()
+    return eve.EVHttpSendText( http.MethodPost, EVLogUrl, eve.EVLogBuffer.String())
+}
+
+{{end}}
