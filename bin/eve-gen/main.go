@@ -175,6 +175,7 @@ func main() {
 					"SECRET_KEY_FOR_TOKEN":   "123456789012345678901234567890ab",
 					"SECRET_SIG_FOR_TOKEN":   "sig.key.secret",
 					"COOKIE_EXP_MINUTES":     15,
+					"TIME_ZONE_LOCATION":     "Europe/Berlin",
 					"TOKEN_EXP_DAYS":         7,
 					"USE_EVSCHEDULE":         false,
 					"USE_EVSCHEDULE_API":     false,

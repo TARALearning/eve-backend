@@ -6,6 +6,7 @@ BSD
 ## DESCRIPTION
 The eve pkg contents are:
     * codebase of the service manager
+    * codebase for eve tools
     * codebase of the core services
     * templates for code generation
 
@@ -39,7 +40,7 @@ The eve pkg contents are:
 * cookie
 * routes/urls
 
-# BUILD DEPENDENCIES
+## BUILD DEPENDENCIES
 * [github.com/boltdb/bolt](https://github.com/boltdb/bolt)
 * [github.com/gorilla/mux](https://github.com/gorilla/mux)
 * [github.com/prometheus/client_golang/prometheus](https://github.com/prometheus/client_golang/tree/master/prometheus)

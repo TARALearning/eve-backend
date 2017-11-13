@@ -2,8 +2,7 @@
 
     if r.URL.Path == "{{.ROUTE_PATH_PREFIX}}access" {
         // check for authenticatio token
-        if r.Header.Get("Authorization") != "" {
-            log.Println(r.Header.Get("Authorization"))
+        if r.Header.Get("Authorization") != "" && strings.Contains(r.Header.Get("Authorization"), "Bearer"){
             sp := new(EVSecretProvider)
             enc, sig, err := sp.SecretGet()
             if err != nil {
@@ -24,6 +23,18 @@
                 return
             }
         }
+
+        // check if there are a basic authentication information available
+        email,pass,ok := r.BasicAuth()
+        if ok {
+            if EVUserValidateCredentials(email, pass){
+                w.WriteHeader(200)
+                w.Write([]byte("OK"))
+                return
+            }
+        }
+
+        // check for email and password as post values
         if (r.FormValue("email") != "" && r.FormValue("password") != "") {
             if EVUserValidateCredentials(r.FormValue("email"), r.FormValue("password")){
                 w.WriteHeader(200)
@@ -64,14 +75,19 @@
     }
 
     if r.URL.Path == "{{.ROUTE_PATH_PREFIX}}login" {
-        log.Println("1")
-        if !EVUserValidateCredentials(r.FormValue("email"), r.FormValue("password")) {
+        // get form data to login user
+        email := r.FormValue("email")
+        pass := r.FormValue("password")
+        // if no form data was provided
+        if email == "" && pass == "" {
+            // try to get basic auth email and pass
+            email,pass,_ = r.BasicAuth()
+        }
+        if !EVUserValidateCredentials(email, pass) {
             w.WriteHeader(403)
 	        w.Write([]byte("Forbidden"))
             return
         }
-        log.Println("2")
-        log.Println("3")
         // if user has successfullry validate the credentials get token credentials from storage
         sp := new(EVSecretProvider)
         enc, sig, err := sp.SecretGet()
@@ -80,24 +96,21 @@
 	        w.Write([]byte("500"))
             return
         }
-        log.Println("4")
         sessId := uniuri.NewLen(16)
         // save the session for all other services
-        res, err := EVSessionSave(sessId, EVUserUid(r.FormValue("email")))
+        res, err := EVSessionSave(sessId, EVUserUid(email))
         if err != nil {
             w.WriteHeader(500)
 	        w.Write([]byte("500"))
             return
         }
-        log.Println("5")
         if res.StatusCode != 200{
             w.WriteHeader(500)
 	        w.Write([]byte("500"))
             return
         }
-        log.Println("6")
         // create token content message
-        tokenProps := map[string]string{"u": EVUserUid(r.FormValue("email")), "c": time.Now().Format("2006-01-02 15:04:05.999999999 -0700 MST"), "e": time.Now().AddDate(0, 0, {{.TOKEN_EXP_DAYS}}).Format("2006-01-02 15:04:05.999999999 -0700 MST"), "t": "", "s": sessId}
+        tokenProps := map[string]string{"u": EVUserUid(email), "c": time.Now().Format("2006-01-02 15:04:05.999999999 -0700 MST"), "e": time.Now().AddDate(0, 0, {{.TOKEN_EXP_DAYS}}).Format("2006-01-02 15:04:05.999999999 -0700 MST"), "t": "", "s": sessId}
         tMessage, err := eve.PlainToken(tokenProps)
         log.Println(tMessage)
         if err != nil {
@@ -105,7 +118,6 @@
 	        w.Write([]byte("500"))
             return
         }
-        log.Println("7")
         // create the token for the user authorization header
         token, err := eve.TokenCreate(tMessage, enc, sig)
         if err != nil {
@@ -113,26 +125,30 @@
 	        w.Write([]byte("500"))
             return
         }
-        log.Println("8")
         // save the token for all the other services in plaintext into the storage
-        res, err = EVTokenSave(EVUserUid(r.FormValue("email")), tMessage)
+        res, err = EVTokenSave(EVUserUid(email), tMessage)
         if err != nil {
             w.WriteHeader(500)
 	        w.Write([]byte("500"))
             return
         }
-        log.Println("9")
         logg,err := eve.ResponseBodyAll(res)
         if err != nil {
             w.WriteHeader(500)
 	        w.Write([]byte("500"))
             return
         }
-        log.Println("1!")
-        log.Println(string(logg))
+        log.Println("logg ::: ",string(logg))
 
         // write the token into the header
         w.Header().Add("Authorization", "Bearer "+token)
+
+        location, err := time.LoadLocation("{{.TIME_ZONE_LOCATION}}")
+		if err != nil {
+			w.WriteHeader(500)
+			w.Write([]byte(err.Error()))
+			return
+		}
 
         // set token as cookie
         http.SetCookie(w, &http.Cookie{
@@ -140,16 +156,16 @@
             Value: token,
             Path: "/",
             Domain: "",
-            Expires: time.Now().Add((time.Minute * {{.COOKIE_EXP_MINUTES}})),
+            Expires: time.Now().In(location).Add((time.Minute * {{.COOKIE_EXP_MINUTES}})),
         })
-        log.Println("12")
         w.WriteHeader(200)
         w.Write([]byte("OK"))
         return
     }
 
      if r.URL.Path == "{{.ROUTE_PATH_PREFIX}}logout" {
-        res, err := EVUserDelete(EVUserUid(r.FormValue("email")))
+        email := r.FormValue("email")
+        res, err := EVUserDelete(EVUserUid(email))
         if err != nil {
             w.WriteHeader(500)
 	        w.Write([]byte("500"))
