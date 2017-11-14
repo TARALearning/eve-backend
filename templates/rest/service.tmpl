@@ -33,6 +33,10 @@ type RestHttpHandler struct{}
     {{template "EVRestSchedule" .}}
 {{end}}
 
+{{if .TIME_ZONE_LOCATION}}
+    {{template "TimeZoneLocation" .}}
+{{end}}
+
 func (hh *RestHttpHandler) ServeHTTP(w http.ResponseWriter, r *http.Request){
     {{if .ENABLE_CROSS_ORIGIN}}
         w.Header().Add("Access-Control-Allow-Headers", "*")

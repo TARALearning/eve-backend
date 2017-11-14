@@ -42,3 +42,5 @@ dist/
 build.sh
 run.sh
 bintray.clean.sh
+
+.DS_Store

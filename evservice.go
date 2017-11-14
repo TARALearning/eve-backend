@@ -32,6 +32,7 @@ var (
 		"templates/rest/prometheus.tmpl",
 		"templates/rest/schedule.tmpl",
 		"templates/rest/service.tmpl",
+		"templates/rest/time_zone_location.tmpl",
 		"templates/service/evauth.tmpl",
 		"templates/service/evbolt.tmpl",
 		"templates/service/evlog.tmpl",

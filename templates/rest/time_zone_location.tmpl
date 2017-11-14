@@ -1,0 +1,15 @@
+{{define "TimeZoneLocation"}}
+func timeZoneLocationTime(location string) (time.Time, error) {
+    // if the zoneinfo.zip file exists on the running system
+    // todo check also the ZONEINFO env var to be able to support
+    // systems without the need for the golang environment to be installed
+    if _, err := os.Stat("/usr/local/go/lib/time/zoneinfo.zip"); !os.IsNotExist(err) {
+        tzLocation, err := time.LoadLocation(location)
+        if err != nil {
+            return time.Now(), err
+        }
+        return time.Now().In(tzLocation), nil
+    }
+    return time.Now(), nil
+} 
+{{end}}
