@@ -201,6 +201,8 @@ func main() {
 					"github.com/gorilla/mux",
 					"evalgo.org/eve",
 					"errors",
+					"strings",
+					"path",
 				}
 				vars = map[string]interface{}{"Package": "main",
 					"DefaultAddress":         "127.0.0.1:9092",
@@ -246,6 +248,8 @@ func main() {
 					"URLS": []string{
 						"/help",
 						"/evbolt",
+						"/evbolt.json",
+						"/evbolt.html",
 						"/metrics",
 					},
 					"ROUTE_PATH_PREFIX": "/0.0.1/eve/",

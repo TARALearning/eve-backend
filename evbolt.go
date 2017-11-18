@@ -2,6 +2,7 @@ package eve
 
 import (
 	"encoding/binary"
+	"encoding/json"
 	"errors"
 	"log"
 	"os"
@@ -386,6 +387,39 @@ func EVBoltAll(db, bucket string) (map[string]string, error) {
 		log.Println("boltAll::values", results)
 	}
 	return results, nil
+}
+
+// all returns all entries for the given database bucket as a evschema html string
+func EVBoltAllHtml(db, bucket string) (string, error) {
+	_, err := EVBoltMetaLogDbBucket(db, bucket)
+	if err != nil {
+		log.Println(err)
+		return "", err
+	}
+	res, err := EVBoltAll(db, bucket)
+	allEntries := "<div itemscope=\"\" itemtype=\"https://schema.org/ItemList\">"
+	counter := 0
+	for k := range res {
+		counter++
+		allEntries += `<li itemprop="itemListElement" itemscope itemtype="http://schema.org/ListItem"><a itemprop="item" evboltkey="` + k + `" href="https://evalgo.org/Item/` + strconv.Itoa(counter) + `"><span itemprop="name">` + res[k] + `</span></a><meta itemprop="position" content="` + strconv.Itoa(counter) + `" /></li>`
+	}
+	return allEntries + "</div>", nil
+}
+
+// all returns all entries for the given database bucket as a evschema html string
+func EVBoltAllJson(db, bucket string) (string, error) {
+	_, err := EVBoltMetaLogDbBucket(db, bucket)
+	if err != nil {
+		log.Println(err)
+		return "", err
+	}
+	res, err := EVBoltAll(db, bucket)
+	allEntries, err := json.Marshal(res)
+	if err != nil {
+		log.Println(err)
+		return "", err
+	}
+	return string(allEntries), nil
 }
 
 // all returns all entries for the given database bucket as a evschema html string

@@ -2,11 +2,26 @@
     {{if .USE_EVBOLT_ROOT}}
         eve.EVBOLT_ROOT = "{{.USE_EVBOLT_ROOT}}"
     {{end}}
+    // define the format to be returned to the requester
+    format := ""
+    switch r.URL.Path{
+        case "{{.ROUTE_PATH_PREFIX}}evbolt.json":
+            format = "json"
+            r.URL.Path = "{{.ROUTE_PATH_PREFIX}}evbolt"
+        case "{{.ROUTE_PATH_PREFIX}}evbolt.html":
+            format = "html"
+            r.URL.Path = "{{.ROUTE_PATH_PREFIX}}evbolt"
+        default:
+            format = "text"
+            ext :=  path.Ext(r.URL.Path)
+            if ext != "" {
+                r.URL.Path = strings.Replace(r.URL.Path, ext, "", -1)
+            }
+    }
     if r.URL.Path == "{{.ROUTE_PATH_PREFIX}}evbolt" {
         {{if .USE_EVBOLT_AUTH}}
             if !EVUserIsAllowed(w,r){
-                w.WriteHeader(403)
-                w.Write([]byte("Forbidden"))
+                eve.ReturnErrorMessage(w, 403, errors.New("Forbidden"), format)
                 return
             }
         {{end}}
@@ -20,30 +35,30 @@
             case "first":
                 err := eve.CheckRequiredFormValues(r, map[string]bool{"database": true, "bucket": true})
                 if err != nil {
-                    eve.ReturnErrorMessage(w, err)
+                    eve.ReturnErrorMessage(w, 400, err, format)
                     return
                 }
                 res, err = eve.EVBoltFirst(r.FormValue("database"), r.FormValue("bucket"))
                 if err != nil {
-                    eve.ReturnErrorMessage(w, err)
+                    eve.ReturnErrorMessage(w, 400, err, format)
                     return
                 }
             case "last":
                 err := eve.CheckRequiredFormValues(r, map[string]bool{"database": true, "bucket": true})
                 if err != nil {
-                    eve.ReturnErrorMessage(w, err)
+                    eve.ReturnErrorMessage(w, 400, err, format)
                     return
                 }
 
                 res, err = eve.EVBoltLast(r.FormValue("database"), r.FormValue("bucket"))
                 if err != nil {
-                    eve.ReturnErrorMessage(w, err)
+                    eve.ReturnErrorMessage(w, 400, err, format)
                     return
                 }
             case "key":
                 err := eve.CheckRequiredFormValues(r, map[string]bool{"database": true, "bucket": true, "key": true})
                 if err != nil {
-                    eve.ReturnErrorMessage(w, err)
+                    eve.ReturnErrorMessage(w, 400, err, format)
                     return
                 }
 
@@ -52,23 +67,23 @@
                 case eve.EVBOLT_KEY_TYPE_AUTO:
                     res, err = eve.EVBoltAutoGet(r.FormValue("database"), r.FormValue("bucket"), r.FormValue("key"))
                     if err != nil {
-                        eve.ReturnErrorMessage(w, err)
+                        eve.ReturnErrorMessage(w, 400, err, format)
                         return
                     }
                 case eve.EVBOLT_KEY_TYPE_CUSTOM:
                     res, err = eve.EVBoltCustomGet(r.FormValue("database"), r.FormValue("bucket"), r.FormValue("key"))
                     if err != nil {
-                        eve.ReturnErrorMessage(w, err)
+                        eve.ReturnErrorMessage(w, 400, err, format)
                         return
                     }
                 default:
-                    eve.ReturnErrorMessage(w, errors.New("keytype '"+keyType+"' is not supported yet"))
+                    eve.ReturnErrorMessage(w, 400 ,errors.New("keytype '"+keyType+"' is not supported yet"), format)
                     return
                 }
             case "meta":
                 err := eve.CheckRequiredFormValues(r, map[string]bool{"evbolt.result": true})
                 if err != nil {
-                    eve.ReturnErrorMessage(w, err)
+                    eve.ReturnErrorMessage(w, 400, err, format)
                     return
                 }
 
@@ -76,70 +91,86 @@
                 case "db.bucket.id":
                     err := eve.CheckRequiredFormValues(r, map[string]bool{"database": true, "bucket": true})
                     if err != nil {
-                        eve.ReturnErrorMessage(w, err)
+                        eve.ReturnErrorMessage(w, 400, err, format)
                         return
                     }
                     res, err = eve.EVBoltMetaDbBucketID(r.FormValue("database"), r.FormValue("bucket"))
                     if err != nil {
-                        eve.ReturnErrorMessage(w, err)
+                        eve.ReturnErrorMessage(w, 400, err, format)
                         return
                     }
                 case "dbs.buckets.all":
                     res, err = eve.EVBoltMetaAll()
                     if err != nil {
-                        eve.ReturnErrorMessage(w, err)
+                        eve.ReturnErrorMessage(w, 400, err, format)
                         return
                     }
                 case "db.buckets.all":
                     err := eve.CheckRequiredFormValues(r, map[string]bool{"database": true})
                     if err != nil {
-                        eve.ReturnErrorMessage(w, err)
+                        eve.ReturnErrorMessage(w, 400, err, format)
                         return
                     }
                     res, err = eve.EVBoltMetaAllBucketsForDb(r.FormValue("database"))
                     if err != nil {
-                        eve.ReturnErrorMessage(w, err)
+                        eve.ReturnErrorMessage(w, 400, err, format)
                         return
                     }
                 case "dbs.bucket.all":
                     err := eve.CheckRequiredFormValues(r, map[string]bool{"bucket": true})
                     if err != nil {
-                        eve.ReturnErrorMessage(w, err)
+                        eve.ReturnErrorMessage(w, 400, err, format)
                         return
                     }
                     res, err = eve.EVBoltMetaAllDbsForBucket(r.FormValue("bucket"))
                     if err != nil {
-                        eve.ReturnErrorMessage(w, err)
+                        eve.ReturnErrorMessage(w, 400, err, format)
                         return
                     }
                 default:
-                    eve.ReturnErrorMessage(w, errors.New("the given evbolt.result type:"+r.FormValue("evbolt.result")+" is not supported yet"))
+                    eve.ReturnErrorMessage(w, 400, errors.New("the given evbolt.result type:"+r.FormValue("evbolt.result")+" is not supported yet"), format)
                     return
                 }
             default:
                 err := eve.CheckRequiredFormValues(r, map[string]bool{"database": true, "bucket": true})
                 if err != nil {
-                    eve.ReturnErrorMessage(w, err)
+                    eve.ReturnErrorMessage(w, 400, err, format)
                     return
                 }
-
-                // default return all if nothing else is requested
-                res, err = eve.EVBoltAllString(r.FormValue("database"), r.FormValue("bucket"))
-                if err != nil {
-                    eve.ReturnErrorMessage(w, err)
-                    return
+                switch format {
+                    case "json":
+                        // default return all if nothing else is requested
+                        res, err = eve.EVBoltAllJson(r.FormValue("database"), r.FormValue("bucket"))
+                        if err != nil {
+                            eve.ReturnErrorMessage(w, 400, err, format)
+                            return
+                        }
+                    case "html":
+                        // default return all if nothing else is requested
+                        res, err = eve.EVBoltAllHtml(r.FormValue("database"), r.FormValue("bucket"))
+                        if err != nil {
+                            eve.ReturnErrorMessage(w, 400, err, format)
+                            return
+                        }
+                    default:
+                        // default return all if nothing else is requested
+                        res, err = eve.EVBoltAllString(r.FormValue("database"), r.FormValue("bucket"))
+                        if err != nil {
+                            eve.ReturnErrorMessage(w, 400, err, format)
+                            return
+                        }
                 }
             }
         case "POST":
             err := eve.CheckRequiredFormValues(r, map[string]bool{"database": true, "bucket": true, "message": true})
             if err != nil {
-                eve.ReturnErrorMessage(w, err)
+                eve.ReturnErrorMessage(w, 400, err, format)
                 return
             }
 
             msg, err := eve.DecodeMessage(r.FormValue("message"), r.FormValue("evbolt.msgtype"))
             if err != nil {
-                eve.ReturnErrorMessage(w, err)
+                eve.ReturnErrorMessage(w, 400, err, format)
                 return
             }
 
@@ -147,7 +178,7 @@
             if r.FormValue("key") != "" && r.FormValue("evbolt.keytype") == "" {
                 keyType = eve.EVBOLT_KEY_TYPE_CUSTOM
             } else if r.FormValue("key") != "" && r.FormValue("evbolt.keytype") != "custom" && r.FormValue("evbolt.keytype") != "c" {
-                eve.ReturnErrorMessage(w, errors.New("If a custom key is given ketype must not be 'auto' or 'a'. Leave keytype blank or use 'custom' or 'c'"))
+                eve.ReturnErrorMessage(w, 400, errors.New("If a custom key is given ketype must not be 'auto' or 'a'. Leave keytype blank or use 'custom' or 'c'"), format)
                 return
             } else {
                 keyType = eve.DefineKeyType(r.FormValue("evbolt.keytype"))
@@ -157,44 +188,44 @@
             case eve.EVBOLT_KEY_TYPE_AUTO:
                 res, err = eve.EVBoltAutoPut(msg, r.FormValue("database"), r.FormValue("bucket"))
                 if err != nil {
-                    eve.ReturnErrorMessage(w, err)
+                    eve.ReturnErrorMessage(w, 400, err, format)
                     return
                 }
             case eve.EVBOLT_KEY_TYPE_CUSTOM:
                 err := eve.CheckRequiredFormValues(r, map[string]bool{"key": true})
                 if err != nil {
-                    eve.ReturnErrorMessage(w, err)
+                    eve.ReturnErrorMessage(w, 400, err, format)
                     return
                 }
 
                 val, err := eve.EVBoltCustomGet(r.FormValue("database"), r.FormValue("bucket"), r.FormValue("key"))
                 if err != nil && err.Error() != eve.NA {
-                    eve.ReturnErrorMessage(w, err)
+                    eve.ReturnErrorMessage(w, 400, err, format)
                     return
                 }
                 if val != "" {
-                    eve.ReturnErrorMessage(w, errors.New("the key "+r.FormValue("key")+" is already in use"))
+                    eve.ReturnErrorMessage(w, 400, errors.New("the key "+r.FormValue("key")+" is already in use"), format)
                     return
                 }
                 res, err = eve.EVBoltCustomPut(r.FormValue("key"), msg, r.FormValue("database"), r.FormValue("bucket"))
                 if err != nil {
-                    eve.ReturnErrorMessage(w, err)
+                    eve.ReturnErrorMessage(w, 400, err, format)
                     return
                 }
             default:
-                eve.ReturnErrorMessage(w, errors.New("keytype '"+keyType+"' is not supported yet"))
+                eve.ReturnErrorMessage(w, 400, errors.New("keytype '"+keyType+"' is not supported yet"), format)
                 return
             }
         case "PUT":
             err := eve.CheckRequiredFormValues(r, map[string]bool{"database": true, "bucket": true, "message": true, "key": true})
             if err != nil {
-                eve.ReturnErrorMessage(w, err)
+                eve.ReturnErrorMessage(w, 400, err, format)
                 return
             }
 
             msg, err := eve.DecodeMessage(r.FormValue("message"), r.FormValue("evbolt.msgtype"))
             if err != nil {
-                eve.ReturnErrorMessage(w, err)
+                eve.ReturnErrorMessage(w, 400, err, format)
                 return
             }
 
@@ -203,23 +234,23 @@
             case eve.EVBOLT_KEY_TYPE_AUTO:
                 res, err = eve.EVBoltAutoUpdate(msg, r.FormValue("database"), r.FormValue("bucket"), r.FormValue("key"))
                 if err != nil {
-                    eve.ReturnErrorMessage(w, err)
+                    eve.ReturnErrorMessage(w, 400, err, format)
                     return
                 }
             case eve.EVBOLT_KEY_TYPE_CUSTOM:
                 res, err = eve.EVBoltCustomUpdate(msg, r.FormValue("database"), r.FormValue("bucket"), r.FormValue("key"))
                 if err != nil {
-                    eve.ReturnErrorMessage(w, err)
+                    eve.ReturnErrorMessage(w, 400, err, format)
                     return
                 }
             default:
-                eve.ReturnErrorMessage(w, errors.New("keytype '"+keyType+"' is not supported yet"))
+                eve.ReturnErrorMessage(w, 400, errors.New("keytype '"+keyType+"' is not supported yet"), format)
                 return
             }
         case "DELETE":
             err := eve.CheckRequiredFormValues(r, map[string]bool{"database": true, "bucket": true, "key": true})
             if err != nil {
-                eve.ReturnErrorMessage(w, err)
+                eve.ReturnErrorMessage(w, 400, err, format)
                 return
             }
 
@@ -228,24 +259,24 @@
             case eve.EVBOLT_KEY_TYPE_AUTO:
                 res, err = eve.EVBoltAutoDelete(r.FormValue("database"), r.FormValue("bucket"), r.FormValue("key"))
                 if err != nil {
-                    eve.ReturnErrorMessage(w, err)
+                    eve.ReturnErrorMessage(w, 400, err, format)
                     return
                 }
             case eve.EVBOLT_KEY_TYPE_CUSTOM:
                 res, err = eve.EVBoltCustomDelete(r.FormValue("database"), r.FormValue("bucket"), r.FormValue("key"))
                 if err != nil {
-                    eve.ReturnErrorMessage(w, err)
+                    eve.ReturnErrorMessage(w, 400, err, format)
                     return
                 }
             default:
-                eve.ReturnErrorMessage(w, errors.New("keytype '"+keyType+"' is not supported yet"))
+                eve.ReturnErrorMessage(w, 400, errors.New("keytype '"+keyType+"' is not supported yet"), format)
                 return
             }
         default:
-            eve.ReturnErrorMessage(w, errors.New("The given HTTP Method<"+r.Method+"> is not supported now!"))
+            eve.ReturnErrorMessage(w, 400, errors.New("The given HTTP Method<"+r.Method+"> is not supported now!"), format)
             return
         }
-        eve.ReturnResult(w, res, r.FormValue("evbolt.format"))
+        eve.ReturnResult(w, 200, res, format)
         return
     }
 {{end}}

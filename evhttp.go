@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"net/url"
+	"strconv"
 	"strings"
 )
 
@@ -65,26 +66,32 @@ func CheckRequiredFormValues(r *http.Request, values map[string]bool) error {
 }
 
 // returnErrorMessage generates a error message and write it into the response object
-func ReturnErrorMessage(w http.ResponseWriter, err error) {
-	w.WriteHeader(500)
-	w.Write([]byte(err.Error()))
+func ReturnErrorMessage(w http.ResponseWriter, statusCode int, err error, format string) {
+	w.WriteHeader(statusCode)
+	switch format {
+	case "json":
+		w.Write([]byte(`{"Response":{"Status":"failed","StatusCode":` + strconv.Itoa(statusCode) + `,"Failed":true,"Message":"` + err.Error() + `"}}`))
+	case "html":
+		w.Write([]byte(`<div itemscope="" itemtype="https://evalgo.org/schema/Response"><div itemprop="Status">failed</div><div itemprop="StatusCode">` + strconv.Itoa(statusCode) + `</div><div itemprop="Failed">true</div><div itemprop="Message" itemscope="" itemtype="https://evalgo.org/schema/Message"><div itemprop="Content">` + err.Error() + `</div></div></div>`))
+	default:
+		w.Write([]byte(err.Error()))
+	}
 }
 
 // returnResult generates response message depending on given format and writes it into the response object
-func ReturnResult(w http.ResponseWriter, htmlResponse, format string) {
-	w.WriteHeader(200)
+func ReturnResult(w http.ResponseWriter, statusCode int, response, format string) {
+	w.WriteHeader(statusCode)
 	resultString := ""
 	switch format {
-	// TODO implement this (see meta go HTML Parser)
-	/*
-		case "raw":
-		// text/plain
-		w.Header().Set("Content-Type", "text/plain")
-		resultString = htmlResponse
-	*/
+	case "json":
+		w.Header().Set("Content-Type", "application/json")
+		resultString = `{"Response":{"Status":"success","StatusCode":` + strconv.Itoa(statusCode) + `,"Failed":false,"Message":"` + response + `"}}`
+	case "html":
+		w.Header().Set("Content-Type", "text/html")
+		resultString = `<div itemscope="" itemtype="https://evalgo.org/schema/Response"><div itemprop="Status">success</div><div itemprop="StatusCode">` + strconv.Itoa(statusCode) + `</div><div itemprop="Failed">false</div><div itemprop="Message" itemscope="" itemtype="https://evalgo.org/schema/Message"><div itemprop="Content">` + response + `</div></div></div>`
 	default:
-		// text/html
-		resultString = htmlResponse
+		w.Header().Set("Content-Type", "text/plain")
+		resultString = response
 	}
 	w.Write([]byte(resultString))
 }
