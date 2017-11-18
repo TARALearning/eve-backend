@@ -3,7 +3,6 @@
         eve.EVBOLT_ROOT = "{{.USE_EVBOLT_ROOT}}"
     {{end}}
     // define the format to be returned to the requester
-    format := ""
     switch r.URL.Path{
         case "{{.ROUTE_PATH_PREFIX}}evbolt.json":
             format = "json"

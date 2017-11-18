@@ -42,6 +42,8 @@ func (hh *RestHttpHandler) ServeHTTP(w http.ResponseWriter, r *http.Request){
         w.Header().Add("Access-Control-Allow-Headers", "*")
 	    w.Header().Add("Access-Control-Allow-Origin", "*")
     {{end}}
+    format := path.Ext(r.URL.Path)
+    log.Println("eve","::","requested format",format)
     {{if .DEBUG}}
         log.Println("eve","::",r.Method, r.URL.Path)
         {{if .USE_EVLOG}}

@@ -1,29 +1,43 @@
 {{define "EVScheduleRestApi"}}
+switch r.URL.Path{
+    case "{{.ROUTE_PATH_PREFIX}}evschedule.json":
+        format = "json"
+        r.URL.Path = "{{.ROUTE_PATH_PREFIX}}evschedule"
+    case "{{.ROUTE_PATH_PREFIX}}evschedule.html":
+        format = "html"
+        r.URL.Path = "{{.ROUTE_PATH_PREFIX}}evschedule"
+    default:
+        format = "text"
+        ext :=  path.Ext(r.URL.Path)
+        if ext != "" {
+            r.URL.Path = strings.Replace(r.URL.Path, ext, "", -1)
+        }
+}
 if strings.Contains(r.URL.Path, "{{.ROUTE_PATH_PREFIX}}evschedule") {
     switch r.Method {
         case http.MethodGet:
             err := EVSchedulerObj.RESTGetCommand(w, r)
             if err != nil {
-                w.WriteHeader(500)
-                w.Write([]byte(err.Error()))
+                eve.ReturnErrorMessage(w, 500, err, format)
+                return
             }
         case http.MethodPost:
             err := EVSchedulerObj.RESTAppendCommand(w, r)
             if err != nil {
-                w.WriteHeader(500)
-                w.Write([]byte(err.Error()))
+                eve.ReturnErrorMessage(w, 500, err, format)
+                return
             }
         case http.MethodPut:
             err := EVSchedulerObj.RESTUpdateCommand(w, r)
             if err != nil {
-                w.WriteHeader(500)
-                w.Write([]byte(err.Error()))
+                eve.ReturnErrorMessage(w, 500, err, format)
+                return
             }
         case http.MethodDelete:
             err := EVSchedulerObj.RESTDeleteCommand(w, r)
             if err != nil {
-                w.WriteHeader(500)
-                w.Write([]byte(err.Error()))
+                eve.ReturnErrorMessage(w, 500, err, format)
+                return
             }
     }
     return

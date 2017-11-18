@@ -137,6 +137,7 @@ func main() {
 					"encoding/base64",
 					"errors",
 					"time",
+					"path",
 				}
 				vars = map[string]interface{}{"Package": "main",
 					"DefaultAddress":         "127.0.0.1:9093",
@@ -329,6 +330,7 @@ func main() {
 					"strings",
 					"sync",
 					"time",
+					"path",
 				}
 				vars = map[string]interface{}{
 					"Package":                "main",

@@ -1,25 +1,47 @@
 {{define "EVAuthRestApi"}}
-
+    switch r.URL.Path{
+        case "{{.ROUTE_PATH_PREFIX}}access.json":
+            format = "json"
+            r.URL.Path = "{{.ROUTE_PATH_PREFIX}}access"
+        case "{{.ROUTE_PATH_PREFIX}}access.html":
+            format = "html"
+            r.URL.Path = "{{.ROUTE_PATH_PREFIX}}access"
+        case "{{.ROUTE_PATH_PREFIX}}login.json":
+            format = "json"
+            r.URL.Path = "{{.ROUTE_PATH_PREFIX}}login"
+        case "{{.ROUTE_PATH_PREFIX}}login.html":
+            format = "html"
+            r.URL.Path = "{{.ROUTE_PATH_PREFIX}}login"
+        case "{{.ROUTE_PATH_PREFIX}}logout.json":
+            format = "json"
+            r.URL.Path = "{{.ROUTE_PATH_PREFIX}}logout"
+        case "{{.ROUTE_PATH_PREFIX}}logout.html":
+            format = "html"
+            r.URL.Path = "{{.ROUTE_PATH_PREFIX}}logout"
+        default:
+            format = "text"
+            ext :=  path.Ext(r.URL.Path)
+            if ext != "" {
+                r.URL.Path = strings.Replace(r.URL.Path, ext, "", -1)
+            }
+    }
     if r.URL.Path == "{{.ROUTE_PATH_PREFIX}}access" {
         // check for authenticatio token
         if r.Header.Get("Authorization") != "" && strings.Contains(r.Header.Get("Authorization"), "Bearer"){
             sp := new(EVSecretProvider)
             enc, sig, err := sp.SecretGet()
             if err != nil {
-                w.WriteHeader(500)
-                w.Write([]byte("500"))
+                eve.ReturnErrorMessage(w, 500, err, format)
                 return
             }
             token := strings.Split(r.Header.Get("Authorization")," ")
             expired, err := eve.TokenIsExpired(token[1], enc, sig)
             if err != nil {
-                w.WriteHeader(500)
-                w.Write([]byte(err.Error()))
+                eve.ReturnErrorMessage(w, 500, err, format)
                 return
             }
             if ! expired {
-                w.WriteHeader(200)
-                w.Write([]byte("OK"))
+                eve.ReturnResult(w, 200, "success", format)
                 return
             }
         }
@@ -28,8 +50,7 @@
         email,pass,ok := r.BasicAuth()
         if ok {
             if EVUserValidateCredentials(email, pass){
-                w.WriteHeader(200)
-                w.Write([]byte("OK"))
+                eve.ReturnResult(w, 200, "success", format)
                 return
             }
         }
@@ -37,8 +58,7 @@
         // check for email and password as post values
         if (r.FormValue("email") != "" && r.FormValue("password") != "") {
             if EVUserValidateCredentials(r.FormValue("email"), r.FormValue("password")){
-                w.WriteHeader(200)
-                w.Write([]byte("OK"))
+                eve.ReturnResult(w, 200, "success", format)
                 return
             }
         }
@@ -46,31 +66,26 @@
         // if nothing works try if there is a valid cookie
         c,err := r.Cookie("EVToken")
         if err != nil {
-            w.WriteHeader(403)
-            w.Write([]byte("Forbidden"))
+            eve.ReturnErrorMessage(w, 403, errors.New("Forbidden"), format)
             return
         }
         log.Println("cookie::::",c)
         sp := new(EVSecretProvider)
         enc, sig, err := sp.SecretGet()
         if err != nil {
-            w.WriteHeader(500)
-            w.Write([]byte("500"))
+            eve.ReturnErrorMessage(w, 500, err, format)
             return
         }
         expired, err := eve.TokenIsExpired(c.Value, enc, sig)
         if err != nil {
-            w.WriteHeader(500)
-            w.Write([]byte(err.Error()))
+            eve.ReturnErrorMessage(w, 500, err, format)
             return
         }
         if ! expired {
-            w.WriteHeader(200)
-            w.Write([]byte("OK"))
+            eve.ReturnResult(w, 200, "success", format)
             return
         }
-        w.WriteHeader(403)
-        w.Write([]byte("Forbidden"))
+        eve.ReturnErrorMessage(w, 403, errors.New("Forbidden"), format)
         return
     }
 
@@ -84,29 +99,25 @@
             email,pass,_ = r.BasicAuth()
         }
         if !EVUserValidateCredentials(email, pass) {
-            w.WriteHeader(403)
-	        w.Write([]byte("Forbidden"))
+            eve.ReturnErrorMessage(w, 403, errors.New("Forbidden"), format)
             return
         }
         // if user has successfullry validate the credentials get token credentials from storage
         sp := new(EVSecretProvider)
         enc, sig, err := sp.SecretGet()
         if err != nil {
-            w.WriteHeader(500)
-	        w.Write([]byte("500"))
+            eve.ReturnErrorMessage(w, 500, err, format)
             return
         }
         sessId := uniuri.NewLen(16)
         // save the session for all other services
         res, err := EVSessionSave(sessId, EVUserUid(email))
         if err != nil {
-            w.WriteHeader(500)
-	        w.Write([]byte("500"))
+            eve.ReturnErrorMessage(w, 500, err, format)
             return
         }
         if res.StatusCode != 200{
-            w.WriteHeader(500)
-	        w.Write([]byte("500"))
+            eve.ReturnErrorMessage(w, 500, err, format)
             return
         }
         // create token content message
@@ -114,28 +125,24 @@
         tMessage, err := eve.PlainToken(tokenProps)
         log.Println(tMessage)
         if err != nil {
-            w.WriteHeader(500)
-	        w.Write([]byte("500"))
+            eve.ReturnErrorMessage(w, 500, err, format)
             return
         }
         // create the token for the user authorization header
         token, err := eve.TokenCreate(tMessage, enc, sig)
         if err != nil {
-            w.WriteHeader(500)
-	        w.Write([]byte("500"))
+            eve.ReturnErrorMessage(w, 500, err, format)
             return
         }
         // save the token for all the other services in plaintext into the storage
         res, err = EVTokenSave(EVUserUid(email), tMessage)
         if err != nil {
-            w.WriteHeader(500)
-	        w.Write([]byte("500"))
+            eve.ReturnErrorMessage(w, 500, err, format)
             return
         }
         logg,err := eve.ResponseBodyAll(res)
         if err != nil {
-            w.WriteHeader(500)
-	        w.Write([]byte("500"))
+            eve.ReturnErrorMessage(w, 500, err, format)
             return
         }
         log.Println("logg ::: ",string(logg))
@@ -145,8 +152,7 @@
 
         now, err := timeZoneLocationTime("{{.TIME_ZONE_LOCATION}}")
 		if err != nil {
-			w.WriteHeader(500)
-			w.Write([]byte(err.Error()))
+			eve.ReturnErrorMessage(w, 500, err, format)
 			return
 		}
 
@@ -158,8 +164,7 @@
             Domain: "",
             Expires: now.Add((time.Minute * {{.COOKIE_EXP_MINUTES}})),
         })
-        w.WriteHeader(200)
-        w.Write([]byte("OK"))
+        eve.ReturnResult(w, 200, "success", format)
         return
     }
 
@@ -167,14 +172,12 @@
         email := r.FormValue("email")
         res, err := EVUserDelete(EVUserUid(email))
         if err != nil {
-            w.WriteHeader(500)
-	        w.Write([]byte("500"))
+            eve.ReturnErrorMessage(w, 500, err, format)
             return
         }
         logg,err := eve.ResponseBodyAll(res)
         if err != nil {
-            w.WriteHeader(500)
-	        w.Write([]byte("500"))
+            eve.ReturnErrorMessage(w, 500, err, format)
             return
         }
         log.Println(string(logg))
