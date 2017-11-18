@@ -397,13 +397,13 @@ func EVBoltAllHtml(db, bucket string) (string, error) {
 		return "", err
 	}
 	res, err := EVBoltAll(db, bucket)
-	allEntries := "<div itemscope=\"\" itemtype=\"https://schema.org/ItemList\">"
+	allEntries := `<div itemscope="" itemtype="https://schema.org/ItemList">`
 	counter := 0
 	for k := range res {
 		counter++
-		allEntries += `<li itemprop="itemListElement" itemscope itemtype="http://schema.org/ListItem"><a itemprop="item" evboltkey="` + k + `" href="https://evalgo.org/Item/` + strconv.Itoa(counter) + `"><span itemprop="name">` + res[k] + `</span></a><meta itemprop="position" content="` + strconv.Itoa(counter) + `" /></li>`
+		allEntries += `<div itemprop="itemListElement" itemscope="" itemtype="http://schema.org/ListItem"><a itemprop="item" evboltkey="` + k + `" href="http://localhost:9092/0.0.1/eve/evbolt.html?database=` + db + `&bucket=` + bucket + `&key=` + k + `"><div itemprop="name">` + res[k] + `</div><meta itemprop="position" content="` + strconv.Itoa(counter) + `"/></a></div>`
 	}
-	return allEntries + "</div>", nil
+	return allEntries + `</div>`, nil
 }
 
 // all returns all entries for the given database bucket as a evschema html string
