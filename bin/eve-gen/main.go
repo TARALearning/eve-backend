@@ -274,6 +274,8 @@ func main() {
 					"github.com/prometheus/client_golang/prometheus/promhttp",
 					"github.com/gorilla/mux",
 					"evalgo.org/eve",
+					"path",
+					"strings",
 				}
 				vars = map[string]interface{}{
 					"Package":                "main",
