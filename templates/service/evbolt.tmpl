@@ -122,14 +122,14 @@
                     return
                 }
                 switch format {
-                    case "json":
+                    case ".json":
                         // default return all if nothing else is requested
                         res, err = eve.EVBoltAllJson(r.FormValue("database"), r.FormValue("bucket"))
                         if err != nil {
                             eve.ReturnErrorMessage(w, 400, err, format)
                             return
                         }
-                    case "html":
+                    case ".html":
                         // default return all if nothing else is requested
                         res, err = eve.EVBoltAllHtml(r.FormValue("database"), r.FormValue("bucket"))
                         if err != nil {
