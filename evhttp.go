@@ -69,9 +69,9 @@ func CheckRequiredFormValues(r *http.Request, values map[string]bool) error {
 func ReturnErrorMessage(w http.ResponseWriter, statusCode int, err error, format string) {
 	w.WriteHeader(statusCode)
 	switch format {
-	case "json":
+	case ".json":
 		w.Write([]byte(`{"Response":{"Status":"failed","StatusCode":` + strconv.Itoa(statusCode) + `,"Failed":true,"Message":"` + err.Error() + `"}}`))
-	case "html":
+	case ".html":
 		w.Write([]byte(`<div itemscope="" itemtype="https://evalgo.org/schema/Response"><div itemprop="Status">failed</div><div itemprop="StatusCode">` + strconv.Itoa(statusCode) + `</div><div itemprop="Failed">true</div><div itemprop="Message" itemscope="" itemtype="https://evalgo.org/schema/Message"><div itemprop="Content">` + err.Error() + `</div></div></div>`))
 	default:
 		w.Write([]byte(err.Error()))
@@ -83,10 +83,10 @@ func ReturnResult(w http.ResponseWriter, statusCode int, response, format string
 	w.WriteHeader(statusCode)
 	resultString := ""
 	switch format {
-	case "json":
+	case ".json":
 		w.Header().Set("Content-Type", "application/json")
 		resultString = `{"Response":{"Status":"success","StatusCode":` + strconv.Itoa(statusCode) + `,"Failed":false,"Message":"` + response + `"}}`
-	case "html":
+	case ".html":
 		w.Header().Set("Content-Type", "text/html")
 		resultString = `<div itemscope="" itemtype="https://evalgo.org/schema/Response"><div itemprop="Status">success</div><div itemprop="StatusCode">` + strconv.Itoa(statusCode) + `</div><div itemprop="Failed">false</div><div itemprop="Message" itemscope="" itemtype="https://evalgo.org/schema/Message"><div itemprop="Content">` + response + `</div></div></div>`
 	default:

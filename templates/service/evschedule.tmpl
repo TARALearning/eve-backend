@@ -1,18 +1,4 @@
 {{define "EVScheduleRestApi"}}
-switch r.URL.Path{
-    case "{{.ROUTE_PATH_PREFIX}}evschedule.json":
-        format = "json"
-        r.URL.Path = "{{.ROUTE_PATH_PREFIX}}evschedule"
-    case "{{.ROUTE_PATH_PREFIX}}evschedule.html":
-        format = "html"
-        r.URL.Path = "{{.ROUTE_PATH_PREFIX}}evschedule"
-    default:
-        format = "text"
-        ext :=  path.Ext(r.URL.Path)
-        if ext != "" {
-            r.URL.Path = strings.Replace(r.URL.Path, ext, "", -1)
-        }
-}
 if strings.Contains(r.URL.Path, "{{.ROUTE_PATH_PREFIX}}evschedule") {
     switch r.Method {
         case http.MethodGet:

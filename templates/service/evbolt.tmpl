@@ -2,21 +2,6 @@
     {{if .USE_EVBOLT_ROOT}}
         eve.EVBOLT_ROOT = "{{.USE_EVBOLT_ROOT}}"
     {{end}}
-    // define the format to be returned to the requester
-    switch r.URL.Path{
-        case "{{.ROUTE_PATH_PREFIX}}evbolt.json":
-            format = "json"
-            r.URL.Path = "{{.ROUTE_PATH_PREFIX}}evbolt"
-        case "{{.ROUTE_PATH_PREFIX}}evbolt.html":
-            format = "html"
-            r.URL.Path = "{{.ROUTE_PATH_PREFIX}}evbolt"
-        default:
-            format = "text"
-            ext :=  path.Ext(r.URL.Path)
-            if ext != "" {
-                r.URL.Path = strings.Replace(r.URL.Path, ext, "", -1)
-            }
-    }
     if r.URL.Path == "{{.ROUTE_PATH_PREFIX}}evbolt" {
         {{if .USE_EVBOLT_AUTH}}
             if !EVUserIsAllowed(w,r){

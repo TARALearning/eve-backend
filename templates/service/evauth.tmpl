@@ -1,30 +1,4 @@
 {{define "EVAuthRestApi"}}
-    switch r.URL.Path{
-        case "{{.ROUTE_PATH_PREFIX}}access.json":
-            format = "json"
-            r.URL.Path = "{{.ROUTE_PATH_PREFIX}}access"
-        case "{{.ROUTE_PATH_PREFIX}}access.html":
-            format = "html"
-            r.URL.Path = "{{.ROUTE_PATH_PREFIX}}access"
-        case "{{.ROUTE_PATH_PREFIX}}login.json":
-            format = "json"
-            r.URL.Path = "{{.ROUTE_PATH_PREFIX}}login"
-        case "{{.ROUTE_PATH_PREFIX}}login.html":
-            format = "html"
-            r.URL.Path = "{{.ROUTE_PATH_PREFIX}}login"
-        case "{{.ROUTE_PATH_PREFIX}}logout.json":
-            format = "json"
-            r.URL.Path = "{{.ROUTE_PATH_PREFIX}}logout"
-        case "{{.ROUTE_PATH_PREFIX}}logout.html":
-            format = "html"
-            r.URL.Path = "{{.ROUTE_PATH_PREFIX}}logout"
-        default:
-            format = "text"
-            ext :=  path.Ext(r.URL.Path)
-            if ext != "" {
-                r.URL.Path = strings.Replace(r.URL.Path, ext, "", -1)
-            }
-    }
     if r.URL.Path == "{{.ROUTE_PATH_PREFIX}}access" {
         // check for authenticatio token
         if r.Header.Get("Authorization") != "" && strings.Contains(r.Header.Get("Authorization"), "Bearer"){
