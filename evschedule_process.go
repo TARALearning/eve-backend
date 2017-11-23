@@ -145,6 +145,7 @@ func (s *Scheduler) RestartCmd(cmdId string) error {
 	return nil
 }
 
+// appendCmd appends a command
 func (s *Scheduler) appendCmd(cmdId, cmd, owner string, args []string) error {
 	eCmd := exec.Command(cmd, args...)
 	evCmd := NewSCmd()
@@ -792,7 +793,8 @@ func (s *Scheduler) RunCron() error {
 				}
 			}
 		}
-		return
+		// unreachable code hopefully
+		// return
 	}(s.CronCmds, &wg, goroutines)
 	return nil
 }

@@ -15,12 +15,12 @@ func Test_SchedulerShutdown(t *testing.T) {
 	if os.Getenv("GOROOT") != "" {
 		gobin = os.Getenv("GOROOT") + string(os.PathSeparator) + "bin" + string(os.PathSeparator) + "go"
 	}
-	out, err := exec.Command(gobin, "build", "-o", "eve-test.exe", "tests/evschedule/main.go").Output()
+	out, err := exec.Command(gobin, "build", "-o", "tests/tmp/eve-test.exe", "tests/evschedule/main.go").Output()
 	if err != nil {
 		t.Error(err)
 	}
 	t.Log(out)
-	err = s.AppendCmd("eve-test.exe", "./eve-test.exe", "", []string{"1m"})
+	err = s.AppendCmd("eve-test.exe", "./tests/tmp/eve-test.exe", "", []string{"1m"})
 	if err != nil {
 		t.Error(err)
 	}

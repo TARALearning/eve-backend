@@ -1,8 +1,10 @@
 package eve
 
 var (
+	// DEFAULT_CTYPE defines the default config type to be created
 	DEFAULT_CTYPE = "default"
-	IMPORTS       = []string{
+	// IMPORTS defines the default import packages to be used in the generated service
+	IMPORTS = []string{
 		"fmt",
 		"flag",
 		"os",
@@ -18,6 +20,7 @@ var (
 		"encoding/base64",
 		"errors",
 	}
+	// TEMPLATES defines the templates that should be used for code generation
 	TEMPLATES = []string{
 		"templates/connector/bolt.tmpl",
 		"templates/connector/log.tmpl",
@@ -38,6 +41,7 @@ var (
 		"templates/service/evlog.tmpl",
 		"templates/service/evschedule.tmpl",
 	}
+	// VARS defines the variables that should be used during the code generation
 	VARS = map[string]interface{}{
 		"Package":                "main",
 		"DefaultAddress":         "127.0.0.1:9090",
@@ -86,12 +90,16 @@ var (
 		},
 		"ROUTE_PATH_PREFIX": "/0.0.1/eve/",
 	}
+	// COMMANDS defines the default commands that should be used in the generated service code
 	COMMANDS = []*EVServiceCommand{
 		NewEVServiceDefaultCommandFlags(),
 	}
+
+	// MAIN i don't know if we need it any longer todo check if this variable is needed
 	MAIN = "EVREST"
 )
 
+// EVServiceConfig defines the service configuration struct
 type EVServiceConfig struct {
 	Main      string
 	Templates []string
@@ -100,14 +108,17 @@ type EVServiceConfig struct {
 	Commands  []*EVServiceCommand
 }
 
+// EVService defines the EVService interface to be implemented
 type EVService interface {
 	EVServiceConfiguration() *EVServiceConfig
 }
 
+// EVServiceConfigObj contents the service configuration object
 type EVServiceConfigObj struct {
 	Config *EVServiceConfig
 }
 
+// NewEVServiceConfig creates a new service configuration with the default values
 func (tco *EVServiceConfigObj) NewEVServiceConfig(cType string) *EVServiceConfigObj {
 	switch cType {
 	case "rest":
@@ -210,6 +221,7 @@ func (tco *EVServiceConfigObj) NewEVServiceConfig(cType string) *EVServiceConfig
 	return tco
 }
 
+// EVServiceConfiguration returns the configuration of the Service
 func (tco *EVServiceConfigObj) EVServiceConfiguration() *EVServiceConfig {
 	if tco.Config == nil {
 		return tco.NewEVServiceConfig(DEFAULT_CTYPE).Config
