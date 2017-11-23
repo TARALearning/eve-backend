@@ -32,6 +32,11 @@ tests/tmp/main.go
 tests/tmp/*_main.go
 tests/tmp/main.json
 tests/tmp/*_main.json
+tests/test.root.*
+tests/*.pem
+tests/test.client.*
+tests/test.server.*
+tests/*.p12
 
 *.db
 *.dblite
