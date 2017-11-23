@@ -1,9 +1,11 @@
 package eve
 
 var (
+	// DEFAULT_ADDRESS for the generated service to be used
 	DEFAULT_ADDRESS = "127.0.0.1:9090"
 )
 
+// EVServiceFlag the struct which describes the flag used in the service
 type EVServiceFlag struct {
 	FName  string
 	FType  string
@@ -11,6 +13,7 @@ type EVServiceFlag struct {
 	FDesc  string
 }
 
+// NewEVServiceFlagDebug returns the debug flag to be used
 func NewEVServiceFlagDebug() *EVServiceFlag {
 	return &EVServiceFlag{
 		FName:  "debug",
@@ -20,6 +23,7 @@ func NewEVServiceFlagDebug() *EVServiceFlag {
 	}
 }
 
+// NewEVServiceFlagHelpHttp returns the help http default flag to be used
 func NewEVServiceFlagHelpHttp() *EVServiceFlag {
 	return &EVServiceFlag{
 		FName:  "hhttp",
@@ -29,6 +33,7 @@ func NewEVServiceFlagHelpHttp() *EVServiceFlag {
 	}
 }
 
+// NewEVServiceFlagHttpAddress returns the address flag which should be used
 func NewEVServiceFlagHttpAddress() *EVServiceFlag {
 	return &EVServiceFlag{
 		FName:  "address",
@@ -38,6 +43,7 @@ func NewEVServiceFlagHttpAddress() *EVServiceFlag {
 	}
 }
 
+// NewEVServiceFlagVersion returns the version flag to be used
 func NewEVServiceFlagVersion() *EVServiceFlag {
 	return &EVServiceFlag{
 		FName:  "version",
@@ -47,6 +53,7 @@ func NewEVServiceFlagVersion() *EVServiceFlag {
 	}
 }
 
+// NewEVServiceFlagSslCrt returns the certificate flag to be used
 func NewEVServiceFlagSslCrt() *EVServiceFlag {
 	return &EVServiceFlag{
 		FName:  "crt",
@@ -56,6 +63,7 @@ func NewEVServiceFlagSslCrt() *EVServiceFlag {
 	}
 }
 
+// NewEVServiceFlagSslKey returns the certificate key flag to be used
 func NewEVServiceFlagSslKey() *EVServiceFlag {
 	return &EVServiceFlag{
 		FName:  "key",
@@ -65,6 +73,7 @@ func NewEVServiceFlagSslKey() *EVServiceFlag {
 	}
 }
 
+// NewEVServiceFlagWebRoot returns the webroot flag to be used for the assets
 func NewEVServiceFlagWebRoot() *EVServiceFlag {
 	return &EVServiceFlag{
 		FName:  "webroot",
@@ -74,6 +83,7 @@ func NewEVServiceFlagWebRoot() *EVServiceFlag {
 	}
 }
 
+// NewEVServiceFlagEvWebRoot returns the webroot flat for the service specific assets to be used
 func NewEVServiceFlagEvWebRoot() *EVServiceFlag {
 	return &EVServiceFlag{
 		FName:  "evwebroot",

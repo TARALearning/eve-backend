@@ -7,9 +7,12 @@ import (
 )
 
 var (
+	// EVServiceUsageLines defines the number of usage lines to be displayed
 	EVServiceUsageLines = 50
 )
 
+// EVGenImports specifies the import packages for code generation
+// it transforms the given slice of strings into import commands in go
 func EVGenImports(importsPkgs []string) string {
 	newImports := []string{}
 	// append prefix and postfix " to the import names
@@ -24,6 +27,7 @@ func EVGenImports(importsPkgs []string) string {
 	return strings.Join(newImports, "\n")
 }
 
+// EVGenCommandFlags generates the from the given commands slice the flags go code strings
 func EVGenCommandFlags(cmds []*EVServiceCommand) string {
 	cmdsString := []string{}
 	for k := range cmds {
@@ -39,6 +43,7 @@ func EVGenCommandFlags(cmds []*EVServiceCommand) string {
 	return strings.Join(cmdsString, "\n")
 }
 
+// EVGenCommandFlagsVars generates the var code strings from the given commands slice
 func EVGenCommandFlagsVars(cmds []*EVServiceCommand) string {
 	cmdsVars := []string{}
 	for k := range cmds {
@@ -54,6 +59,7 @@ func EVGenCommandFlagsVars(cmds []*EVServiceCommand) string {
 	return strings.Join(cmdsVars, "\n")
 }
 
+// EVGenUsageAppendMoreLines appends more usage lines 2 times more default which is EVServiceUsageLines
 func EVGenUsageAppendMoreLines(lines []string) []string {
 	newLines := make([]string, 0)
 	lines = EVGenUsageRemoveEmptyLines(lines)
@@ -68,6 +74,7 @@ func EVGenUsageAppendMoreLines(lines []string) []string {
 	return lines
 }
 
+// EVGenUsageRemoveEmptyLines removes empty usage lines
 func EVGenUsageRemoveEmptyLines(lines []string) []string {
 	last := EVServiceUsageLines
 	for k := range lines {
@@ -88,6 +95,7 @@ func EVGenUsageRemoveEmptyLines(lines []string) []string {
 	return lines
 }
 
+// EVGenCommandUsage generates the default usage lines to be displayed in the usage/help text
 func EVGenCommandUsage(cmds []*EVServiceCommand, vars map[string]interface{}) string {
 	usage := make([]string, EVServiceUsageLines)
 	usage[0] = vars["Name"].(string) + "\n"
@@ -115,6 +123,7 @@ func EVGenCommandUsage(cmds []*EVServiceCommand, vars map[string]interface{}) st
 	return strings.Join(usage, "\n")
 }
 
+// EVGenMain generates the main go code file with the default settings
 func EVGenMain(srv EVService) ([]byte, error) {
 	funcMap := template.FuncMap{
 		"imports":          EVGenImports,
