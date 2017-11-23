@@ -19,10 +19,16 @@ import (
 var wg sync.WaitGroup
 
 // Running contents the commands which are executed by the scheduler
-var Running map[string]*SCmd = make(map[string]*SCmd, 0)
+var Running = make(map[string]*SCmd, 0)
 
 // mutex is the variable which is needed for mutexing the Running commands map
 var mutex = &sync.Mutex{}
+
+// serviceEnabled describes the service status enabled
+var serviceEnabled = "enabled"
+
+// serviceDisabled describes the service status disabled
+var serviceDisabled = "disabled"
 
 // SCmd is the struct which is used to store the executed command and the
 // stdin stderr output related to the given command
@@ -30,7 +36,7 @@ var mutex = &sync.Mutex{}
 // the given command because it is used to check for the command if it is already running
 // if there is another command with the same name it will kill it during bootstrap
 type SCmd struct {
-	Id                string
+	ID                string
 	Cmd               *exec.Cmd
 	Owner             string
 	Stdout            *bufio.Scanner
@@ -43,14 +49,14 @@ type SCmd struct {
 // NewSCmd will create a new SchedulerCommand object
 func NewSCmd() *SCmd {
 	c := new(SCmd)
-	c.Id = "N/A"
+	c.ID = "N/A"
 	c.Cmd = nil
 	c.Owner = ""
 	c.Stdout = nil
 	c.Stderr = nil
 	c.StdoutQuitChannel = make(chan bool)
 	c.StderrQuitChannel = make(chan bool)
-	c.ServiceType = "enabled"
+	c.ServiceType = serviceEnabled
 	return c
 }
 
@@ -111,16 +117,16 @@ func NewScheduler() *Scheduler {
 }
 
 // RestartCmd does restart a command which was already started before
-func (s *Scheduler) RestartCmd(cmdId string) error {
+func (s *Scheduler) RestartCmd(cmdID string) error {
 	found := false
 	mutex.Lock()
 	defer mutex.Unlock()
 	for id, oCmd := range s.Cmds {
-		if oCmd.Id == cmdId {
+		if oCmd.ID == cmdID {
 			found = true
 			eCmd := exec.Command(oCmd.Cmd.Args[0], oCmd.Cmd.Args[1:]...)
 			evCmd := NewSCmd()
-			evCmd.Id = cmdId
+			evCmd.ID = cmdID
 			evCmd.Cmd = eCmd
 			cmdStdoutReader, err := eCmd.StdoutPipe()
 			if err != nil {
@@ -140,16 +146,16 @@ func (s *Scheduler) RestartCmd(cmdId string) error {
 		}
 	}
 	if !found {
-		return errors.New("the given process with the id:" + cmdId + " could not be found!")
+		return errors.New("the given process with the id:" + cmdID + " could not be found!")
 	}
 	return nil
 }
 
 // appendCmd appends a command
-func (s *Scheduler) appendCmd(cmdId, cmd, owner string, args []string) error {
+func (s *Scheduler) appendCmd(cmdID, cmd, owner string, args []string) error {
 	eCmd := exec.Command(cmd, args...)
 	evCmd := NewSCmd()
-	evCmd.Id = cmdId
+	evCmd.ID = cmdID
 	evCmd.Cmd = eCmd
 	evCmd.Owner = owner
 	cmdStdoutReader, err := eCmd.StdoutPipe()
@@ -168,18 +174,18 @@ func (s *Scheduler) appendCmd(cmdId, cmd, owner string, args []string) error {
 }
 
 // AppendCmd will append a command to the Scheduler Running map
-func (s *Scheduler) AppendCmd(cmdId, cmd, owner string, args []string) error {
+func (s *Scheduler) AppendCmd(cmdID, cmd, owner string, args []string) error {
 	mutex.Lock()
 	defer mutex.Unlock()
-	return s.appendCmd(cmdId, cmd, owner, args)
+	return s.appendCmd(cmdID, cmd, owner, args)
 }
 
 // DeleteCmd removes a cmd from the Scheduler Running map
-func (s *Scheduler) DeleteCmd(cmdId string) error {
+func (s *Scheduler) DeleteCmd(cmdID string) error {
 	mutex.Lock()
 	defer mutex.Unlock()
 	for idx, cmd := range s.Cmds {
-		if cmd.Id == cmdId {
+		if cmd.ID == cmdID {
 			delete(s.Cmds, idx)
 		}
 	}
@@ -187,32 +193,32 @@ func (s *Scheduler) DeleteCmd(cmdId string) error {
 }
 
 // ReplaceCmd removes/appends a cmd from/to the Scheduler Running map
-func (s *Scheduler) ReplaceCmd(cmdId, cmd, owner string, args []string) error {
-	err := s.DeleteCmd(cmdId)
+func (s *Scheduler) ReplaceCmd(cmdID, cmd, owner string, args []string) error {
+	err := s.DeleteCmd(cmdID)
 	if err != nil {
 		return err
 	}
-	return s.AppendCmd(cmdId, cmd, owner, args)
+	return s.AppendCmd(cmdID, cmd, owner, args)
 }
 
 // killCmd kills the given command
 func killCmd(cmd *SCmd) error {
 	if DEBUG {
-		fmt.Println("killing process with id", cmd.Id)
+		fmt.Println("killing process with ID", cmd.ID)
 	}
-	cmd.ServiceType = "disabled"
-	delete(Running, cmd.Id)
+	cmd.ServiceType = serviceDisabled
+	delete(Running, cmd.ID)
 	close(cmd.StderrQuitChannel)
 	close(cmd.StdoutQuitChannel)
-	return EnforceProcessKill(cmd.Id)
+	return EnforceProcessKill(cmd.ID)
 }
 
 // KillCmd kills a cmd from the Scheduler Running map
-func (s *Scheduler) KillCmd(cmdId string) error {
+func (s *Scheduler) KillCmd(cmdID string) error {
 	mutex.Lock()
 	defer mutex.Unlock()
 	for _, cmd := range s.Cmds {
-		if cmd.Id == cmdId {
+		if cmd.ID == cmdID {
 			return killCmd(cmd)
 		}
 	}
@@ -224,10 +230,10 @@ func (s *Scheduler) KillAllCmds() error {
 	mutex.Lock()
 	defer mutex.Unlock()
 	for _, cmd := range s.Cmds {
-		if cmd.ServiceType != "disabled" {
+		if cmd.ServiceType != serviceDisabled {
 			err := killCmd(cmd)
 			if err != nil {
-				log.Println("Scheduler::KillAllCmds cannot kill command with Id", cmd.Id, "ERROR::", err)
+				log.Println("Scheduler::KillAllCmds cannot kill command with Id", cmd.ID, "ERROR::", err)
 				return err
 			}
 		}
@@ -239,14 +245,14 @@ func (s *Scheduler) KillAllCmds() error {
 func (s *Scheduler) RunCmd(cmd *SCmd) error {
 	// todo implement more service types like enabled,disabled,stopped,...
 	switch cmd.ServiceType {
-	case "disabled":
+	case serviceDisabled:
 		if DEBUG {
-			fmt.Println("Scheduler::RunCmd found ServiceType disabled do not start cmd", cmd.Id)
+			fmt.Println("Scheduler::RunCmd found ServiceType disabled do not start cmd", cmd.ID)
 		}
 		return nil
 	default:
 		if DEBUG {
-			fmt.Println("Scheduler::RunCmd starting found ServiceType", cmd.ServiceType, " with id", cmd.Id)
+			fmt.Println("Scheduler::RunCmd starting found ServiceType", cmd.ServiceType, " with id", cmd.ID)
 		}
 	}
 	go func(cmd *SCmd, wg *sync.WaitGroup) {
@@ -301,7 +307,7 @@ func (s *Scheduler) RunCmd(cmd *SCmd) error {
 						log.Fatal(err)
 					}
 				}
-				gid, err := user.LookupGroupId(owner[1])
+				gid, err := user.LookupGroupID(owner[1])
 				if err != nil {
 					if DEBUG {
 						log.Println("WARNING:", err)
@@ -319,7 +325,7 @@ func (s *Scheduler) RunCmd(cmd *SCmd) error {
 						log.Fatal(err)
 					}
 				}
-				// if LookupGroupId does not return a value
+				// if LookupGroupID does not return a value
 				// fallback to the usr.Gid group
 				var igid int
 				if gid != nil {
@@ -358,7 +364,7 @@ func (s *Scheduler) RunCmd(cmd *SCmd) error {
 		// wait 3 seconds for the cmd to be initialized
 		time.Sleep(3 * time.Second)
 		mutex.Lock()
-		Running[cmd.Id] = cmd
+		Running[cmd.ID] = cmd
 		mutex.Unlock()
 	}(cmd, &wg)
 	// time.Sleep(6 * time.Second)
@@ -366,11 +372,11 @@ func (s *Scheduler) RunCmd(cmd *SCmd) error {
 }
 
 // CmdFind returns the map int key of the command with the given cmd id
-func (s *Scheduler) CmdFind(pId string) int {
+func (s *Scheduler) CmdFind(pID string) int {
 	// mutex.Lock()
 	// defer mutex.Unlock()
 	for id, cmd := range s.Cmds {
-		if pId == cmd.Id {
+		if pID == cmd.ID {
 			return id
 		}
 	}
@@ -427,18 +433,18 @@ func (s *Scheduler) Monitoring(wg *sync.WaitGroup) {
 						log.Println("EVSchedule", err)
 					}
 					// err = nil
-					cmdId := s.CmdFind(id)
+					cmdID := s.CmdFind(id)
 					if DEBUG {
-						fmt.Println("command ID::", cmdId)
+						fmt.Println("command ID::", cmdID)
 					}
-					if cmdId == -1 {
+					if cmdID == -1 {
 						log.Println("error:: can not find the given command with id::", id, "in the Scheduler.Cmds map")
 					} else {
 						cmdArgs := cmd.Cmd.Args
 						if DEBUG {
-							log.Println("delete cmd with id", cmdId, "from s.Cmds")
+							log.Println("delete cmd with id", cmdID, "from s.Cmds")
 						}
-						delete(s.Cmds, cmdId)
+						delete(s.Cmds, cmdID)
 						if DEBUG {
 							fmt.Println(cmdArgs)
 						}
@@ -447,11 +453,11 @@ func (s *Scheduler) Monitoring(wg *sync.WaitGroup) {
 							log.Println(err.Error())
 							log.Println("EVSchedule", err)
 						}
-						cmdId = s.CmdFind(id)
-						if cmdId == -1 {
+						cmdID = s.CmdFind(id)
+						if cmdID == -1 {
 							log.Println("error:: can not find the given command with id::", id, "in the Scheduler.Cmds map")
 						} else {
-							*cmd = *s.Cmds[cmdId]
+							*cmd = *s.Cmds[cmdID]
 						}
 					}
 					err = startCmd(cmd)
@@ -498,7 +504,7 @@ func (s *Scheduler) Monitoring(wg *sync.WaitGroup) {
 						log.Println("service: " + id + "(" + strconv.Itoa(cmd.Cmd.Process.Pid) + ")" + " seems to be OK")
 					}
 					if DEBUG {
-						fmt.Println("proc == nil || proc.Pid() != cmd.Cmd.Process.Pid")
+						fmt.Println("proc == nil || proc.pID() != cmd.Cmd.Process.pID")
 					}
 					if proc == nil || proc.Pid() != cmd.Cmd.Process.Pid {
 						log.Println("the process seems to be restarted!")
@@ -512,7 +518,7 @@ func (s *Scheduler) Monitoring(wg *sync.WaitGroup) {
 
 // EnforceProcessKill will check for a command based on it's Id if it is running
 // and take care to kill it anyway
-func EnforceProcessKill(cmdId string) error {
+func EnforceProcessKill(cmdID string) error {
 	allProcs, err := gops.Processes()
 	if err != nil {
 		return err
@@ -521,7 +527,7 @@ func EnforceProcessKill(cmdId string) error {
 		if DEBUG {
 			fmt.Println("found::", wProc.Executable())
 		}
-		if wProc.Executable() == cmdId {
+		if wProc.Executable() == cmdID {
 			if DEBUG {
 				fmt.Println("EnforceProcessKill found executable with id, ", wProc.Executable())
 			}
@@ -536,7 +542,7 @@ func EnforceProcessKill(cmdId string) error {
 			return nil
 		}
 	}
-	return errors.New("EnforceProcessKill::ERROR could not find process with id::" + cmdId)
+	return errors.New("EnforceProcessKill::ERROR could not find process with id::" + cmdID)
 }
 
 // Run will start all available commands in the Running map
@@ -545,7 +551,7 @@ func EnforceProcessKill(cmdId string) error {
 func (s *Scheduler) Run() error {
 	for _, cmd := range s.Cmds {
 		if cmd.ServiceType != "disabled" {
-			err := EnforceProcessKill(cmd.Id)
+			err := EnforceProcessKill(cmd.ID)
 			if err != nil {
 				// do nothing because if the executable
 				// is not available it is the best it could happen
@@ -590,35 +596,35 @@ func startCmd(cmd *SCmd) error {
 }
 
 // EnableProcess will enable the process with the given id
-func (s *Scheduler) EnableProcess(pId string) error {
+func (s *Scheduler) EnableProcess(pID string) error {
 	mutex.Lock()
 	defer mutex.Unlock()
 	for _, cmd := range s.Cmds {
-		if cmd.Id == pId {
+		if cmd.ID == pID {
 			cmd.ServiceType = "enabled"
 			return nil
 		}
 	}
-	return errors.New("EnableProcess could not found the process with the given id::" + pId)
+	return errors.New("EnableProcess could not found the process with the given id::" + pID)
 }
 
 // DisableProcess will disable the process with the given id
-func (s *Scheduler) DisableProcess(pId string) error {
+func (s *Scheduler) DisableProcess(pID string) error {
 	mutex.Lock()
 	defer mutex.Unlock()
 	for _, cmd := range s.Cmds {
-		if cmd.Id == pId {
+		if cmd.ID == pID {
 			cmd.ServiceType = "disabled"
 			return nil
 		}
 	}
-	return errors.New("DisableProcess could not found the process with the given id::" + pId)
+	return errors.New("DisableProcess could not found the process with the given id::" + pID)
 }
 
 // StartProcess will start the process with the given id
-func (s *Scheduler) StartProcess(pId string) error {
+func (s *Scheduler) StartProcess(pID string) error {
 	if DEBUG {
-		fmt.Println("Starting Processsssss :::: ", pId)
+		fmt.Println("Starting Processsssss :::: ", pID)
 	}
 	mutex.Lock()
 	defer mutex.Unlock()
@@ -629,24 +635,24 @@ func (s *Scheduler) StartProcess(pId string) error {
 		if DEBUG {
 			fmt.Println(cmd)
 		}
-		if cmd.Id == pId {
+		if cmd.ID == pID {
 			err := startCmd(cmd)
 			if err != nil {
-				log.Println("Scheduler::StartProcesses cannot start process with Id", cmd.Id, "ERROR::", err)
+				log.Println("Scheduler::StartProcesses cannot start process with Id", cmd.ID, "ERROR::", err)
 			}
 			return s.RunCmd(cmd)
 		}
 	}
-	return errors.New("StartProcess could not found the process with the given id::" + pId)
+	return errors.New("StartProcess could not found the process with the given id::" + pID)
 }
 
-// StartProcess will start all processes
+// StartAllProcesses will start all processes
 func (s *Scheduler) StartAllProcesses() error {
 	for _, cmd := range s.Cmds {
 		log.Println(cmd)
-		err := s.StartProcess(cmd.Id)
+		err := s.StartProcess(cmd.ID)
 		if err != nil {
-			log.Println("Scheduler::StartAllProcesses cannot start process with Id", cmd.Id, "ERROR::", err)
+			log.Println("Scheduler::StartAllProcesses cannot start process with Id", cmd.ID, "ERROR::", err)
 			return err
 		}
 	}
@@ -688,38 +694,38 @@ func (s *Scheduler) RunCron() error {
 	for _, cronjob := range s.CronCmds {
 		now := time.Now()
 
-		run_month := false
-		run_day := false
-		run_hour := false
-		run_minute := false
+		runMonth := false
+		runDay := false
+		runHour := false
+		runMinute := false
 
 		// month 1-12
 		if strconv.Itoa(int(now.Month())) == cronjob.Months || cronjob.Months == "*" {
-			run_month = true
+			runMonth = true
 		}
 
 		// weekday 0-6 ==> 1-7
 		weekday := int(now.Weekday()) + 1
 		if strconv.Itoa(weekday) == cronjob.WeekDays || cronjob.WeekDays == "*" {
-			run_day = true
+			runDay = true
 		}
 
 		// monthday 1-31
 		if strconv.Itoa(now.Day()) == cronjob.MonthDays || cronjob.MonthDays == "*" {
-			run_day = true
+			runDay = true
 		}
 
 		// hours 0-23
 		if strconv.Itoa(now.Hour()) == cronjob.Hours || cronjob.Hours == "*" {
-			run_hour = true
+			runHour = true
 		}
 
 		// minutes 0-59
 		if strconv.Itoa(now.Minute()) == cronjob.Minutes || cronjob.Minutes == "*" {
-			run_minute = true
+			runMinute = true
 		}
 
-		if run_month && run_day && run_hour && run_minute {
+		if runMonth && runDay && runHour && runMinute {
 			cronjob.Running = true
 			go func(cronjob *CronCmd, wg *sync.WaitGroup) {
 				wg.Add(1)

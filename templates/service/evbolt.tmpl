@@ -1,6 +1,6 @@
 {{define "EVBoltRestApi"}}
-    {{if .USE_EVBOLT_ROOT}}
-        eve.EVBOLT_ROOT = "{{.USE_EVBOLT_ROOT}}"
+    {{if .USE_evBoltRoot}}
+        eve.evBoltRoot = "{{.USE_evBoltRoot}}"
     {{end}}
     if r.URL.Path == "{{.ROUTE_PATH_PREFIX}}evbolt" {
         {{if .USE_EVBOLT_AUTH}}
@@ -48,13 +48,13 @@
 
                 keyType := eve.DefineKeyType(r.FormValue("evbolt.keytype"))
                 switch keyType {
-                case eve.EVBOLT_KEY_TYPE_AUTO:
+                case eve.evBoltKeyTypeAuto:
                     res, err = eve.EVBoltAutoGet(r.FormValue("database"), r.FormValue("bucket"), r.FormValue("key"))
                     if err != nil {
                         eve.ReturnErrorMessage(w, 400, err, format)
                         return
                     }
-                case eve.EVBOLT_KEY_TYPE_CUSTOM:
+                case eve.evBoltKeyTypeCustom:
                     res, err = eve.EVBoltCustomGet(r.FormValue("database"), r.FormValue("bucket"), r.FormValue("key"))
                     if err != nil {
                         eve.ReturnErrorMessage(w, 400, err, format)
@@ -124,14 +124,14 @@
                 switch format {
                     case ".json":
                         // default return all if nothing else is requested
-                        res, err = eve.EVBoltAllJson(r.FormValue("database"), r.FormValue("bucket"))
+                        res, err = eve.EVBoltAllJSON(r.FormValue("database"), r.FormValue("bucket"))
                         if err != nil {
                             eve.ReturnErrorMessage(w, 400, err, format)
                             return
                         }
                     case ".html":
                         // default return all if nothing else is requested
-                        res, err = eve.EVBoltAllHtml(r.FormValue("database"), r.FormValue("bucket"))
+                        res, err = eve.EVBoltAllHTML(r.FormValue("database"), r.FormValue("bucket"))
                         if err != nil {
                             eve.ReturnErrorMessage(w, 400, err, format)
                             return
@@ -160,7 +160,7 @@
 
             keyType := ""
             if r.FormValue("key") != "" && r.FormValue("evbolt.keytype") == "" {
-                keyType = eve.EVBOLT_KEY_TYPE_CUSTOM
+                keyType = eve.evBoltKeyTypeCustom
             } else if r.FormValue("key") != "" && r.FormValue("evbolt.keytype") != "custom" && r.FormValue("evbolt.keytype") != "c" {
                 eve.ReturnErrorMessage(w, 400, errors.New("If a custom key is given ketype must not be 'auto' or 'a'. Leave keytype blank or use 'custom' or 'c'"), format)
                 return
@@ -169,13 +169,13 @@
             }
 
             switch keyType {
-            case eve.EVBOLT_KEY_TYPE_AUTO:
+            case eve.evBoltKeyTypeAuto:
                 res, err = eve.EVBoltAutoPut(msg, r.FormValue("database"), r.FormValue("bucket"))
                 if err != nil {
                     eve.ReturnErrorMessage(w, 400, err, format)
                     return
                 }
-            case eve.EVBOLT_KEY_TYPE_CUSTOM:
+            case eve.evBoltKeyTypeCustom:
                 err := eve.CheckRequiredFormValues(r, map[string]bool{"key": true})
                 if err != nil {
                     eve.ReturnErrorMessage(w, 400, err, format)
@@ -215,13 +215,13 @@
 
             keyType := eve.DefineKeyType(r.FormValue("evbolt.keytype"))
             switch keyType {
-            case eve.EVBOLT_KEY_TYPE_AUTO:
+            case eve.evBoltKeyTypeAuto:
                 res, err = eve.EVBoltAutoUpdate(msg, r.FormValue("database"), r.FormValue("bucket"), r.FormValue("key"))
                 if err != nil {
                     eve.ReturnErrorMessage(w, 400, err, format)
                     return
                 }
-            case eve.EVBOLT_KEY_TYPE_CUSTOM:
+            case eve.evBoltKeyTypeCustom:
                 res, err = eve.EVBoltCustomUpdate(msg, r.FormValue("database"), r.FormValue("bucket"), r.FormValue("key"))
                 if err != nil {
                     eve.ReturnErrorMessage(w, 400, err, format)
@@ -240,13 +240,13 @@
 
             keyType := eve.DefineKeyType(r.FormValue("evbolt.keytype"))
             switch keyType {
-            case eve.EVBOLT_KEY_TYPE_AUTO:
+            case eve.evBoltKeyTypeAuto:
                 res, err = eve.EVBoltAutoDelete(r.FormValue("database"), r.FormValue("bucket"), r.FormValue("key"))
                 if err != nil {
                     eve.ReturnErrorMessage(w, 400, err, format)
                     return
                 }
-            case eve.EVBOLT_KEY_TYPE_CUSTOM:
+            case eve.evBoltKeyTypeCustom:
                 res, err = eve.EVBoltCustomDelete(r.FormValue("database"), r.FormValue("bucket"), r.FormValue("key"))
                 if err != nil {
                     eve.ReturnErrorMessage(w, 400, err, format)

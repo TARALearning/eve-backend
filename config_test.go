@@ -1,7 +1,8 @@
 package eve
 
+// ConfigFotTest configures the service configuration for the unit tests
 func ConfigForTest(cType string) *EVServiceConfigObj {
-	DEFAULT_CTYPE = cType
+	defaultCType = cType
 	tco := &EVServiceConfigObj{}
 	tco.EVServiceConfiguration()
 	return tco

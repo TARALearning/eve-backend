@@ -13,12 +13,12 @@ import (
 )
 
 var (
-	// EVBOLT_ROOT is the path where to store the *.db files
-	EVBOLT_ROOT = "./tests/tmp/"
-	// EVBOLT_KEY_TYPE_AUTO is key type for autoincrement/int bolt keys
-	EVBOLT_KEY_TYPE_AUTO = "a"
-	// EVBOLT_KEY_TYPE_CUSTOM is key type for custom/string (user given) bolt keys
-	EVBOLT_KEY_TYPE_CUSTOM = "c"
+	// evBoltRoot is the path where to store the *.db files
+	evBoltRoot = "./tests/tmp/"
+	// evBoltKeyTypeAuto is key type for autoincrement/int bolt keys
+	evBoltKeyTypeAuto = "a"
+	// evBoltKeyTypeCustom is key type for custom/string (user given) bolt keys
+	evBoltKeyTypeCustom = "c"
 )
 
 // EVBoltItob is required to convert a int value into a bolt specific key []byte value
@@ -42,14 +42,14 @@ func EVBoltPut(id, message, db, bucket string) (string, error) {
 	if DEBUG {
 		log.Println("EVBoltPut message::", message, "into", db, "::", bucket)
 	}
-	cdb, err := bolt.Open(EVBOLT_ROOT+string(os.PathSeparator)+db, 0777, &bolt.Options{Timeout: 1 * time.Second})
+	cdb, err := bolt.Open(evBoltRoot+string(os.PathSeparator)+db, 0777, &bolt.Options{Timeout: 1 * time.Second})
 	if err != nil {
 		log.Println(err)
 		return "", err
 	}
 	defer cdb.Close()
 	cdb.Update(func(tx *bolt.Tx) error {
-		_, err := tx.CreateBucketIfNotExists([]byte(bucket))
+		_, err = tx.CreateBucketIfNotExists([]byte(bucket))
 		if err != nil {
 			log.Println(err)
 		}
@@ -88,14 +88,14 @@ func EVBoltAutoPut(message, db, bucket string) (string, error) {
 	if DEBUG {
 		log.Println("EVBoltAutoPut message::", message, "into", db, "::", bucket)
 	}
-	cdb, err := bolt.Open(EVBOLT_ROOT+string(os.PathSeparator)+db, 0777, &bolt.Options{Timeout: 1 * time.Second})
+	cdb, err := bolt.Open(evBoltRoot+string(os.PathSeparator)+db, 0777, &bolt.Options{Timeout: 1 * time.Second})
 	if err != nil {
 		log.Println(err)
 		return "", err
 	}
 	defer cdb.Close()
 	cdb.Update(func(tx *bolt.Tx) error {
-		_, err := tx.CreateBucketIfNotExists([]byte(bucket))
+		_, err = tx.CreateBucketIfNotExists([]byte(bucket))
 		if err != nil {
 			log.Println(err)
 		}
@@ -129,14 +129,14 @@ func EVBoltCustomUpdate(message, db, bucket, id string) (string, error) {
 	if DEBUG {
 		log.Println("EVBoltCustomUpdate message::", message, "into", db, "::", bucket, "with the given key::", id)
 	}
-	cdb, err := bolt.Open(EVBOLT_ROOT+string(os.PathSeparator)+db, 0777, &bolt.Options{Timeout: 1 * time.Second})
+	cdb, err := bolt.Open(evBoltRoot+string(os.PathSeparator)+db, 0777, &bolt.Options{Timeout: 1 * time.Second})
 	if err != nil {
 		log.Println(err)
 		return "", err
 	}
 	defer cdb.Close()
 	cdb.Update(func(tx *bolt.Tx) error {
-		_, err := tx.CreateBucketIfNotExists([]byte(bucket))
+		_, err = tx.CreateBucketIfNotExists([]byte(bucket))
 		if err != nil {
 			log.Println(err)
 		}
@@ -165,14 +165,14 @@ func EVBoltAutoUpdate(message, db, bucket, id string) (string, error) {
 	if DEBUG {
 		log.Println("EVBoltAutoUpdate message::", message, "into", db, "::", bucket)
 	}
-	cdb, err := bolt.Open(EVBOLT_ROOT+string(os.PathSeparator)+db, 0777, &bolt.Options{Timeout: 1 * time.Second})
+	cdb, err := bolt.Open(evBoltRoot+string(os.PathSeparator)+db, 0777, &bolt.Options{Timeout: 1 * time.Second})
 	if err != nil {
 		log.Println(err)
 		return "", err
 	}
 	defer cdb.Close()
 	cdb.Update(func(tx *bolt.Tx) error {
-		_, err := tx.CreateBucketIfNotExists([]byte(bucket))
+		_, err = tx.CreateBucketIfNotExists([]byte(bucket))
 		if err != nil {
 			log.Println(err)
 		}
@@ -202,14 +202,14 @@ func EVBoltLast(db, bucket string) (string, error) {
 		log.Println(err)
 		return "", err
 	}
-	cdb, err := bolt.Open(EVBOLT_ROOT+string(os.PathSeparator)+db, 0777, &bolt.Options{Timeout: 1 * time.Second})
+	cdb, err := bolt.Open(evBoltRoot+string(os.PathSeparator)+db, 0777, &bolt.Options{Timeout: 1 * time.Second})
 	if err != nil {
 		log.Println(err)
 		return "", err
 	}
 	defer cdb.Close()
 	cdb.Update(func(tx *bolt.Tx) error {
-		_, err := tx.CreateBucketIfNotExists([]byte(bucket))
+		_, err = tx.CreateBucketIfNotExists([]byte(bucket))
 		if err != nil {
 			log.Println(err)
 		}
@@ -242,14 +242,14 @@ func EVBoltFirst(db, bucket string) (string, error) {
 		log.Println(err)
 		return "", err
 	}
-	cdb, err := bolt.Open(EVBOLT_ROOT+string(os.PathSeparator)+db, 0777, &bolt.Options{Timeout: 1 * time.Second})
+	cdb, err := bolt.Open(evBoltRoot+string(os.PathSeparator)+db, 0777, &bolt.Options{Timeout: 1 * time.Second})
 	if err != nil {
 		log.Println(err)
 		return "", err
 	}
 	defer cdb.Close()
 	cdb.Update(func(tx *bolt.Tx) error {
-		_, err := tx.CreateBucketIfNotExists([]byte(bucket))
+		_, err = tx.CreateBucketIfNotExists([]byte(bucket))
 		if err != nil {
 			log.Println(err)
 		}
@@ -282,14 +282,14 @@ func EVBoltCustomGet(db, bucket, key string) (string, error) {
 		log.Println(err)
 		return key, err
 	}
-	cdb, err := bolt.Open(EVBOLT_ROOT+string(os.PathSeparator)+db, 0777, &bolt.Options{Timeout: 1 * time.Second})
+	cdb, err := bolt.Open(evBoltRoot+string(os.PathSeparator)+db, 0777, &bolt.Options{Timeout: 1 * time.Second})
 	if err != nil {
 		log.Println(err)
 		return "", err
 	}
 	defer cdb.Close()
 	cdb.Update(func(tx *bolt.Tx) error {
-		_, err := tx.CreateBucketIfNotExists([]byte(bucket))
+		_, err = tx.CreateBucketIfNotExists([]byte(bucket))
 		if err != nil {
 			log.Println(err)
 		}
@@ -320,14 +320,14 @@ func EVBoltAutoGet(db, bucket, key string) (string, error) {
 		log.Println(err)
 		return key, err
 	}
-	cdb, err := bolt.Open(EVBOLT_ROOT+string(os.PathSeparator)+db, 0777, &bolt.Options{Timeout: 1 * time.Second})
+	cdb, err := bolt.Open(evBoltRoot+string(os.PathSeparator)+db, 0777, &bolt.Options{Timeout: 1 * time.Second})
 	if err != nil {
 		log.Println(err)
 		return "", err
 	}
 	defer cdb.Close()
 	cdb.Update(func(tx *bolt.Tx) error {
-		_, err := tx.CreateBucketIfNotExists([]byte(bucket))
+		_, err = tx.CreateBucketIfNotExists([]byte(bucket))
 		if err != nil {
 			log.Println(err)
 		}
@@ -358,14 +358,14 @@ func EVBoltAutoGet(db, bucket, key string) (string, error) {
 
 // EVBoltAll returns all entries for the given database bucket as a evschema html string
 func EVBoltAll(db, bucket string) (map[string]string, error) {
-	cdb, err := bolt.Open(EVBOLT_ROOT+string(os.PathSeparator)+db, 0777, &bolt.Options{Timeout: 1 * time.Second})
+	cdb, err := bolt.Open(evBoltRoot+string(os.PathSeparator)+db, 0777, &bolt.Options{Timeout: 1 * time.Second})
 	if err != nil {
 		log.Println(err)
 		return nil, err
 	}
 	defer cdb.Close()
 	cdb.Update(func(tx *bolt.Tx) error {
-		_, err := tx.CreateBucketIfNotExists([]byte(bucket))
+		_, err = tx.CreateBucketIfNotExists([]byte(bucket))
 		if err != nil {
 			log.Println(err)
 		}
@@ -389,14 +389,18 @@ func EVBoltAll(db, bucket string) (map[string]string, error) {
 	return results, nil
 }
 
-// EVBoltAllHtml returns all entries for the given database bucket as a evschema html string
-func EVBoltAllHtml(db, bucket string) (string, error) {
+// EVBoltAllHTML returns all entries for the given database bucket as a evschema html string
+func EVBoltAllHTML(db, bucket string) (string, error) {
 	_, err := EVBoltMetaLogDbBucket(db, bucket)
 	if err != nil {
 		log.Println(err)
 		return "", err
 	}
 	res, err := EVBoltAll(db, bucket)
+	if err != nil {
+		log.Println(err)
+		return "", err
+	}
 	allEntries := `<div itemscope="" itemtype="https://schema.org/ItemList">`
 	counter := 0
 	for k := range res {
@@ -406,14 +410,18 @@ func EVBoltAllHtml(db, bucket string) (string, error) {
 	return allEntries + `</div>`, nil
 }
 
-// EVBoltAllJson returns all entries for the given database bucket as a evschema html string
-func EVBoltAllJson(db, bucket string) (string, error) {
+// EVBoltAllJSON returns all entries for the given database bucket as a evschema html string
+func EVBoltAllJSON(db, bucket string) (string, error) {
 	_, err := EVBoltMetaLogDbBucket(db, bucket)
 	if err != nil {
 		log.Println(err)
 		return "", err
 	}
 	res, err := EVBoltAll(db, bucket)
+	if err != nil {
+		log.Println(err)
+		return "", err
+	}
 	allEntries, err := json.Marshal(res)
 	if err != nil {
 		log.Println(err)
@@ -430,6 +438,10 @@ func EVBoltAllString(db, bucket string) (string, error) {
 		return "", err
 	}
 	res, err := EVBoltAll(db, bucket)
+	if err != nil {
+		log.Println(err)
+		return "", err
+	}
 	allEntries := ""
 	for k := range res {
 		allEntries += k + " " + res[k] + "\n"
@@ -447,14 +459,14 @@ func EVBoltAutoDelete(db, bucket, id string) (string, error) {
 	if DEBUG {
 		log.Println("EVBoltAutoDelete message from", db, "::", bucket)
 	}
-	cdb, err := bolt.Open(EVBOLT_ROOT+string(os.PathSeparator)+db, 0777, &bolt.Options{Timeout: 1 * time.Second})
+	cdb, err := bolt.Open(evBoltRoot+string(os.PathSeparator)+db, 0777, &bolt.Options{Timeout: 1 * time.Second})
 	if err != nil {
 		log.Println(err)
 		return "", err
 	}
 	defer cdb.Close()
 	cdb.Update(func(tx *bolt.Tx) error {
-		_, err := tx.CreateBucketIfNotExists([]byte(bucket))
+		_, err = tx.CreateBucketIfNotExists([]byte(bucket))
 		if err != nil {
 			log.Println(err)
 		}
@@ -487,14 +499,14 @@ func EVBoltCustomDelete(db, bucket, id string) (string, error) {
 	if DEBUG {
 		log.Println("EVBoltCustomDelete message from", db, "::", bucket)
 	}
-	cdb, err := bolt.Open(EVBOLT_ROOT+string(os.PathSeparator)+db, 0777, &bolt.Options{Timeout: 1 * time.Second})
+	cdb, err := bolt.Open(evBoltRoot+string(os.PathSeparator)+db, 0777, &bolt.Options{Timeout: 1 * time.Second})
 	if err != nil {
 		log.Println(err)
 		return "", err
 	}
 	defer cdb.Close()
 	cdb.Update(func(tx *bolt.Tx) error {
-		_, err := tx.CreateBucketIfNotExists([]byte(bucket))
+		_, err = tx.CreateBucketIfNotExists([]byte(bucket))
 		if err != nil {
 			log.Println(err)
 		}

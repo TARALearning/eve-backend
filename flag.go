@@ -1,8 +1,8 @@
 package eve
 
 var (
-	// DEFAULT_ADDRESS for the generated service to be used
-	DEFAULT_ADDRESS = "127.0.0.1:9090"
+	// defaultAddress for the generated service to be used
+	defaultAddress = "127.0.0.1:9090"
 )
 
 // EVServiceFlag the struct which describes the flag used in the service
@@ -23,8 +23,8 @@ func NewEVServiceFlagDebug() *EVServiceFlag {
 	}
 }
 
-// NewEVServiceFlagHelpHttp returns the help http default flag to be used
-func NewEVServiceFlagHelpHttp() *EVServiceFlag {
+// NewEVServiceFlagHelpHTTP returns the help http default flag to be used
+func NewEVServiceFlagHelpHTTP() *EVServiceFlag {
 	return &EVServiceFlag{
 		FName:  "hhttp",
 		FType:  "string",
@@ -33,12 +33,12 @@ func NewEVServiceFlagHelpHttp() *EVServiceFlag {
 	}
 }
 
-// NewEVServiceFlagHttpAddress returns the address flag which should be used
-func NewEVServiceFlagHttpAddress() *EVServiceFlag {
+// NewEVServiceFlagHTTPAddress returns the address flag which should be used
+func NewEVServiceFlagHTTPAddress() *EVServiceFlag {
 	return &EVServiceFlag{
 		FName:  "address",
 		FType:  "string",
-		FValue: DEFAULT_ADDRESS,
+		FValue: defaultAddress,
 		FDesc:  "address for the http service to run on the given command",
 	}
 }

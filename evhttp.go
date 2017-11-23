@@ -120,7 +120,7 @@ func ReturnErrorMessage(w http.ResponseWriter, statusCode int, err error, format
 // ReturnResult generates response message depending on given format and writes it into the response object
 func ReturnResult(w http.ResponseWriter, statusCode int, response, format string) {
 	w.WriteHeader(statusCode)
-	resultString := ""
+	var resultString string
 	switch format {
 	case ".json":
 		w.Header().Set("Content-Type", "application/json")
@@ -139,16 +139,16 @@ func ReturnResult(w http.ResponseWriter, statusCode int, response, format string
 func DefineKeyType(keyType string) string {
 	switch keyType {
 	case "c", "custom":
-		keyType = EVBOLT_KEY_TYPE_CUSTOM
+		keyType = evBoltKeyTypeCustom
 	default:
-		keyType = EVBOLT_KEY_TYPE_AUTO
+		keyType = evBoltKeyTypeAuto
 	}
 	return keyType
 }
 
 // DecodeMessage decodes message depending on message type
 func DecodeMessage(msg, msgType string) (string, error) {
-	message := ""
+	var message string
 	switch msgType {
 	case "base64":
 		bMsg, err := base64.StdEncoding.DecodeString(msg)

@@ -69,7 +69,7 @@ The eve pkg contents are:
     for SRV in "${SERVICES[@]}";do
         echo "build ${SRV}"
         if [ "${SRV}" == "evbolt" ];then
-            USES=" -use EVBOLT_ROOT=. ${USES_DEFAULT}"
+            USES=" -use evBoltRoot=. ${USES_DEFAULT}"
         else
             USES="${USES_DEFAULT}"
         fi

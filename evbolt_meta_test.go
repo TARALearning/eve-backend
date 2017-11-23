@@ -29,7 +29,7 @@ func Test_EVBoltMetaLogDbBucket(t *testing.T) {
 	if id != "e28eeb9e6b5288e6ddb883637d00c4bc" {
 		t.Error("the EVBoltMetaDbBucketID does not work as expected!")
 	}
-	os.Remove(EVBOLT_ROOT + string(os.PathSeparator) + "evbolt.meta.db")
+	os.Remove(evBoltRoot + string(os.PathSeparator) + "evbolt.meta.db")
 }
 
 func Test_EVBoltMetaAll(t *testing.T) {
@@ -38,7 +38,7 @@ func Test_EVBoltMetaAll(t *testing.T) {
 		t.Error(err)
 	}
 	t.Log(all)
-	os.Remove(EVBOLT_ROOT + string(os.PathSeparator) + "evbolt.meta.db")
+	os.Remove(evBoltRoot + string(os.PathSeparator) + "evbolt.meta.db")
 }
 
 func Test_EVBoltMetaAllBucketsForDb(t *testing.T) {
@@ -47,7 +47,7 @@ func Test_EVBoltMetaAllBucketsForDb(t *testing.T) {
 		t.Error(err)
 	}
 	t.Log(all)
-	os.Remove(EVBOLT_ROOT + string(os.PathSeparator) + "evbolt.meta.db")
+	os.Remove(evBoltRoot + string(os.PathSeparator) + "evbolt.meta.db")
 }
 
 func Test_EVBoltMetaAllDbsForBucket(t *testing.T) {
@@ -56,5 +56,5 @@ func Test_EVBoltMetaAllDbsForBucket(t *testing.T) {
 		t.Error(err)
 	}
 	t.Log(all)
-	os.Remove(EVBOLT_ROOT + string(os.PathSeparator) + "evbolt.meta.db")
+	os.Remove(evBoltRoot + string(os.PathSeparator) + "evbolt.meta.db")
 }

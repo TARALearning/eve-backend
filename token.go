@@ -17,10 +17,12 @@ import (
 	"time"
 )
 
+// TokenSecretHandler token secret handler interface definition
 type TokenSecretHandler interface {
 	SecretGet() (encSecret string, sigSecret string, err error)
 }
 
+// tokenMakeSig generate a token signature
 func tokenMakeSig(message, secret string) string {
 	secretHash := md5.New()
 	secretHash.Write([]byte(secret))
@@ -30,12 +32,14 @@ func tokenMakeSig(message, secret string) string {
 	return hex.EncodeToString(sig.Sum(nil))
 }
 
+// tokenCheckSig check the token signature
 func tokenCheckSig(message, secret string) bool {
 	mkey := strings.Split(message, "#")
 	newToken := tokenMakeSig(mkey[0], secret)
 	return hmac.Equal([]byte(newToken), []byte(mkey[1]))
 }
 
+// TokenIsExpired check if the token is expired
 func TokenIsExpired(base64Msg, encSecret, sigSecret string) (bool, error) {
 	check := time.Now()
 	// decrypt the base64 message into the encrypted message
@@ -79,6 +83,7 @@ func TokenIsExpired(base64Msg, encSecret, sigSecret string) (bool, error) {
 	return true, nil
 }
 
+// tokenEncrypt encrypt the token
 func tokenEncrypt(key, text []byte) ([]byte, error) {
 	var block cipher.Block
 	var err error
@@ -96,6 +101,7 @@ func tokenEncrypt(key, text []byte) ([]byte, error) {
 	return ciphertext, nil
 }
 
+// tokenDecrypt decrypt the given token
 func tokenDecrypt(key, ciphertext []byte) (plaintext []byte, err error) {
 	var block cipher.Block
 	if block, err = aes.NewCipher(key); err != nil {
@@ -112,6 +118,7 @@ func tokenDecrypt(key, ciphertext []byte) (plaintext []byte, err error) {
 	return plaintext, nil
 }
 
+// TokenCreate creates a token with the given message, encSecret and sigSecret
 func TokenCreate(message, encSecret, sigSecret string) (string, error) {
 	message = strings.Replace(message, "&#43;", "+", -1)
 	// create hmac message signature
@@ -125,6 +132,7 @@ func TokenCreate(message, encSecret, sigSecret string) (string, error) {
 	return base64.StdEncoding.EncodeToString(encMessage), nil
 }
 
+// TokenToString converts a token into String
 func TokenToString(base64Msg, encSecret string) (string, error) {
 	// decrypt the base64 message into the encrypted message
 	base64EncMsg, err := base64.StdEncoding.DecodeString(base64Msg)
@@ -139,6 +147,7 @@ func TokenToString(base64Msg, encSecret string) (string, error) {
 	return strings.Replace(string(decMessage), "&#43;", "+", -1), nil
 }
 
+// TokenCheck checks if a token is ok
 func TokenCheck(base64Msg, encSecret, sigSecret string) (bool, error) {
 	nDecMessage, err := TokenToString(base64Msg, encSecret)
 	if err != nil {
@@ -151,9 +160,10 @@ func TokenCheck(base64Msg, encSecret, sigSecret string) (bool, error) {
 	return true, nil
 }
 
+// PlainToken returns the string format of token
 func PlainToken(tokenProps map[string]string) (string, error) {
 	mapKeys := make([]string, 0)
-	for k, _ := range tokenProps {
+	for k := range tokenProps {
 		mapKeys = append(mapKeys, k)
 	}
 	sort.Strings(mapKeys)

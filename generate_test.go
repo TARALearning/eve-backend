@@ -19,12 +19,12 @@ func Test_GenMain(t *testing.T) {
 
 func Test_GenRestMain(t *testing.T) {
 	srv := ConfigForTest("rest")
-	srvJson, err := json.Marshal(srv)
+	srvJSON, err := json.Marshal(srv)
 	if err != nil {
 		t.Error(err)
 	}
 	t.Log(srv)
-	err = ioutil.WriteFile("tests/tmp/main.json", srvJson, 0777)
+	err = ioutil.WriteFile("tests/tmp/main.json", srvJSON, 0777)
 	if err != nil {
 		t.Error(err)
 	}
@@ -42,12 +42,12 @@ func Test_GenRestMain(t *testing.T) {
 
 func Test_GenScheduleMain(t *testing.T) {
 	srv := ConfigForTest("schedule")
-	srvJson, err := json.Marshal(srv)
+	srvJSON, err := json.Marshal(srv)
 	if err != nil {
 		t.Error(err)
 	}
 	t.Log(srv)
-	err = ioutil.WriteFile("tests/tmp/main.json", srvJson, 0777)
+	err = ioutil.WriteFile("tests/tmp/main.json", srvJSON, 0777)
 	if err != nil {
 		t.Error(err)
 	}

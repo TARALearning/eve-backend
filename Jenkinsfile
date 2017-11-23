@@ -59,7 +59,7 @@ node('linux-ubuntu-16.04-amd64') {
 					for (int s = 0; s < services.size(); s++){
 						switch("${services[s]}".toString()){
 							case "evbolt":
-								use_flags = "-use EVBOLT_ROOT=. "+use_flags_default
+								use_flags = "-use evBoltRoot=. "+use_flags_default
 								break;
 							default:
 								use_flags = use_flags_default
@@ -215,7 +215,7 @@ node('linux-ubuntu-16.04-amd64') {
 					for (int s = 0; s < services.size(); s++){
 						switch("${services[s]}".toString()){
 							case "evbolt":
-								use_flags = "-use EVBOLT_ROOT=. "+use_flags_default
+								use_flags = "-use evBoltRoot=. "+use_flags_default
 								break;
 							default:
 								use_flags = use_flags_default

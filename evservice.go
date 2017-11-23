@@ -1,10 +1,16 @@
 package eve
 
 var (
-	// DEFAULT_CTYPE defines the default config type to be created
-	DEFAULT_CTYPE = "default"
-	// IMPORTS defines the default import packages to be used in the generated service
-	IMPORTS = []string{
+	// defaultCType defines the default config type to be created
+	defaultCType = "default"
+	// urls defines the default urls to be used
+	urls = []string{
+		"/help",
+		"/bolt",
+		"/metrics",
+	}
+	// imports defines the default import packages to be used in the generated service
+	imports = []string{
 		"fmt",
 		"flag",
 		"os",
@@ -21,7 +27,7 @@ var (
 		"errors",
 	}
 	// TEMPLATES defines the templates that should be used for code generation
-	TEMPLATES = []string{
+	templates = []string{
 		"templates/connector/bolt.tmpl",
 		"templates/connector/log.tmpl",
 		"templates/connector/secret.tmpl",
@@ -42,7 +48,7 @@ var (
 		"templates/service/evschedule.tmpl",
 	}
 	// VARS defines the variables that should be used during the code generation
-	VARS = map[string]interface{}{
+	vars = map[string]interface{}{
 		"Package":                "main",
 		"DefaultAddress":         "127.0.0.1:9090",
 		"UsageFunc":              "EVUsage",
@@ -83,20 +89,16 @@ var (
 		"TOKEN_EXP_DAYS":         7,
 		"USE_EVSCHEDULE":         false,
 		"USE_EVSCHEDULE_API":     false,
-		"URLS": []string{
-			"/help",
-			"/bolt",
-			"/metrics",
-		},
-		"ROUTE_PATH_PREFIX": "/0.0.1/eve/",
+		"URLS":                   urls,
+		"ROUTE_PATH_PREFIX":      "/0.0.1/eve/",
 	}
 	// COMMANDS defines the default commands that should be used in the generated service code
-	COMMANDS = []*EVServiceCommand{
+	commands = []*EVServiceCommand{
 		NewEVServiceDefaultCommandFlags(),
 	}
 
 	// MAIN i don't know if we need it any longer todo check if this variable is needed
-	MAIN = "EVREST"
+	main = "EVREST"
 )
 
 // EVServiceConfig defines the service configuration struct
@@ -123,66 +125,66 @@ func (tco *EVServiceConfigObj) NewEVServiceConfig(cType string) *EVServiceConfig
 	switch cType {
 	case "rest":
 		tco.Config = &EVServiceConfig{
-			Main:      MAIN,
-			Imports:   IMPORTS,
-			Templates: TEMPLATES,
-			Commands:  COMMANDS,
-			Vars:      VARS,
+			Main:      main,
+			Imports:   imports,
+			Templates: templates,
+			Commands:  commands,
+			Vars:      vars,
 		}
 	case "rest_all":
-		VARS["USE_EVLOG"] = true
-		VARS["USE_EVLOG_API"] = true
-		VARS["EVLOG_URL"] = "http://localhost:9090/0.0.1/eve/evlog"
-		cVars := VARS["URLS"].([]string)
-		cVars = append(cVars, "login")
-		cVars = append(cVars, "setup")
-		cVars = append(cVars, "access")
-		cVars = append(cVars, "logout")
+		vars["USE_EVLOG"] = true
+		vars["USE_EVLOG_API"] = true
+		vars["EVLOG_URL"] = "http://localhost:9090/0.0.1/eve/evlog"
+		urls = append(urls, "login")
+		urls = append(urls, "setup")
+		urls = append(urls, "access")
+		urls = append(urls, "logout")
+		vars["URLS"] = urls
 		tco.Config = &EVServiceConfig{
 			Main:      "EVREST",
-			Imports:   IMPORTS,
-			Templates: TEMPLATES,
-			Commands:  COMMANDS,
-			Vars:      VARS,
+			Imports:   imports,
+			Templates: templates,
+			Commands:  commands,
+			Vars:      vars,
 		}
 	case "schedule":
-		VARS["USE_EVTOKEN"] = false
-		VARS["TOKEN_STORAGE_URL"] = ""
-		VARS["TOKEN_STORAGE_DB"] = ""
-		VARS["TOKEN_STORAGE_BUCKET"] = ""
-		VARS["USE_EVLOG"] = false
-		VARS["EVLOG_URL"] = ""
-		VARS["USE_EVLOG_API"] = false
-		VARS["USE_EVSESSION"] = false
-		VARS["SESSION_STORAGE_URL"] = ""
-		VARS["SESSION_STORAGE_DB"] = ""
-		VARS["SESSION_STORAGE_BUCKET"] = ""
-		VARS["USE_EVSECRET"] = false
-		VARS["SECRET_STORAGE_URL"] = ""
-		VARS["SECRET_STORAGE_DB"] = ""
-		VARS["SECRET_STORAGE_BUCKET"] = ""
-		VARS["SECRET_ENC_KEY"] = ""
-		VARS["SECRET_SIG_KEY"] = ""
-		VARS["USE_EVUSER"] = false
-		VARS["USER_STORAGE_URL"] = ""
-		VARS["USER_STORAGE_DB"] = ""
-		VARS["USER_STORAGE_BUCKET"] = ""
-		VARS["USE_EVBOLT_API"] = false
-		VARS["USE_EVBOLT_AUTH"] = false
-		VARS["USE_LOGIN_API"] = false
-		VARS["SECRET_KEY_FOR_TOKEN"] = ""
-		VARS["SECRET_SIG_FOR_TOKEN"] = ""
-		VARS["COOKIE_EXP_MINUTES"] = 0
-		VARS["TOKEN_EXP_DAYS"] = 0
-		VARS["USE_EVSCHEDULE"] = true
-		VARS["USE_EVSCHEDULE_API"] = true
-		VARS["URLS"] = []string{
+		vars["USE_EVTOKEN"] = false
+		vars["TOKEN_STORAGE_URL"] = ""
+		vars["TOKEN_STORAGE_DB"] = ""
+		vars["TOKEN_STORAGE_BUCKET"] = ""
+		vars["USE_EVLOG"] = false
+		vars["EVLOG_URL"] = ""
+		vars["USE_EVLOG_API"] = false
+		vars["USE_EVSESSION"] = false
+		vars["SESSION_STORAGE_URL"] = ""
+		vars["SESSION_STORAGE_DB"] = ""
+		vars["SESSION_STORAGE_BUCKET"] = ""
+		vars["USE_EVSECRET"] = false
+		vars["SECRET_STORAGE_URL"] = ""
+		vars["SECRET_STORAGE_DB"] = ""
+		vars["SECRET_STORAGE_BUCKET"] = ""
+		vars["SECRET_ENC_KEY"] = ""
+		vars["SECRET_SIG_KEY"] = ""
+		vars["USE_EVUSER"] = false
+		vars["USER_STORAGE_URL"] = ""
+		vars["USER_STORAGE_DB"] = ""
+		vars["USER_STORAGE_BUCKET"] = ""
+		vars["USE_EVBOLT_API"] = false
+		vars["USE_EVBOLT_AUTH"] = false
+		vars["USE_LOGIN_API"] = false
+		vars["SECRET_KEY_FOR_TOKEN"] = ""
+		vars["SECRET_SIG_FOR_TOKEN"] = ""
+		vars["COOKIE_EXP_MINUTES"] = 0
+		vars["TOKEN_EXP_DAYS"] = 0
+		vars["USE_EVSCHEDULE"] = true
+		vars["USE_EVSCHEDULE_API"] = true
+		vars["URLS"] = []string{
 			"/help",
 			"/evschedule",
 			"/metrics",
 		}
-		VARS["ROUTE_PATH_PREFIX"] = "/0.0.1/eve/"
-		IMPORTS = []string{
+		vars["ROUTE_PATH_PREFIX"] = "/0.0.1/eve/"
+		imports = []string{
 			"fmt",
 			"flag",
 			"os",
@@ -198,11 +200,11 @@ func (tco *EVServiceConfigObj) NewEVServiceConfig(cType string) *EVServiceConfig
 			"sync",
 		}
 		tco.Config = &EVServiceConfig{
-			Main:      MAIN,
-			Imports:   IMPORTS,
-			Templates: TEMPLATES,
-			Commands:  COMMANDS,
-			Vars:      VARS,
+			Main:      main,
+			Imports:   imports,
+			Templates: templates,
+			Commands:  commands,
+			Vars:      vars,
 		}
 	default:
 		tco.Config = &EVServiceConfig{
@@ -224,7 +226,7 @@ func (tco *EVServiceConfigObj) NewEVServiceConfig(cType string) *EVServiceConfig
 // EVServiceConfiguration returns the configuration of the Service
 func (tco *EVServiceConfigObj) EVServiceConfiguration() *EVServiceConfig {
 	if tco.Config == nil {
-		return tco.NewEVServiceConfig(DEFAULT_CTYPE).Config
+		return tco.NewEVServiceConfig(defaultCType).Config
 	}
 	return tco.Config
 }

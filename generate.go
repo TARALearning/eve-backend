@@ -61,7 +61,7 @@ func EVGenCommandFlagsVars(cmds []*EVServiceCommand) string {
 
 // EVGenUsageAppendMoreLines appends more usage lines 2 times more default which is EVServiceUsageLines
 func EVGenUsageAppendMoreLines(lines []string) []string {
-	newLines := make([]string, 0)
+	var newLines []string
 	lines = EVGenUsageRemoveEmptyLines(lines)
 	if len(lines) >= EVServiceUsageLines {
 		EVServiceUsageLines = EVServiceUsageLines * 2
