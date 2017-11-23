@@ -1,14 +1,46 @@
 package eve
 
 import (
+	"bytes"
+	"crypto/tls"
 	"encoding/base64"
 	"errors"
+	"io"
 	"io/ioutil"
+	"mime/multipart"
 	"net/http"
 	"net/url"
+	"os"
 	"strconv"
 	"strings"
 )
+
+func EVHttpNewClient() *http.Client {
+	tr := &http.Transport{
+		TLSClientConfig: &tls.Config{
+			InsecureSkipVerify: true,
+		},
+	}
+	return &http.Client{
+		Transport: tr,
+	}
+}
+
+func EVHttpNewClientCrt(crt, key string) (*http.Client, error) {
+	cert, err := tls.LoadX509KeyPair(crt, key)
+	if err != nil {
+		return nil, err
+	}
+	tlsConfig := &tls.Config{
+		Certificates:       []tls.Certificate{cert},
+		InsecureSkipVerify: true,
+	}
+	tlsConfig.BuildNameToCertificate()
+	tr := &http.Transport{TLSClientConfig: tlsConfig}
+	return &http.Client{
+		Transport: tr,
+	}, nil
+}
 
 func EVHttpSendForm(method string, url string, data url.Values) (*http.Response, error) {
 	client := &http.Client{}
@@ -121,4 +153,31 @@ func DecodeMessage(msg, msgType string) (string, error) {
 		message = msg
 	}
 	return message, nil
+}
+
+func EVHttpSendFile(uri, filename, filepath string) (*http.Response, error) {
+	body := &bytes.Buffer{}
+	bodyWriter := multipart.NewWriter(body)
+	fileWriter, err := bodyWriter.CreateFormFile(filename, filepath)
+	if err != nil {
+		return nil, err
+	}
+	fh, err := os.Open(filepath)
+	if err != nil {
+		return nil, err
+	}
+	defer fh.Close()
+	_, err = io.Copy(fileWriter, fh)
+	if err != nil {
+		return nil, err
+	}
+	contentType := bodyWriter.FormDataContentType()
+	bodyWriter.Close()
+	client := EVHttpNewClient()
+	req, err := http.NewRequest("POST", uri, body)
+	if err != nil {
+		return nil, err
+	}
+	req.Header.Set("Content-Type", contentType)
+	return client.Do(req)
 }

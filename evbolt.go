@@ -21,15 +21,15 @@ var (
 	EVBOLT_KEY_TYPE_CUSTOM = "c"
 )
 
-// itob is required to convert a int value into a bolt specific key []byte value
-func itob(v int) []byte {
+// EVBoltItob is required to convert a int value into a bolt specific key []byte value
+func EVBoltItob(v int) []byte {
 	b := make([]byte, 8)
 	binary.BigEndian.PutUint64(b, uint64(v))
 	return b
 }
 
-// boti is required to convert a bolt specific key []byte value into a int value
-func boti(b []byte) int {
+// EVBoltBoti is required to convert a bolt specific key []byte value into a int value
+func EVBoltBoti(b []byte) int {
 	if len(b) != 8 {
 		return -1
 	}
@@ -37,10 +37,10 @@ func boti(b []byte) int {
 	return i
 }
 
-// boltPut puts a message with given custom/string id as a evschema html string into the given db bucket
-func boltPut(id, message, db, bucket string) (string, error) {
+// EVBoltPut puts a message with given custom/string id as a evschema html string into the given db bucket
+func EVBoltPut(id, message, db, bucket string) (string, error) {
 	if DEBUG {
-		log.Println("boltPut message::", message, "into", db, "::", bucket)
+		log.Println("EVBoltPut message::", message, "into", db, "::", bucket)
 	}
 	cdb, err := bolt.Open(EVBOLT_ROOT+string(os.PathSeparator)+db, 0777, &bolt.Options{Timeout: 1 * time.Second})
 	if err != nil {
@@ -58,7 +58,7 @@ func boltPut(id, message, db, bucket string) (string, error) {
 	err = cdb.Update(func(tx *bolt.Tx) error {
 		sb := tx.Bucket([]byte(bucket))
 		if DEBUG {
-			log.Println("boltPut message to id::", id)
+			log.Println("EVBoltPut message to id::", id)
 		}
 		return sb.Put([]byte(id), []byte(message))
 	})
@@ -68,17 +68,17 @@ func boltPut(id, message, db, bucket string) (string, error) {
 	return id, nil
 }
 
-// cPut puts a given message to the given database, bucket with the given custom/string id
+// EVBoltCustomPut puts a given message to the given database, bucket with the given custom/string id
 func EVBoltCustomPut(id, message, db, bucket string) (string, error) {
 	_, err := EVBoltMetaLogDbBucket(db, bucket)
 	if err != nil {
 		log.Println(err)
 		return id, err
 	}
-	return boltPut(id, message, db, bucket)
+	return EVBoltPut(id, message, db, bucket)
 }
 
-// aPut puts a given message as a evschema html string to the given database and bucket with a autoincrement/int key
+// EVBoltAutoPut puts a given message as a evschema html string to the given database and bucket with a autoincrement/int key
 func EVBoltAutoPut(message, db, bucket string) (string, error) {
 	_, err := EVBoltMetaLogDbBucket(db, bucket)
 	if err != nil {
@@ -86,7 +86,7 @@ func EVBoltAutoPut(message, db, bucket string) (string, error) {
 		return "", err
 	}
 	if DEBUG {
-		log.Println("aPut message::", message, "into", db, "::", bucket)
+		log.Println("EVBoltAutoPut message::", message, "into", db, "::", bucket)
 	}
 	cdb, err := bolt.Open(EVBOLT_ROOT+string(os.PathSeparator)+db, 0777, &bolt.Options{Timeout: 1 * time.Second})
 	if err != nil {
@@ -109,9 +109,9 @@ func EVBoltAutoPut(message, db, bucket string) (string, error) {
 			return err
 		}
 		if DEBUG {
-			log.Println("aPut message to id::", id)
+			log.Println("EVBoltAutoPut message to id::", id)
 		}
-		return sb.Put(itob(int(id)), []byte(message))
+		return sb.Put(EVBoltItob(int(id)), []byte(message))
 	})
 	if err != nil {
 		return "", err
@@ -119,7 +119,7 @@ func EVBoltAutoPut(message, db, bucket string) (string, error) {
 	return strconv.FormatUint(id, 10), nil
 }
 
-// cUpdate updates a given message as a evschema html string into the given database,bucket with a custom/string id
+// EVBoltCustomUpdate updates a given message as a evschema html string into the given database,bucket with a custom/string id
 func EVBoltCustomUpdate(message, db, bucket, id string) (string, error) {
 	_, err := EVBoltMetaLogDbBucket(db, bucket)
 	if err != nil {
@@ -127,7 +127,7 @@ func EVBoltCustomUpdate(message, db, bucket, id string) (string, error) {
 		return id, err
 	}
 	if DEBUG {
-		log.Println("cUpdate message::", message, "into", db, "::", bucket, "with the given key::", id)
+		log.Println("EVBoltCustomUpdate message::", message, "into", db, "::", bucket, "with the given key::", id)
 	}
 	cdb, err := bolt.Open(EVBOLT_ROOT+string(os.PathSeparator)+db, 0777, &bolt.Options{Timeout: 1 * time.Second})
 	if err != nil {
@@ -145,7 +145,7 @@ func EVBoltCustomUpdate(message, db, bucket, id string) (string, error) {
 	err = cdb.Update(func(tx *bolt.Tx) error {
 		sb := tx.Bucket([]byte(bucket))
 		if DEBUG {
-			log.Println("cUpdate message to id::", id)
+			log.Println("EVBoltCustomUpdate message to id::", id)
 		}
 		return sb.Put([]byte(id), []byte(message))
 	})
@@ -155,7 +155,7 @@ func EVBoltCustomUpdate(message, db, bucket, id string) (string, error) {
 	return id, nil
 }
 
-// aUpdate updates a given message as a evschema html string into the given database,bucket with a autoincrement/int id
+// EVBoltAutoUpdate updates a given message as a evschema html string into the given database,bucket with a autoincrement/int id
 func EVBoltAutoUpdate(message, db, bucket, id string) (string, error) {
 	_, err := EVBoltMetaLogDbBucket(db, bucket)
 	if err != nil {
@@ -163,7 +163,7 @@ func EVBoltAutoUpdate(message, db, bucket, id string) (string, error) {
 		return "", err
 	}
 	if DEBUG {
-		log.Println("aUpdate message::", message, "into", db, "::", bucket)
+		log.Println("EVBoltAutoUpdate message::", message, "into", db, "::", bucket)
 	}
 	cdb, err := bolt.Open(EVBOLT_ROOT+string(os.PathSeparator)+db, 0777, &bolt.Options{Timeout: 1 * time.Second})
 	if err != nil {
@@ -185,9 +185,9 @@ func EVBoltAutoUpdate(message, db, bucket, id string) (string, error) {
 	err = cdb.Update(func(tx *bolt.Tx) error {
 		sb := tx.Bucket([]byte(bucket))
 		if DEBUG {
-			log.Println("aUpdate message to id::", id)
+			log.Println("EVBoltAutoUpdate message to id::", id)
 		}
-		return sb.Put(itob(nid), []byte(message))
+		return sb.Put(EVBoltItob(nid), []byte(message))
 	})
 	if err != nil {
 		return "", err
@@ -195,7 +195,7 @@ func EVBoltAutoUpdate(message, db, bucket, id string) (string, error) {
 	return strconv.Itoa(nid), nil
 }
 
-// last returns the last entry of the given database bucket as a evschema html string
+// EVBoltLast returns the last entry of the given database bucket as a evschema html string
 func EVBoltLast(db, bucket string) (string, error) {
 	_, err := EVBoltMetaLogDbBucket(db, bucket)
 	if err != nil {
@@ -230,12 +230,12 @@ func EVBoltLast(db, bucket string) (string, error) {
 		return "", errors.New(NA)
 	}
 	if DEBUG {
-		log.Println("last::value", string(value))
+		log.Println("EVBoltLast::value", string(value))
 	}
 	return string(value), nil
 }
 
-// first returns the first entry of the given database bucketas a evschema html string
+// EVBoltFirst returns the first entry of the given database bucketas a evschema html string
 func EVBoltFirst(db, bucket string) (string, error) {
 	_, err := EVBoltMetaLogDbBucket(db, bucket)
 	if err != nil {
@@ -270,12 +270,12 @@ func EVBoltFirst(db, bucket string) (string, error) {
 		return "", errors.New(NA)
 	}
 	if DEBUG {
-		log.Println("first::value", string(value))
+		log.Println("EVBoltFirst::value", string(value))
 	}
 	return string(value), nil
 }
 
-// cGet returns the entry of the given database bucket with the given custom/string key as a evschema html string
+// EVBoltCustomGet returns the entry of the given database bucket with the given custom/string key as a evschema html string
 func EVBoltCustomGet(db, bucket, key string) (string, error) {
 	_, err := EVBoltMetaLogDbBucket(db, bucket)
 	if err != nil {
@@ -308,12 +308,12 @@ func EVBoltCustomGet(db, bucket, key string) (string, error) {
 		return "", errors.New(NA)
 	}
 	if DEBUG {
-		log.Println("cGet::value", result)
+		log.Println("EVBoltCustomGet::value", result)
 	}
 	return result, nil
 }
 
-// aGet returns the entry of the given database bucket with the given autoincrement/int key as a evschema html string
+// EVBoltAutoGet returns the entry of the given database bucket with the given autoincrement/int key as a evschema html string
 func EVBoltAutoGet(db, bucket, key string) (string, error) {
 	_, err := EVBoltMetaLogDbBucket(db, bucket)
 	if err != nil {
@@ -337,7 +337,7 @@ func EVBoltAutoGet(db, bucket, key string) (string, error) {
 	err = cdb.View(func(tx *bolt.Tx) error {
 		sb := tx.Bucket([]byte(bucket))
 		sb.ForEach(func(k, v []byte) error {
-			if strconv.Itoa(boti(k)) == key {
+			if strconv.Itoa(EVBoltBoti(k)) == key {
 				result = string(v)
 			}
 			return nil
@@ -351,12 +351,12 @@ func EVBoltAutoGet(db, bucket, key string) (string, error) {
 		return "", errors.New(NA)
 	}
 	if DEBUG {
-		log.Println("aGet::value", result)
+		log.Println("EVBoltAutoGet::value", result)
 	}
 	return result, nil
 }
 
-// boltAll returns all entries for the given database bucket as a evschema html string
+// EVBoltAll returns all entries for the given database bucket as a evschema html string
 func EVBoltAll(db, bucket string) (map[string]string, error) {
 	cdb, err := bolt.Open(EVBOLT_ROOT+string(os.PathSeparator)+db, 0777, &bolt.Options{Timeout: 1 * time.Second})
 	if err != nil {
@@ -384,12 +384,12 @@ func EVBoltAll(db, bucket string) (map[string]string, error) {
 		return nil, err
 	}
 	if DEBUG {
-		log.Println("boltAll::values", results)
+		log.Println("EVBoltAll::values", results)
 	}
 	return results, nil
 }
 
-// all returns all entries for the given database bucket as a evschema html string
+// EVBoltAllHtml returns all entries for the given database bucket as a evschema html string
 func EVBoltAllHtml(db, bucket string) (string, error) {
 	_, err := EVBoltMetaLogDbBucket(db, bucket)
 	if err != nil {
@@ -406,7 +406,7 @@ func EVBoltAllHtml(db, bucket string) (string, error) {
 	return allEntries + `</div>`, nil
 }
 
-// all returns all entries for the given database bucket as a evschema html string
+// EVBoltAllJson returns all entries for the given database bucket as a evschema html string
 func EVBoltAllJson(db, bucket string) (string, error) {
 	_, err := EVBoltMetaLogDbBucket(db, bucket)
 	if err != nil {
@@ -422,7 +422,7 @@ func EVBoltAllJson(db, bucket string) (string, error) {
 	return string(allEntries), nil
 }
 
-// all returns all entries for the given database bucket as a evschema html string
+// EVBoltAllString returns all entries for the given database bucket as a evschema html string
 func EVBoltAllString(db, bucket string) (string, error) {
 	_, err := EVBoltMetaLogDbBucket(db, bucket)
 	if err != nil {
@@ -437,7 +437,7 @@ func EVBoltAllString(db, bucket string) (string, error) {
 	return allEntries, nil
 }
 
-// bDelete deletes a entry of the given database bucket at the given autoincrement/int key as a evschema html string
+// EVBoltAutoDelete deletes a entry of the given database bucket at the given autoincrement/int key as a evschema html string
 func EVBoltAutoDelete(db, bucket, id string) (string, error) {
 	_, err := EVBoltMetaLogDbBucket(db, bucket)
 	if err != nil {
@@ -445,7 +445,7 @@ func EVBoltAutoDelete(db, bucket, id string) (string, error) {
 		return "", err
 	}
 	if DEBUG {
-		log.Println("aDelete message from", db, "::", bucket)
+		log.Println("EVBoltAutoDelete message from", db, "::", bucket)
 	}
 	cdb, err := bolt.Open(EVBOLT_ROOT+string(os.PathSeparator)+db, 0777, &bolt.Options{Timeout: 1 * time.Second})
 	if err != nil {
@@ -467,9 +467,9 @@ func EVBoltAutoDelete(db, bucket, id string) (string, error) {
 	err = cdb.Update(func(tx *bolt.Tx) error {
 		sb := tx.Bucket([]byte(bucket))
 		if DEBUG {
-			log.Println("aDelete message with id::", id)
+			log.Println("EVBoltAutoDelete message with id::", id)
 		}
-		return sb.Delete(itob(nid))
+		return sb.Delete(EVBoltItob(nid))
 	})
 	if err != nil {
 		return "", err
@@ -477,7 +477,7 @@ func EVBoltAutoDelete(db, bucket, id string) (string, error) {
 	return strconv.Itoa(nid), nil
 }
 
-// cDelete deletes a entry of the given database bucket at the given custom/string key as a evschema html string
+// EVBoltCustomDelete deletes a entry of the given database bucket at the given custom/string key as a evschema html string
 func EVBoltCustomDelete(db, bucket, id string) (string, error) {
 	_, err := EVBoltMetaLogDbBucket(db, bucket)
 	if err != nil {
@@ -485,7 +485,7 @@ func EVBoltCustomDelete(db, bucket, id string) (string, error) {
 		return "", err
 	}
 	if DEBUG {
-		log.Println("cDelete message from", db, "::", bucket)
+		log.Println("EVBoltCustomDelete message from", db, "::", bucket)
 	}
 	cdb, err := bolt.Open(EVBOLT_ROOT+string(os.PathSeparator)+db, 0777, &bolt.Options{Timeout: 1 * time.Second})
 	if err != nil {
@@ -503,7 +503,7 @@ func EVBoltCustomDelete(db, bucket, id string) (string, error) {
 	err = cdb.Update(func(tx *bolt.Tx) error {
 		sb := tx.Bucket([]byte(bucket))
 		if DEBUG {
-			log.Println("cDelete message with id::", id)
+			log.Println("EVBoltCustomDelete message with id::", id)
 		}
 		return sb.Delete([]byte(id))
 	})

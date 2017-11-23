@@ -22,19 +22,19 @@ func dbBucketID(db, bucket string) string {
 	return hex.EncodeToString(hasher.Sum(nil))
 }
 
-// MetaDbBucketID returns the md5 hashed {db}/{bucket} id as a evschema html string
+// EVBoltMetaDbBucketID returns the md5 hashed {db}/{bucket} id as a evschema html string
 func EVBoltMetaDbBucketID(db, bucket string) (string, error) {
 	return dbBucketID(db, bucket), nil
 }
 
-// MetaLogDbBucket writes the db bucket (as a evschema html string) into the meta storage
+// EVBoltMetaLogDbBucket writes the db bucket (as a evschema html string) into the meta storage
 func EVBoltMetaLogDbBucket(db, bucket string) (string, error) {
 	msg := db + "/" + bucket
 	id := dbBucketID(db, bucket)
-	return boltPut(id, msg, MetaDB, MetaBUCKET)
+	return EVBoltPut(id, msg, MetaDB, MetaBUCKET)
 }
 
-// MetaAll returns all entries in the meta storage as a evschema html string
+// EVBoltMetaAll returns all entries in the meta storage as a evschema html string
 func EVBoltMetaAll() (string, error) {
 	res, err := EVBoltAll(MetaDB, MetaBUCKET)
 	if err != nil {
@@ -47,7 +47,7 @@ func EVBoltMetaAll() (string, error) {
 	return all, nil
 }
 
-// MetaAllBucketsForDb returns all buckets for a given database from the meta storage as a evschema html string
+// EVBoltMetaAllBucketsForDb returns all buckets for a given database from the meta storage as a evschema html string
 // todo: finish implementation
 func EVBoltMetaAllBucketsForDb(db string) (string, error) {
 	res, err := EVBoltAll(MetaDB, MetaBUCKET)
@@ -61,7 +61,7 @@ func EVBoltMetaAllBucketsForDb(db string) (string, error) {
 	return all, nil
 }
 
-// MetaAllDbsForBucket returns all databases for the given bucket from the meta storage as a evschema html string
+// EVBoltMetaAllDbsForBucket returns all databases for the given bucket from the meta storage as a evschema html string
 // todo: finish implementation
 func EVBoltMetaAllDbsForBucket(bucket string) (string, error) {
 	res, err := EVBoltAll(MetaDB, MetaBUCKET)
