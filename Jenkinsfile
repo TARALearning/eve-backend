@@ -38,6 +38,7 @@ node('linux-ubuntu-16.04-amd64') {
 					}
 				}
 				stage ('Run TESTS'){
+					sh("cd tests && chmod +x gen.ssl.client.crt.sh && ./gen.ssl.client.crt.sh")
 					sh("${gobin} test -v")
 				}
 				stage ('Build TOOLS'){
@@ -174,6 +175,7 @@ node('linux-ubuntu-16.04-amd64') {
 					}
 				}
 				stage ('Run TESTS'){
+					sh("cd tests && chmod +x gen.ssl.client.crt.sh && ./gen.ssl.client.crt.sh")
 					sh("${gobin} test -v")
 				}
 			}
@@ -192,6 +194,7 @@ node('linux-ubuntu-16.04-amd64') {
 					}
 				}
 				stage ('Run TESTS'){
+					sh("cd tests && chmod +x gen.ssl.client.crt.sh && ./gen.ssl.client.crt.sh")
 					sh("${gobin} test -v")
 				}
 				stage ('Build TOOLS'){

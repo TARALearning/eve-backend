@@ -1,0 +1,49 @@
+[ req ]
+#default_bits		= 2048
+#default_md		= sha256
+#default_keyfile 	= privkey.pem
+distinguished_name	= req_distinguished_name
+attributes		= req_attributes
+
+[ req_distinguished_name ]
+countryName			= Country Name (2 letter code)
+countryName_min			= 2
+countryName_max			= 2
+stateOrProvinceName		= State or Province Name (full name)
+localityName			= Locality Name (eg, city)
+0.organizationName		= Organization Name (eg, company)
+organizationalUnitName		= Organizational Unit Name (eg, section)
+commonName			= Common Name (eg, fully qualified host name)
+commonName_max			= 64
+emailAddress			= Email Address
+emailAddress_max		= 64
+
+[ req_attributes ]
+challengePassword		= A challenge password
+challengePassword_min		= 4
+challengePassword_max		= 20
+
+[ ca ]
+default_ca = my_ca
+
+[ my_ca ]
+certificate = ./test.root.ca.crt
+private_key = ./test.root.ca.key
+default_md = sha256
+default_days = 9999
+new_certs_dir = ./
+database = ./test.root.database.txt
+serial = ./test.root.serial.txt
+policy = policy_anything
+
+[ policy_anything ]
+# if the value is "match" then the field value must match the same field in the
+# CA certificate. If the value is "supplied" then it must be present.
+# Optional means it may be present. Any fields not mentioned are silently
+# deleted.
+countryName = match
+stateOrProvinceName = supplied
+organizationName = supplied
+commonName = supplied
+organizationalUnitName = optional
+commonName = supplied

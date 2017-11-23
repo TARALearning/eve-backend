@@ -1,6 +1,6 @@
 package eve
 
 var (
-	// NA: not available
+	// NA not available
 	NA = "Not available"
 )

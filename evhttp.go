@@ -15,6 +15,7 @@ import (
 	"strings"
 )
 
+// EVHttpNewClient creates a http client with the default values
 func EVHttpNewClient() *http.Client {
 	tr := &http.Transport{
 		TLSClientConfig: &tls.Config{
@@ -26,6 +27,7 @@ func EVHttpNewClient() *http.Client {
 	}
 }
 
+// EVHttpNewClientCrt creates a http client with certificate authentification enabled with the given cert and key
 func EVHttpNewClientCrt(crt, key string) (*http.Client, error) {
 	cert, err := tls.LoadX509KeyPair(crt, key)
 	if err != nil {
@@ -42,8 +44,9 @@ func EVHttpNewClientCrt(crt, key string) (*http.Client, error) {
 	}, nil
 }
 
+// EVHttpSendForm sends form data with a given method and values to the given url
 func EVHttpSendForm(method string, url string, data url.Values) (*http.Response, error) {
-	client := &http.Client{}
+	client := EVHttpNewClient()
 	req, err := http.NewRequest(method, url, strings.NewReader(data.Encode()))
 	if err != nil {
 		return nil, err
@@ -52,8 +55,9 @@ func EVHttpSendForm(method string, url string, data url.Values) (*http.Response,
 	return client.Do(req)
 }
 
+// EVHttpSendText sends a text with the given method url and values
 func EVHttpSendText(method string, url string, text string) (*http.Response, error) {
-	client := &http.Client{}
+	client := EVHttpNewClient()
 	req, err := http.NewRequest(method, url, strings.NewReader(text))
 	if err != nil {
 		return nil, err
@@ -62,12 +66,13 @@ func EVHttpSendText(method string, url string, text string) (*http.Response, err
 	return client.Do(req)
 }
 
+// EVHttpReceive is mostly used for all types of GET requests like DELETE etc.
 func EVHttpReceive(method string, url string, values url.Values) (*http.Response, error) {
 	urlValues := ""
 	if values != nil {
 		urlValues = "?" + values.Encode()
 	}
-	client := &http.Client{}
+	client := EVHttpNewClient()
 	req, err := http.NewRequest(method, url+urlValues, nil)
 	if err != nil {
 		return nil, err
@@ -75,11 +80,13 @@ func EVHttpReceive(method string, url string, values url.Values) (*http.Response
 	return client.Do(req)
 }
 
+// ResponseBodyAll returns []byte and error from response body
 func ResponseBodyAll(response *http.Response) ([]byte, error) {
 	defer response.Body.Close()
 	return ioutil.ReadAll(response.Body)
 }
 
+// RequestBodyAll returns []byte and error from the request body
 func RequestBodyAll(request *http.Request) ([]byte, error) {
 	defer request.Body.Close()
 	return ioutil.ReadAll(request.Body)
@@ -97,7 +104,7 @@ func CheckRequiredFormValues(r *http.Request, values map[string]bool) error {
 	return nil
 }
 
-// returnErrorMessage generates a error message and write it into the response object
+// ReturnErrorMessage generates a error message and write it into the response object
 func ReturnErrorMessage(w http.ResponseWriter, statusCode int, err error, format string) {
 	w.WriteHeader(statusCode)
 	switch format {
@@ -110,7 +117,7 @@ func ReturnErrorMessage(w http.ResponseWriter, statusCode int, err error, format
 	}
 }
 
-// returnResult generates response message depending on given format and writes it into the response object
+// ReturnResult generates response message depending on given format and writes it into the response object
 func ReturnResult(w http.ResponseWriter, statusCode int, response, format string) {
 	w.WriteHeader(statusCode)
 	resultString := ""
@@ -128,7 +135,7 @@ func ReturnResult(w http.ResponseWriter, statusCode int, response, format string
 	w.Write([]byte(resultString))
 }
 
-// defineKeyType sets key type to predefined values depending on user input
+// DefineKeyType sets key type to predefined values depending on user input
 func DefineKeyType(keyType string) string {
 	switch keyType {
 	case "c", "custom":
@@ -139,7 +146,7 @@ func DefineKeyType(keyType string) string {
 	return keyType
 }
 
-// decodeMessage decodes message depending on message type
+// DecodeMessage decodes message depending on message type
 func DecodeMessage(msg, msgType string) (string, error) {
 	message := ""
 	switch msgType {
@@ -155,6 +162,7 @@ func DecodeMessage(msg, msgType string) (string, error) {
 	return message, nil
 }
 
+// EVHttpSendFile sends a file or with other words it is a file upload
 func EVHttpSendFile(uri, filename, filepath string) (*http.Response, error) {
 	body := &bytes.Buffer{}
 	bodyWriter := multipart.NewWriter(body)
