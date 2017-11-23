@@ -4,5 +4,7 @@ import "testing"
 
 func Test_Command(t *testing.T) {
 	cmd := NewEVServiceDefaultCommandFlags()
-	t.Log(cmd)
+	if cmd.Name != "help" {
+		t.Error("NewEVServiceDefaultCommandFlags does not work as expected")
+	}
 }

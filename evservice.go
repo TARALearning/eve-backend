@@ -120,6 +120,11 @@ type EVServiceConfigObj struct {
 	Config *EVServiceConfig
 }
 
+// NewEVServiceConfigObj creates a new service config object
+func NewEVServiceConfigObj() *EVServiceConfigObj {
+	return &EVServiceConfigObj{}
+}
+
 // NewEVServiceConfig creates a new service configuration with the default values
 func (tco *EVServiceConfigObj) NewEVServiceConfig(cType string) *EVServiceConfigObj {
 	switch cType {
