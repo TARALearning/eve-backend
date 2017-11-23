@@ -80,7 +80,7 @@ if [ ! -f "${prefix}client.crt" ];then
   openssl ca -batch -config ${config} -days ${days} -in ${prefix}client.csr -out ${prefix}client.crt -keyfile ${prefix}root.ca.key -cert ${prefix}root.ca.crt -policy policy_anything -subj "${subj}"
 fi
 
-if [ ! -f "${prefix}client.cert.p12" ];then
-  echo "generating ${prefix}client.cert.p12"
-  openssl pkcs12 -export -in ${prefix}client.crt -inkey ${prefix}client.key -certfile ${prefix}root.ca.crt -out ${prefix}client.cert.p12
-fi
+#if [ ! -f "${prefix}client.cert.p12" ];then
+#  echo "generating ${prefix}client.cert.p12"
+#  openssl pkcs12 -export -in ${prefix}client.crt -inkey ${prefix}client.key -certfile ${prefix}root.ca.crt -out ${prefix}client.cert.p12
+#fi
