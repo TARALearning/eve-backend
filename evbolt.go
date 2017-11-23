@@ -15,11 +15,19 @@ import (
 var (
 	// evBoltRoot is the path where to store the *.db files
 	evBoltRoot = "./tests/tmp/"
-	// evBoltKeyTypeAuto is key type for autoincrement/int bolt keys
-	evBoltKeyTypeAuto = "a"
-	// evBoltKeyTypeCustom is key type for custom/string (user given) bolt keys
-	evBoltKeyTypeCustom = "c"
 )
+
+const (
+	// EvBoltKeyTypeAuto is key type for autoincrement/int bolt keys
+	EvBoltKeyTypeAuto = "a"
+	// EvBoltKeyTypeCustom is key type for custom/string (user given) bolt keys
+	EvBoltKeyTypeCustom = "c"
+)
+
+// SetEvBoltRoot sets the root path where the databases should be saved
+func SetEvBoltRoot(rootPath string) {
+	evBoltRoot = rootPath
+}
 
 // EVBoltItob is required to convert a int value into a bolt specific key []byte value
 func EVBoltItob(v int) []byte {

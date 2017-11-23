@@ -139,9 +139,9 @@ func ReturnResult(w http.ResponseWriter, statusCode int, response, format string
 func DefineKeyType(keyType string) string {
 	switch keyType {
 	case "c", "custom":
-		keyType = evBoltKeyTypeCustom
+		keyType = EvBoltKeyTypeCustom
 	default:
-		keyType = evBoltKeyTypeAuto
+		keyType = EvBoltKeyTypeAuto
 	}
 	return keyType
 }

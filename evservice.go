@@ -230,3 +230,23 @@ func (tco *EVServiceConfigObj) EVServiceConfiguration() *EVServiceConfig {
 	}
 	return tco.Config
 }
+
+// SrvConfigMain returns the service config main value
+func SrvConfigMain() string {
+	return main
+}
+
+// SrvConfigTemplates returns the service config templates slice of strings
+func SrvConfigTemplates() []string {
+	return templates
+}
+
+// SrvConfigCommands returns the default service commands
+func SrvConfigCommands() []*EVServiceCommand {
+	return commands
+}
+
+// SetDefaultCType sets the default cType
+func SetDefaultCType(cType string) {
+	defaultCType = cType
+}

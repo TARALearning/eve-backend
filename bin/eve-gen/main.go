@@ -93,7 +93,7 @@ func main() {
 		srv := &eve.EVServiceConfigObj{}
 		// todo implement change of the type to schedule
 		//  in case evschedule is built with a config file
-		eve.defaultCType = "rest"
+		eve.SetDefaultCType("rest")
 
 		var srvConfig *eve.EVServiceConfig
 		fmt.Println("eve-gen :: check if config file was provided...")
@@ -244,7 +244,7 @@ func main() {
 					"USER_STORAGE_URL":       "",
 					"USER_STORAGE_DB":        "",
 					"USER_STORAGE_BUCKET":    "",
-					"USE_evBoltRoot":        ".",
+					"USE_evBoltRoot":         ".",
 					"USE_EVBOLT_API":         true,
 					"USE_EVBOLT_AUTH":        false,
 					"USE_LOGIN_API":          false,
@@ -401,10 +401,10 @@ func main() {
 				os.Exit(2)
 			}
 			srvConfig = &eve.EVServiceConfig{
-				Main:      eve.MAIN,
+				Main:      eve.SrvConfigMain(),
 				Imports:   imports,
-				Templates: eve.TEMPLATES,
-				Commands:  eve.COMMANDS,
+				Templates: eve.SrvConfigTemplates(),
+				Commands:  eve.SrvConfigCommands(),
 				Vars:      vars,
 			}
 		}
