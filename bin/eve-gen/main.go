@@ -25,7 +25,7 @@ func (c *uses) Set(value string) error {
 
 var (
 	flags   *flag.FlagSet
-	VERSION = "0.0.1"
+	VERSION = eve.VERSION
 	command = ""
 	service = ""
 	use     uses
@@ -142,7 +142,7 @@ func main() {
 				vars = map[string]interface{}{"Package": "main",
 					"DefaultAddress":         "127.0.0.1:9093",
 					"UsageFunc":              "EVUsage",
-					"Version":                "0.0.1",
+					"Version":                eve.VERSION,
 					"Name":                   "EVAuth",
 					"Description":            "EVAuth is a rest micro service which can be used to authenticate agains users or hosts/services",
 					"Src":                    "https://git.evalgo.de:8443/",
@@ -150,24 +150,24 @@ func main() {
 					"ENABLE_CROSS_ORIGIN":    true,
 					"USE_PROMETHEUS":         true,
 					"USE_EVTOKEN":            true,
-					"TOKEN_STORAGE_URL":      "http://localhost:9092/0.0.1/eve/evbolt",
+					"TOKEN_STORAGE_URL":      "http://localhost:9092/" + eve.VERSION + "/eve/evbolt",
 					"TOKEN_STORAGE_DB":       "tokens.db",
 					"TOKEN_STORAGE_BUCKET":   "tokens",
 					"USE_EVLOG":              false,
 					"EVLOG_URL":              "",
 					"USE_EVLOG_API":          false,
 					"USE_EVSESSION":          true,
-					"SESSION_STORAGE_URL":    "http://localhost:9092/0.0.1/eve/evbolt",
+					"SESSION_STORAGE_URL":    "http://localhost:9092/" + eve.VERSION + "/eve/evbolt",
 					"SESSION_STORAGE_DB":     "sessions.db",
 					"SESSION_STORAGE_BUCKET": "sessions",
 					"USE_EVSECRET":           true,
-					"SECRET_STORAGE_URL":     "http://localhost:9092/0.0.1/eve/evbolt",
+					"SECRET_STORAGE_URL":     "http://localhost:9092/" + eve.VERSION + "/eve/evbolt",
 					"SECRET_STORAGE_DB":      "secrets.db",
 					"SECRET_STORAGE_BUCKET":  "secrets",
 					"SECRET_ENC_KEY":         "TokenKeyEnc",
 					"SECRET_SIG_KEY":         "TokenKeySig",
 					"USE_EVUSER":             true,
-					"USER_STORAGE_URL":       "http://localhost:9092/0.0.1/eve/evbolt",
+					"USER_STORAGE_URL":       "http://localhost:9092/" + eve.VERSION + "/eve/evbolt",
 					"USER_STORAGE_DB":        "users.db",
 					"USER_STORAGE_BUCKET":    "users",
 					"USE_EVBOLT_API":         true,
@@ -196,7 +196,7 @@ func main() {
 						"/access.html",
 						"/logout.html",
 					},
-					"ROUTE_PATH_PREFIX": "/0.0.1/eve/",
+					"ROUTE_PATH_PREFIX": "/" + eve.VERSION + "/eve/",
 				}
 			case "evbolt":
 				imports = []string{
@@ -216,7 +216,7 @@ func main() {
 				vars = map[string]interface{}{"Package": "main",
 					"DefaultAddress":         "127.0.0.1:9092",
 					"UsageFunc":              "EVUsage",
-					"Version":                "0.0.1",
+					"Version":                eve.VERSION,
 					"Name":                   "EVBolt",
 					"Description":            "EVBolt is a rest micro service which wrapps the golang bolt database",
 					"Src":                    "https://git.evalgo.de:8443/",
@@ -228,7 +228,7 @@ func main() {
 					"TOKEN_STORAGE_DB":       "",
 					"TOKEN_STORAGE_BUCKET":   "",
 					"USE_EVLOG":              true,
-					"EVLOG_URL":              "http://localhost:9091/0.0.1/eve/evlog",
+					"EVLOG_URL":              "http://localhost:9091/" + eve.VERSION + "/eve/evlog",
 					"USE_EVLOG_API":          false,
 					"USE_EVSESSION":          false,
 					"SESSION_STORAGE_URL":    "",
@@ -261,7 +261,7 @@ func main() {
 						"/evbolt.html",
 						"/metrics",
 					},
-					"ROUTE_PATH_PREFIX": "/0.0.1/eve/",
+					"ROUTE_PATH_PREFIX": "/" + eve.VERSION + "/eve/",
 				}
 			case "evlog":
 				imports = []string{
@@ -281,7 +281,7 @@ func main() {
 					"Package":                "main",
 					"DefaultAddress":         "127.0.0.1:9091",
 					"UsageFunc":              "EVUsage",
-					"Version":                "0.0.1",
+					"Version":                eve.VERSION,
 					"Name":                   "EVLog",
 					"Description":            "EVLog is a rest micro service to be used for logging messages from the other microservices",
 					"Src":                    "https://git.evalgo.de:8443/",
@@ -323,7 +323,7 @@ func main() {
 						"/evlog",
 						"/metrics",
 					},
-					"ROUTE_PATH_PREFIX": "/0.0.1/eve/",
+					"ROUTE_PATH_PREFIX": "/" + eve.VERSION + "/eve/",
 				}
 			case "evschedule":
 				imports = []string{
@@ -346,7 +346,7 @@ func main() {
 					"Package":                "main",
 					"DefaultAddress":         "127.0.0.1:9091",
 					"UsageFunc":              "EVUsage",
-					"Version":                "0.0.1",
+					"Version":                eve.VERSION,
 					"Name":                   "EVSchedule",
 					"Description":            "EVSchedule is a rest micro service to manage processes",
 					"Src":                    "https://git.evalgo.de:8443/",
@@ -358,7 +358,7 @@ func main() {
 					"TOKEN_STORAGE_DB":       "",
 					"TOKEN_STORAGE_BUCKET":   "",
 					"USE_EVLOG":              true,
-					"EVLOG_URL":              "http://localhost:9091/0.0.1/eve/evlog",
+					"EVLOG_URL":              "http://localhost:9091/" + eve.VERSION + "/eve/evlog",
 					"USE_EVLOG_API":          false,
 					"USE_EVSESSION":          false,
 					"SESSION_STORAGE_URL":    "",
@@ -393,7 +393,7 @@ func main() {
 						"/evschedule/commands/{command}.html",
 						"/metrics",
 					},
-					"ROUTE_PATH_PREFIX": "/0.0.1/eve/",
+					"ROUTE_PATH_PREFIX": "/" + eve.VERSION + "/eve/",
 				}
 			default:
 				fmt.Println("error: the given service name <" + service + "> is not supported yet")

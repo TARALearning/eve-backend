@@ -7,7 +7,7 @@ node('linux-ubuntu-16.04-amd64') {
 	def dependencies = ['github.com/boltdb/bolt', 'github.com/gorilla/mux', 'github.com/prometheus/client_golang/prometheus', 'github.com/prometheus/client_golang/prometheus/promhttp', 'github.com/dchest/uniuri', 'github.com/mitchellh/go-ps', 'github.com/axw/gocov/...', 'github.com/AlekSi/gocov-xml']
 	def oses = ['darwin', 'linux', 'windows']
 	def archs = ['amd64']
-	def version = '0.0.1'
+	def version = '0.0.2'
 	def ext = ''
 	def dist = 'dist'
 	def curr = pwd()
@@ -124,7 +124,7 @@ node('linux-ubuntu-16.04-amd64') {
 					withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: 'bintray', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD']]) {
 						sh("cp -Rf ${dist} "+dateFormat.format(date))
 						sh("zip -r "+dateFormat.format(date)+".zip "+dateFormat.format(date))
-						sh("curl -v -X PUT --header 'X-Bintray-Package: core' --header 'X-Bintray-Version: 0.0.1' --header 'X-Bintray-Publish: 1' --header 'X-Bintray-Override: 1' --header 'X-Bintray-Explode: 1' --user '${USERNAME}:${PASSWORD}' -T "+dateFormat.format(date)+".zip 'https://api.bintray.com/content/evalgo/eve-backend/"+dateFormat.format(date)+".zip'")
+						sh("curl -v -X PUT --header 'X-Bintray-Package: core' --header 'X-Bintray-Version: 0.0.2' --header 'X-Bintray-Publish: 1' --header 'X-Bintray-Override: 1' --header 'X-Bintray-Explode: 1' --user '${USERNAME}:${PASSWORD}' -T "+dateFormat.format(date)+".zip 'https://api.bintray.com/content/evalgo/eve-backend/"+dateFormat.format(date)+".zip'")
 						sh("sleep 20")
 						for (int s = 0; s < services.size(); s++){
 							for (int o = 0; o < oses.size(); o++){

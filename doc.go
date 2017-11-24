@@ -10,7 +10,7 @@ package eve
 
 var (
 	// VERSION of the eve library and all its's services
-	VERSION = "0.0.1"
+	VERSION = "0.0.2"
 	// DEBUG is used to set the debug flag for printing out information
 	DEBUG = false
 )
