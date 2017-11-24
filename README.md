@@ -1,7 +1,7 @@
 # eve
 
 ## LICENSE
-BSD-2
+BSD
 
 ## DESCRIPTION
 The eve pkg contents are:
