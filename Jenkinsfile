@@ -42,7 +42,6 @@ node('linux-ubuntu-16.04-amd64') {
 					sh("cd tests && chmod +x gen.ssl.client.crt.sh && ./gen.ssl.client.crt.sh")
 					sh("${gobin} test -v")
 					sh("${gobin} test -coverprofile=dist/coverage.out")
-					sh("${gobin} tool cover -func=dist/coverage.out")
 					sh("${gopathbin}/gocov test evalgo.org/eve | ${gopathbin}/gocov-xml > dist/coverage.xml")
 				}
 				stage ('Build TOOLS'){
@@ -182,7 +181,6 @@ node('linux-ubuntu-16.04-amd64') {
 					sh("cd tests && chmod +x gen.ssl.client.crt.sh && ./gen.ssl.client.crt.sh")
 					sh("${gobin} test -v")
 					sh("${gobin} test -coverprofile=dist/coverage.out")
-					sh("${gobin} tool cover -func=dist/coverage.out")
 					sh("${gopathbin}/gocov test evalgo.org/eve | ${gopathbin}/gocov-xml > dist/coverage.xml")
 				}
 			}
@@ -204,7 +202,6 @@ node('linux-ubuntu-16.04-amd64') {
 					sh("cd tests && chmod +x gen.ssl.client.crt.sh && ./gen.ssl.client.crt.sh")
 					sh("${gobin} test -v")
 					sh("${gobin} test -coverprofile=dist/coverage.out")
-					sh("${gobin} tool cover -func=dist/coverage.out")
 					sh("${gopathbin}/gocov test evalgo.org/eve | ${gopathbin}/gocov-xml > dist/coverage.xml")
 				}
 				stage ('Build TOOLS'){
