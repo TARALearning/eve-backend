@@ -12,17 +12,9 @@ The eve pkg contents are:
 
 ## BUILD STATUS
 
-### MASTER
-[![Build Status](https://jenkins.evalgo.de:8443/buildStatus/icon?job=eve%20backend%20pipeline/master)](https://jenkins.evalgo.de:8443/job/eve%20backend%20pipeline/master)
-
-### TEST
-[![Build Status](https://jenkins.evalgo.de:8443/buildStatus/icon?job=eve%20backend%20pipeline/test)](https://jenkins.evalgo.de:8443/job/eve%20backend%20pipeline/test)
-
-### DEV
-[![Build Status](https://jenkins.evalgo.de:8443/buildStatus/icon?job=eve%20backend%20pipeline/dev)](https://jenkins.evalgo.de:8443/job/eve%20backend%20pipeline/dev)
-
-## DOWNLOAD
- [ ![Download](https://api.bintray.com/packages/evalgo/eve-backend/core/images/download.svg) ](https://bintray.com/evalgo/eve-backend/core/_latestVersion)
+    | Master   |     Testing      |  Development |
+    |----------|:-------------:|------:|
+    | [![Build Status](https://jenkins.evalgo.de:8443/buildStatus/icon?job=eve%20backend%20pipeline/master)](https://jenkins.evalgo.de:8443/job/eve%20backend%20pipeline/master)|  [![Build Status](https://jenkins.evalgo.de:8443/buildStatus/icon?job=eve%20backend%20pipeline/test)](https://jenkins.evalgo.de:8443/job/eve%20backend%20pipeline/test) | [![Build Status](https://jenkins.evalgo.de:8443/buildStatus/icon?job=eve%20backend%20pipeline/dev)](https://jenkins.evalgo.de:8443/job/eve%20backend%20pipeline/dev) |
 
 ## TOOLS
 * [eve-gen]()
