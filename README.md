@@ -10,13 +10,18 @@ The eve pkg contents are:
     * codebase of the core services
     * templates for code generation
 
+## BUILD STATUS
+* [![DEV](https://jenkins.evalgo.de:8443/buildStatus/icon?job=eve backend pipeline/dev)](https://jenkins.evalgo.de:8443/job/eve%20backend%20pipeline/job/dev/)
+* [![TEST](https://jenkins.evalgo.de:8443/buildStatus/icon?job=eve backend pipeline/test)](https://jenkins.evalgo.de:8443/job/eve%20backend%20pipeline/job/test/)
+* [![MASTER](https://jenkins.evalgo.de:8443/buildStatus/icon?job=eve backend pipeline/master)](https://jenkins.evalgo.de:8443/job/eve%20backend%20pipeline/job/master/)
+
 ## DOWNLOAD
  [ ![Download](https://api.bintray.com/packages/evalgo/eve-backend/core/images/download.svg) ](https://bintray.com/evalgo/eve-backend/core/_latestVersion)
 
 ## TOOLS
 * [eve-gen]()
 * [eve-setup]()
-* [eve-bintray]() 
+* [eve-bintray]()
   have a look about the scope and usage for this tool at the bottom of this file
 
 ## SERVICES
@@ -82,7 +87,7 @@ The eve pkg contents are:
 
 ## RUN
 ```bash
-    # start the scheduler 
+    # start the scheduler
     dist/evschedule http&
     # register all services
     curl -X POST -d "Id=evauth&Cmd=dist/evlog&Args=http" http://127.0.0.1:9091/0.0.1/eve/evschedule
