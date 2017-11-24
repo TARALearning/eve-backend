@@ -19,7 +19,7 @@ The eve pkg contents are:
 ## RELEASES/VERSION(S)
 | Master   |     Testing      |  Development |
 |----------|:-------------:|------:|
-| 0.0.1    |     0.0.1     |    RC 0.0.2 |
+| 0.0.2    |     0.0.2     |    RC 0.0.3 |
 
 ## TOOLS
 * [eve-gen]()
