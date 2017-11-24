@@ -55,7 +55,7 @@ node('linux-ubuntu-16.04-amd64') {
 					sh("cd tests && chmod +x gen.ssl.client.crt.sh && ./gen.ssl.client.crt.sh")
 					sh("${gobin} test -v")
 					sh("${gobin} test -coverprofile=dist/coverage.out")
-					sh("${gopathbin}/gocov test evalgo.org/eve | ${gopathbin}/gocov-xml > dist/coverage.xml")
+					sh("cd ${curr}/${build}/${gopath}/src/evalgo.org/eve && gocov test | gocov-xml > ${curr}/dist/coverage.xml")
 				}
 				stage ('Build TOOLS'){
 					for (int t = 0; t < tools.size(); t++){
@@ -197,7 +197,7 @@ node('linux-ubuntu-16.04-amd64') {
 					sh("cd tests && chmod +x gen.ssl.client.crt.sh && ./gen.ssl.client.crt.sh")
 					sh("${gobin} test -v")
 					sh("${gobin} test -coverprofile=dist/coverage.out")
-					sh("${gopathbin}/gocov test evalgo.org/eve | ${gopathbin}/gocov-xml > dist/coverage.xml")
+					sh("cd ${curr}/${build}/${gopath}/src/evalgo.org/eve && gocov test | gocov-xml > ${curr}/dist/coverage.xml")
 				}
 				stage("dev :: post to slack") {
 	        notifySlack("success!", slackNotificationChannel, [])
@@ -221,7 +221,7 @@ node('linux-ubuntu-16.04-amd64') {
 					sh("cd tests && chmod +x gen.ssl.client.crt.sh && ./gen.ssl.client.crt.sh")
 					sh("${gobin} test -v")
 					sh("${gobin} test -coverprofile=dist/coverage.out")
-					sh("${gopathbin}/gocov test evalgo.org/eve | ${gopathbin}/gocov-xml > dist/coverage.xml")
+					sh("cd ${curr}/${build}/${gopath}/src/evalgo.org/eve && gocov test | gocov-xml > ${curr}/dist/coverage.xml")
 				}
 				stage ('Build TOOLS'){
 					for (int t = 0; t < tools.size(); t++){

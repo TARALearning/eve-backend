@@ -14,12 +14,15 @@ The eve pkg contents are:
 
 | Master   |     Testing      |  Development |
 |----------|:-------------:|------:|
-| [![Build Status](https://jenkins.evalgo.de:8443/buildStatus/icon?job=eve%20backend%20pipeline/master)](https://jenkins.evalgo.de:8443/job/eve%20backend%20pipeline/master)|  [![Build Status](https://jenkins.evalgo.de:8443/buildStatus/icon?job=eve%20backend%20pipeline/test)](https://jenkins.evalgo.de:8443/job/eve%20backend%20pipeline/test) | [![Build Status](https://jenkins.evalgo.de:8443/buildStatus/icon?job=eve%20backend%20pipeline/dev)](https://jenkins.evalgo.de:8443/job/eve%20backend%20pipeline/dev) |
+| [![Build Status](https://jenkins.campus-one.com:8443/buildStatus/icon?job=eve%20backend%20pipeline/master)](https://jenkins.campus-one.com:8443/job/eve%20backend%20pipeline/master)|  [![Build Status](https://jenkins.campus-one.com:8443/buildStatus/icon?job=eve%20backend%20pipeline/test)](https://jenkins.campus-one.com:8443/job/eve%20backend%20pipeline/test) | [![Build Status](https://jenkins.campus-one.com:8443/buildStatus/icon?job=eve%20backend%20pipeline/dev)](https://jenkins.campus-one.com:8443/job/eve%20backend%20pipeline/dev) |
 
 ## RELEASES/VERSION(S)
 | Master   |     Testing      |  Development |
 |----------|:-------------:|------:|
 | 0.0.2    |     0.0.2     |    RC 0.0.3 |
+
+## DOWNLOAD
+ [ ![Latest Version](https://api.bintray.com/packages/evalgo/eve-backend/core/images/download.svg) ](https://bintray.com/evalgo/eve-backend/core/_latestVersion)
 
 ## TOOLS
 * [eve-gen]()
