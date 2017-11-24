@@ -11,7 +11,7 @@ The eve pkg contents are:
     * templates for code generation
 
 ## BUILD STATUS
-* [![Build Status](https://jenkins.evalgo.de:8443/buildStatus/icon?job=eve backend pipeline/master)](https://jenkins.evalgo.de:8443/job/eve backend pipeline/master)
+[![Build Status](https://jenkins.evalgo.de:8443/buildStatus/icon?job=eve backend pipeline/master)](https://jenkins.evalgo.de:8443/job/eve backend pipeline/master)
 
 ## DOWNLOAD
  [ ![Download](https://api.bintray.com/packages/evalgo/eve-backend/core/images/download.svg) ](https://bintray.com/evalgo/eve-backend/core/_latestVersion)
