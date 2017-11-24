@@ -1,4 +1,18 @@
 import java.text.SimpleDateFormat
+import groovy.json.JsonOutput
+
+def notifySlack(text, channel, attachments) {
+	def slackURL = 'https://evalgo.slack.com/services/hooks/jenkins-ci/'
+	def jenkinsIcon = 'https://wiki.jenkins-ci.org/download/attachments/2916393/logo.png'
+
+	def payload = JsonOutput.toJson([text: text,
+			channel: channel,
+			username: "jenkins",
+			icon_url: jenkinsIcon,
+			attachments: attachments
+	])
+	sh ("curl -X POST --data-urlencode \'payload=${payload}\' ${slackURL}")
+}
 
 node('linux-ubuntu-16.04-amd64') {
 	checkout scm
@@ -25,18 +39,6 @@ node('linux-ubuntu-16.04-amd64') {
 	def use_flags = ""
 	def use_flags_default = "-use debug"
 	def slackNotificationChannel = "build"
-	def notifySlack(text, channel, attachments) {
-    def slackURL = 'https://evalgo.slack.com/services/hooks/jenkins-ci/'
-    def jenkinsIcon = 'https://wiki.jenkins-ci.org/download/attachments/2916393/logo.png'
-
-    def payload = JsonOutput.toJson([text: text,
-        channel: channel,
-        username: "jenkins",
-        icon_url: jenkinsIcon,
-        attachments: attachments
-    ])
-    sh ("curl -X POST --data-urlencode \'payload=${payload}\' ${slackURL}")
-	}
 	switch (env.BRANCH_NAME) {
 		case "master":
 			withEnv(["GOROOT=${curr}/${build}/${goroot}", "GOPATH=${curr}/${build}/${gopath}", "PATH+GOPATHBIN=${curr}/${build}/${gopath}/bin", "PATH+GOROOTBIN=${curr}/${build}/${goroot}/bin"]){
