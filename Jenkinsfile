@@ -24,6 +24,19 @@ node('linux-ubuntu-16.04-amd64') {
 	def date = new Date()
 	def use_flags = ""
 	def use_flags_default = "-use debug"
+	def slackNotificationChannel = "build"
+	def notifySlack(text, channel, attachments) {
+    def slackURL = 'https://evalgo.slack.com/services/hooks/jenkins-ci/'
+    def jenkinsIcon = 'https://wiki.jenkins-ci.org/download/attachments/2916393/logo.png'
+
+    def payload = JsonOutput.toJson([text: text,
+        channel: channel,
+        username: "jenkins",
+        icon_url: jenkinsIcon,
+        attachments: attachments
+    ])
+    sh ("curl -X POST --data-urlencode \'payload=${payload}\' ${slackURL}")
+	}
 	switch (env.BRANCH_NAME) {
 		case "master":
 			withEnv(["GOROOT=${curr}/${build}/${goroot}", "GOPATH=${curr}/${build}/${gopath}", "PATH+GOPATHBIN=${curr}/${build}/${gopath}/bin", "PATH+GOROOTBIN=${curr}/${build}/${goroot}/bin"]){
@@ -162,6 +175,9 @@ node('linux-ubuntu-16.04-amd64') {
 						}
 					}
 				}
+				stage("master :: post to slack") {
+	        notifySlack("success!", slackNotificationChannel, [])
+	    	}
 			}
 			break;
 		case "dev":
@@ -183,6 +199,9 @@ node('linux-ubuntu-16.04-amd64') {
 					sh("${gobin} test -coverprofile=dist/coverage.out")
 					sh("${gopathbin}/gocov test evalgo.org/eve | ${gopathbin}/gocov-xml > dist/coverage.xml")
 				}
+				stage("dev :: post to slack") {
+	        notifySlack("success!", slackNotificationChannel, [])
+	    	}
 			}
 			break;
 		case "test":
@@ -245,6 +264,9 @@ node('linux-ubuntu-16.04-amd64') {
 			stage ('Archive EVE ARTIFACTS'){
 				archiveArtifacts("${dist}/*")
 			}
+			stage("test :: post to slack") {
+        notifySlack("success!", slackNotificationChannel, [])
+    	}
 			break;
 		default:
 			stage ('no pipeline'){
