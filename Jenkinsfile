@@ -165,7 +165,7 @@ node('linux-ubuntu-16.04-amd64') {
 				}
 				stage("master :: post to slack") {
 					withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: 'slack', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD']]) {
-	        	slackSend channel: '#build', color: 'good', message: 'eve-backend::master success', teamDomain: '${USERNAME}', token: '${PASSWORD}'
+	        	slackSend channel: '#build', color: 'good', message: 'eve-backend::master success', teamDomain: "${USERNAME}", token: "${PASSWORD}"
 					}
 	    	}
 			}
@@ -191,7 +191,7 @@ node('linux-ubuntu-16.04-amd64') {
 				}
 				stage("dev :: post to slack") {
 					withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: 'slack', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD']]) {
-	        	slackSend channel: '#build', color: 'good', message: 'eve-backend::dev success', teamDomain: '${USERNAME}', token: '${PASSWORD}'
+	        	slackSend channel: '#build', color: 'good', message: 'eve-backend::dev success', teamDomain: "${USERNAME}", token: "${PASSWORD}"
 					}
 	    	}
 			}
@@ -258,7 +258,7 @@ node('linux-ubuntu-16.04-amd64') {
 			}
 			stage("test :: post to slack") {
 				withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: 'slack', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD']]) {
-        	slackSend channel: '#build', color: 'good', message: 'eve-backend::test success', teamDomain: '${USERNAME}', token: '${PASSWORD}'
+        	slackSend channel: '#build', color: 'good', message: 'eve-backend::test success', teamDomain: "${USERNAME}", token: "${PASSWORD}"
 				}
     	}
 			break;
