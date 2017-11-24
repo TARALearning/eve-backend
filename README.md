@@ -21,6 +21,9 @@ The eve pkg contents are:
 |----------|:-------------:|------:|
 | 0.0.2    |     0.0.2     |    RC 0.0.3 |
 
+## DOWNLOAD
+ [ ![Latest Version](https://api.bintray.com/packages/evalgo/eve-backend/core/images/download.svg) ](https://bintray.com/evalgo/eve-backend/core/_latestVersion)
+
 ## TOOLS
 * [eve-gen]()
 * [eve-setup]()
