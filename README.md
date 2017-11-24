@@ -16,6 +16,11 @@ The eve pkg contents are:
 |----------|:-------------:|------:|
 | [![Build Status](https://jenkins.evalgo.de:8443/buildStatus/icon?job=eve%20backend%20pipeline/master)](https://jenkins.evalgo.de:8443/job/eve%20backend%20pipeline/master)|  [![Build Status](https://jenkins.evalgo.de:8443/buildStatus/icon?job=eve%20backend%20pipeline/test)](https://jenkins.evalgo.de:8443/job/eve%20backend%20pipeline/test) | [![Build Status](https://jenkins.evalgo.de:8443/buildStatus/icon?job=eve%20backend%20pipeline/dev)](https://jenkins.evalgo.de:8443/job/eve%20backend%20pipeline/dev) |
 
+## RELEASES/VERSION(S)
+| Master   |     Testing      |  Development |
+|----------|:-------------:|------:|
+| 0.0.1    |     0.0.1     |    RC 0.0.2 |
+
 ## TOOLS
 * [eve-gen]()
 * [eve-setup]()
@@ -88,17 +93,17 @@ The eve pkg contents are:
     # start the scheduler
     dist/evschedule http&
     # register all services
-    curl -X POST -d "Id=evauth&Cmd=dist/evlog&Args=http" http://127.0.0.1:9091/0.0.1/eve/evschedule
-    curl -X POST -d "Id=evauth&Cmd=dist/evbolt&Args=http" http://127.0.0.1:9091/0.0.1/eve/evschedule
-    curl -X POST -d "Id=evauth&Cmd=dist/evauth&Args=http" http://127.0.0.1:9091/0.0.1/eve/evschedule
+    curl -X POST -d "Id=evauth&Cmd=dist/evlog&Args=http" http://127.0.0.1:9091/{VERSION}/eve/evschedule
+    curl -X POST -d "Id=evauth&Cmd=dist/evbolt&Args=http" http://127.0.0.1:9091/{VERSION}/eve/evschedule
+    curl -X POST -d "Id=evauth&Cmd=dist/evauth&Args=http" http://127.0.0.1:9091/{VERSION}/eve/evschedule
     # start all services
-    curl -X PUT -d "Mode=Start.Processes" http://127.0.0.1:9091/0.0.1/eve/evschedule
+    curl -X PUT -d "Mode=Start.Processes" http://127.0.0.1:9091/{VERSION}/eve/evschedule
 ```
 
 ## SETUP
 ```bash
     go run bin/eve-setup/main.go \
-        http://localhost:9092/0.0.1/eve/evbolt  \
+        http://localhost:9092/{VERSION}/eve/evbolt  \
         francisc.simon@evalgo.org \
         secret \
         123456789012345678901234567890ab \

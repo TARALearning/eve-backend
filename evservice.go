@@ -52,7 +52,7 @@ var (
 		"Package":                "main",
 		"DefaultAddress":         "127.0.0.1:9090",
 		"UsageFunc":              "EVUsage",
-		"Version":                "0.0.1",
+		"Version":                VERSION,
 		"Name":                   "EVBolt",
 		"Description":            "EVBolt is a rest micro service which wrapps the golang bolt database",
 		"Src":                    "https://git.evalgo.de:8443/",
@@ -60,24 +60,24 @@ var (
 		"ENABLE_CROSS_ORIGIN":    true,
 		"USE_PROMETHEUS":         true,
 		"USE_EVTOKEN":            true,
-		"TOKEN_STORAGE_URL":      "http://localhost:9090/0.0.1/eve/bolt",
+		"TOKEN_STORAGE_URL":      "http://localhost:9090/" + VERSION + "/eve/bolt",
 		"TOKEN_STORAGE_DB":       "tokens.db",
 		"TOKEN_STORAGE_BUCKET":   "tokens",
 		"USE_EVLOG":              false,
 		"EVLOG_URL":              "",
 		"USE_EVLOG_API":          false,
 		"USE_EVSESSION":          true,
-		"SESSION_STORAGE_URL":    "http://localhost:9090/0.0.1/eve/bolt",
+		"SESSION_STORAGE_URL":    "http://localhost:9090/" + VERSION + "/eve/bolt",
 		"SESSION_STORAGE_DB":     "sessions.db",
 		"SESSION_STORAGE_BUCKET": "sessions",
 		"USE_EVSECRET":           true,
-		"SECRET_STORAGE_URL":     "http://localhost:9090/0.0.1/eve/bolt",
+		"SECRET_STORAGE_URL":     "http://localhost:9090/" + VERSION + "/eve/bolt",
 		"SECRET_STORAGE_DB":      "secrets.db",
 		"SECRET_STORAGE_BUCKET":  "secrets",
 		"SECRET_ENC_KEY":         "TokenKeyEnc",
 		"SECRET_SIG_KEY":         "TokenKeySig",
 		"USE_EVUSER":             true,
-		"USER_STORAGE_URL":       "http://localhost:9090/0.0.1/eve/bolt",
+		"USER_STORAGE_URL":       "http://localhost:9090/" + VERSION + "/eve/bolt",
 		"USER_STORAGE_DB":        "users.db",
 		"USER_STORAGE_BUCKET":    "users",
 		"USE_EVBOLT_API":         true,
@@ -90,7 +90,7 @@ var (
 		"USE_EVSCHEDULE":         false,
 		"USE_EVSCHEDULE_API":     false,
 		"URLS":                   urls,
-		"ROUTE_PATH_PREFIX":      "/0.0.1/eve/",
+		"ROUTE_PATH_PREFIX":      "/" + VERSION + "/eve/",
 	}
 	// COMMANDS defines the default commands that should be used in the generated service code
 	commands = []*EVServiceCommand{
@@ -139,7 +139,7 @@ func (tco *EVServiceConfigObj) NewEVServiceConfig(cType string) *EVServiceConfig
 	case "rest_all":
 		vars["USE_EVLOG"] = true
 		vars["USE_EVLOG_API"] = true
-		vars["EVLOG_URL"] = "http://localhost:9090/0.0.1/eve/evlog"
+		vars["EVLOG_URL"] = "http://localhost:9090/" + VERSION + "/eve/evlog"
 		urls = append(urls, "login")
 		urls = append(urls, "setup")
 		urls = append(urls, "access")
@@ -188,7 +188,7 @@ func (tco *EVServiceConfigObj) NewEVServiceConfig(cType string) *EVServiceConfig
 			"/evschedule",
 			"/metrics",
 		}
-		vars["ROUTE_PATH_PREFIX"] = "/0.0.1/eve/"
+		vars["ROUTE_PATH_PREFIX"] = "/" + VERSION + "/eve/"
 		imports = []string{
 			"fmt",
 			"flag",

@@ -36,7 +36,7 @@ func main() {
 		fmt.Println("example:")
 		fmt.Println("")
 		fmt.Println("eve-setup \\")
-		fmt.Println("    http://localhost:9092/0.0.1/eve/evbolt \\")
+		fmt.Println("    http://localhost:9092/" + eve.VERSION + "/eve/evbolt \\")
 		fmt.Println("    francisc.simon@evalgo.org \\")
 		fmt.Println("    secret \\")
 		fmt.Println("    123456789012345678901234567890ab \\")
