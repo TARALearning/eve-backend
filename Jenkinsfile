@@ -4,7 +4,7 @@ node('linux-ubuntu-16.04-amd64') {
 	checkout scm
 	def services = ['evauth', 'evbolt', 'evlog', 'evschedule']
 	def tools = ['eve-gen', 'eve-setup']
-	def dependencies = ['github.com/boltdb/bolt', 'github.com/gorilla/mux', 'github.com/prometheus/client_golang/prometheus', 'github.com/prometheus/client_golang/prometheus/promhttp', 'github.com/dchest/uniuri', 'github.com/mitchellh/go-ps', 'go get github.com/axw/gocov/...', 'go get github.com/AlekSi/gocov-xml']
+	def dependencies = ['github.com/boltdb/bolt', 'github.com/gorilla/mux', 'github.com/prometheus/client_golang/prometheus', 'github.com/prometheus/client_golang/prometheus/promhttp', 'github.com/dchest/uniuri', 'github.com/mitchellh/go-ps', 'github.com/axw/gocov/...', 'github.com/AlekSi/gocov-xml']
 	def oses = ['darwin', 'linux', 'windows']
 	def archs = ['amd64']
 	def version = '0.0.1'
