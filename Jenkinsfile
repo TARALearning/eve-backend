@@ -1,18 +1,4 @@
 import java.text.SimpleDateFormat
-import groovy.json.JsonOutput
-
-def notifySlack(text, channel, attachments) {
-	def slackURL = 'https://evalgo.slack.com/services/hooks/jenkins-ci/'
-	def jenkinsIcon = 'https://wiki.jenkins-ci.org/download/attachments/2916393/logo.png'
-
-	def payload = JsonOutput.toJson([text: text,
-			channel: channel,
-			username: "jenkins",
-			icon_url: jenkinsIcon,
-			attachments: attachments
-	])
-	sh ("curl -X POST --data-urlencode \'payload=${payload}\' ${slackURL}")
-}
 
 node('linux-ubuntu-16.04-amd64') {
 	checkout scm
@@ -178,7 +164,9 @@ node('linux-ubuntu-16.04-amd64') {
 					}
 				}
 				stage("master :: post to slack") {
-	        notifySlack("success!", slackNotificationChannel, [])
+					withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: 'slack', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD']]) {
+	        	slackSend channel: '#build', color: 'good', message: 'eve-backend::master success', teamDomain: '${USERNAME}', token: '${PASSWORD}'
+					}
 	    	}
 			}
 			break;
@@ -202,7 +190,9 @@ node('linux-ubuntu-16.04-amd64') {
 					sh("cd ${curr}/${build}/${gopath}/src/evalgo.org/eve && gocov test | gocov-xml > ${curr}/dist/coverage.xml")
 				}
 				stage("dev :: post to slack") {
-	        notifySlack("success!", slackNotificationChannel, [])
+					withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: 'slack', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD']]) {
+	        	slackSend channel: '#build', color: 'good', message: 'eve-backend::dev success', teamDomain: '${USERNAME}', token: '${PASSWORD}'
+					}
 	    	}
 			}
 			break;
@@ -267,7 +257,9 @@ node('linux-ubuntu-16.04-amd64') {
 				archiveArtifacts("${dist}/*")
 			}
 			stage("test :: post to slack") {
-        notifySlack("success!", slackNotificationChannel, [])
+				withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: 'slack', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD']]) {
+        	slackSend channel: '#build', color: 'good', message: 'eve-backend::test success', teamDomain: '${USERNAME}', token: '${PASSWORD}'
+				}
     	}
 			break;
 		default:
