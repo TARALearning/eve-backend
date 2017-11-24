@@ -4,7 +4,7 @@ node('linux-ubuntu-16.04-amd64') {
 	checkout scm
 	def services = ['evauth', 'evbolt', 'evlog', 'evschedule']
 	def tools = ['eve-gen', 'eve-setup']
-	def dependencies = ['github.com/boltdb/bolt', 'github.com/gorilla/mux', 'github.com/prometheus/client_golang/prometheus', 'github.com/prometheus/client_golang/prometheus/promhttp', 'github.com/dchest/uniuri', 'github.com/mitchellh/go-ps']
+	def dependencies = ['github.com/boltdb/bolt', 'github.com/gorilla/mux', 'github.com/prometheus/client_golang/prometheus', 'github.com/prometheus/client_golang/prometheus/promhttp', 'github.com/dchest/uniuri', 'github.com/mitchellh/go-ps', 'go get github.com/axw/gocov/...', 'go get github.com/AlekSi/gocov-xml']
 	def oses = ['darwin', 'linux', 'windows']
 	def archs = ['amd64']
 	def version = '0.0.1'
@@ -17,12 +17,14 @@ node('linux-ubuntu-16.04-amd64') {
 	def goroot = "go-${go_version}"
 	def gopath = "${go}-${go_version}-packages"
 	def gobin = "${curr}/${build}/${goroot}/bin/go"
+	def gopathbin = "${build}/${gopath}/bin"
 	def src = "${build}/${gopath}/src/evalgo.org/eve"
 	def tmp = "tests/tmp"
 	def dateFormat = new SimpleDateFormat("yyyy-MM-dd-HH-mm")
 	def date = new Date()
 	def use_flags = ""
 	def use_flags_default = "-use debug"
+	cobertura autoUpdateHealth: false, autoUpdateStability: false, coberturaReportFile: 'dist/coverage.xml', conditionalCoverageTargets: '70, 0, 0', failUnhealthy: false, failUnstable: false, lineCoverageTargets: '80, 0, 0', maxNumberOfBuilds: 0, methodCoverageTargets: '80, 0, 0', onlyStable: false, sourceEncoding: 'ASCII'
 	switch (env.BRANCH_NAME) {
 		case "master":
 			withEnv(["GOROOT=${curr}/${build}/${goroot}", "GOPATH=${curr}/${build}/${gopath}"]){
@@ -40,6 +42,9 @@ node('linux-ubuntu-16.04-amd64') {
 				stage ('Run TESTS'){
 					sh("cd tests && chmod +x gen.ssl.client.crt.sh && ./gen.ssl.client.crt.sh")
 					sh("${gobin} test -v")
+					sh("go test -coverprofile=dist/coverage.out")
+					sh("go tool cover -func=dist/coverage.out")
+					sh("${gopathbin}/gocov test evalgo.org/eve | ${gopathbin}/gocov-xml > dist/coverage.xml")
 				}
 				stage ('Build TOOLS'){
 					for (int t = 0; t < tools.size(); t++){
@@ -177,6 +182,9 @@ node('linux-ubuntu-16.04-amd64') {
 				stage ('Run TESTS'){
 					sh("cd tests && chmod +x gen.ssl.client.crt.sh && ./gen.ssl.client.crt.sh")
 					sh("${gobin} test -v")
+					sh("go test -coverprofile=dist/coverage.out")
+					sh("go tool cover -func=dist/coverage.out")
+					sh("${gopathbin}/gocov test evalgo.org/eve | ${gopathbin}/gocov-xml > dist/coverage.xml")
 				}
 			}
 			break;
@@ -196,6 +204,9 @@ node('linux-ubuntu-16.04-amd64') {
 				stage ('Run TESTS'){
 					sh("cd tests && chmod +x gen.ssl.client.crt.sh && ./gen.ssl.client.crt.sh")
 					sh("${gobin} test -v")
+					sh("go test -coverprofile=dist/coverage.out")
+					sh("go tool cover -func=dist/coverage.out")
+					sh("${gopathbin}/gocov test evalgo.org/eve | ${gopathbin}/gocov-xml > dist/coverage.xml")
 				}
 				stage ('Build TOOLS'){
 					for (int t = 0; t < tools.size(); t++){
