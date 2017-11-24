@@ -26,7 +26,7 @@ node('linux-ubuntu-16.04-amd64') {
 	def use_flags_default = "-use debug"
 	switch (env.BRANCH_NAME) {
 		case "master":
-			withEnv(["GOROOT=${curr}/${build}/${goroot}", "GOPATH=${curr}/${build}/${gopath}", "PATH=env.PATH:${curr}/${build}/${gopath}/bin:${curr}/${build}/${goroot}/bin"]){
+			withEnv(["GOROOT=${curr}/${build}/${goroot}", "GOPATH=${curr}/${build}/${gopath}", "PATH+GOPATHBIN=${curr}/${build}/${gopath}/bin", "PATH+GOROOTBIN=${curr}/${build}/${goroot}/bin"]){
 				stage ('Init GO ENV'){
 					sh("rm -rf ${build} .goget ${dist}")
 					sh("mkdir ${build} ${dist}")
@@ -165,7 +165,7 @@ node('linux-ubuntu-16.04-amd64') {
 			}
 			break;
 		case "dev":
-			withEnv(["GOROOT=${curr}/${build}/${goroot}", "GOPATH=${curr}/${build}/${gopath}", "PATH=env.PATH:${curr}/${build}/${gopath}/bin:${curr}/${build}/${goroot}/bin"]){
+			withEnv(["GOROOT=${curr}/${build}/${goroot}", "GOPATH=${curr}/${build}/${gopath}", , "PATH+GOPATHBIN=${curr}/${build}/${gopath}/bin", "PATH+GOROOTBIN=${curr}/${build}/${goroot}/bin"]){
 				stage ('Init GO ENV'){
 					sh("rm -rf ${build} .goget ${dist}")
 					sh("mkdir ${build} ${dist}")
@@ -186,7 +186,7 @@ node('linux-ubuntu-16.04-amd64') {
 			}
 			break;
 		case "test":
-			withEnv(["GOROOT=${curr}/${build}/${goroot}", "GOPATH=${curr}/${build}/${gopath}", "PATH=env.PATH:${curr}/${build}/${gopath}/bin:${curr}/${build}/${goroot}/bin"]){
+			withEnv(["GOROOT=${curr}/${build}/${goroot}", "GOPATH=${curr}/${build}/${gopath}", , "PATH+GOPATHBIN=${curr}/${build}/${gopath}/bin", "PATH+GOROOTBIN=${curr}/${build}/${goroot}/bin"]){
 				stage ('Init GO ENV'){
 					sh("rm -rf ${build} .goget ${dist}")
 					sh("mkdir ${build} ${dist}")
