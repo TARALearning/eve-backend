@@ -24,7 +24,6 @@ node('linux-ubuntu-16.04-amd64') {
 	def date = new Date()
 	def use_flags = ""
 	def use_flags_default = "-use debug"
-	cobertura autoUpdateHealth: false, autoUpdateStability: false, coberturaReportFile: 'dist/coverage.xml', conditionalCoverageTargets: '70, 0, 0', failUnhealthy: false, failUnstable: false, lineCoverageTargets: '80, 0, 0', maxNumberOfBuilds: 0, methodCoverageTargets: '80, 0, 0', onlyStable: false, sourceEncoding: 'ASCII'
 	switch (env.BRANCH_NAME) {
 		case "master":
 			withEnv(["GOROOT=${curr}/${build}/${goroot}", "GOPATH=${curr}/${build}/${gopath}"]){
@@ -255,6 +254,6 @@ node('linux-ubuntu-16.04-amd64') {
 				sh('echo "this branch ${env.BRANCH_NAME} has no pipeline stages now!"')
 			}
 			break;
-
     }
+		cobertura autoUpdateHealth: false, autoUpdateStability: false, coberturaReportFile: 'dist/coverage.xml', conditionalCoverageTargets: '70, 0, 0', failUnhealthy: false, failUnstable: false, lineCoverageTargets: '80, 0, 0', maxNumberOfBuilds: 0, methodCoverageTargets: '80, 0, 0', onlyStable: false, sourceEncoding: 'ASCII'
 }
