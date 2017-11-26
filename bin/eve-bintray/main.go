@@ -13,13 +13,13 @@ import (
 
 var (
 	client     = &http.Client{}
-	subject    = os.Args[1]
-	repo       = os.Args[2]
-	rpackage   = os.Args[3]
-	version    = os.Args[4]
-	bintrayURL = "https://api.bintray.com"
-	username   = os.Args[5]
-	password   = os.Args[6]
+	subject    = ""
+	repo       = ""
+	rpackage   = ""
+	version    = ""
+	bintrayURL = ""
+	username   = ""
+	password   = ""
 )
 
 func init() {
@@ -62,6 +62,13 @@ func deleteFile(filepath string) error {
 }
 
 func main() {
+	subject = os.Args[1]
+	repo = os.Args[2]
+	rpackage = os.Args[3]
+	version = os.Args[4]
+	bintrayURL = os.Args[5]
+	username = os.Args[6]
+	password = os.Args[7]
 	fmt.Println("getting all files for ", subject, repo, rpackage, version, "...")
 	client := &http.Client{}
 	url := bintrayURL + "/packages/" + subject + "/" + repo + "/" + rpackage + "/versions/" + version + "/files?include_unpublished=1"
