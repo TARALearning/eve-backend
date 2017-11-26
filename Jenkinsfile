@@ -3,7 +3,7 @@ import java.text.SimpleDateFormat
 node('linux-ubuntu-16.04-amd64') {
 	checkout scm
 	def services = ['evauth', 'evbolt', 'evlog', 'evschedule']
-	def tools = ['eve-gen', 'eve-setup']
+	def tools = ['eve-bintray', 'eve-gen', 'eve-setup']
 	def dependencies = ['github.com/boltdb/bolt', 'github.com/gorilla/mux', 'github.com/prometheus/client_golang/prometheus', 'github.com/prometheus/client_golang/prometheus/promhttp', 'github.com/dchest/uniuri', 'github.com/mitchellh/go-ps', 'github.com/axw/gocov/...', 'github.com/AlekSi/gocov-xml']
 	def oses = ['darwin', 'linux', 'windows']
 	def archs = ['amd64']
@@ -121,11 +121,16 @@ node('linux-ubuntu-16.04-amd64') {
 						}
 				}
 			}
+			stage ('CleanUp EVE ARTIFACTS at BinTray'){
+					withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: 'bintray', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD']]) {
+						sh("${dist}/eve-bintray evalgo eve-backend core ${version} https://api.bintray.com ${USERNAME} ${PASSWORD}")
+					}
+			}
 			stage ('Deploy EVE ARTIFACTS to BinTray'){
 					withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: 'bintray', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD']]) {
 						sh("cp -Rf ${dist} "+dateFormat.format(date))
 						sh("zip -r "+dateFormat.format(date)+".zip "+dateFormat.format(date))
-						sh("curl -v -X PUT --header 'X-Bintray-Package: core' --header 'X-Bintray-Version: 0.0.2' --header 'X-Bintray-Publish: 1' --header 'X-Bintray-Override: 1' --header 'X-Bintray-Explode: 1' --user '${USERNAME}:${PASSWORD}' -T "+dateFormat.format(date)+".zip 'https://api.bintray.com/content/evalgo/eve-backend/"+dateFormat.format(date)+".zip'")
+						sh("curl -v -X PUT --header 'X-Bintray-Package: core' --header 'X-Bintray-Version: ${version}' --header 'X-Bintray-Publish: 1' --header 'X-Bintray-Override: 1' --header 'X-Bintray-Explode: 1' --user '${USERNAME}:${PASSWORD}' -T "+dateFormat.format(date)+".zip 'https://api.bintray.com/content/evalgo/eve-backend/"+dateFormat.format(date)+".zip'")
 						sh("sleep 20")
 						for (int s = 0; s < services.size(); s++){
 							for (int o = 0; o < oses.size(); o++){
