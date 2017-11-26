@@ -25,7 +25,7 @@ func (c *uses) Set(value string) error {
 
 var (
 	flags   *flag.FlagSet
-	VERSION = eve.VERSION
+	version = eve.VERSION
 	command = ""
 	service = ""
 	use     uses
@@ -34,6 +34,7 @@ var (
 	target  = ""
 )
 
+// GenUsage displays the help/usage instructions
 func GenUsage() {
 	fmt.Println(`
 usage: eve-gen {command} {type} {service-name} -use {use_flag} -use {use_flag} -target /path/to/main.go...
@@ -88,7 +89,7 @@ func main() {
 		GenUsage()
 		os.Exit(0)
 	case "version":
-		fmt.Println("eve-gen version:", VERSION)
+		fmt.Println("eve-gen version:", version)
 	default:
 		srv := &eve.EVServiceConfigObj{}
 		// todo implement change of the type to schedule
@@ -99,12 +100,12 @@ func main() {
 		fmt.Println("eve-gen :: check if config file was provided...")
 		if config != "" {
 			fmt.Println("eve-gen :: found config file <" + config + ">")
-			srvJson, err := ioutil.ReadFile(config)
+			srvJSON, err := ioutil.ReadFile(config)
 			if err != nil {
 				log.Fatal(err)
 			}
 			fmt.Println("eve-gen :: reading config file from:", config+"...")
-			err = json.Unmarshal(srvJson, srv)
+			err = json.Unmarshal(srvJSON, srv)
 			if err != nil {
 				log.Fatal(err)
 			}
@@ -419,14 +420,14 @@ func main() {
 			case "debug":
 				srvConfig.Vars["DEBUG"] = true
 			default:
-				use_case_split := strings.Split(u, "=")
-				if len(use_case_split) == 2 {
-					switch use_case_split[0] {
+				useCaseSplit := strings.Split(u, "=")
+				if len(useCaseSplit) == 2 {
+					switch useCaseSplit[0] {
 					case "evBoltRoot":
-						srvConfig.Vars["USE_"+use_case_split[0]] = use_case_split[1]
+						srvConfig.Vars["USE_"+useCaseSplit[0]] = useCaseSplit[1]
 					default:
 						fmt.Println("")
-						fmt.Println("error: the given use flag <" + use_case_split[0] + "> does not exist!")
+						fmt.Println("error: the given use flag <" + useCaseSplit[0] + "> does not exist!")
 						GenUsage()
 						os.Exit(2)
 					}

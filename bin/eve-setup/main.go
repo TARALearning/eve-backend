@@ -12,22 +12,21 @@ import (
 )
 
 var (
-	EVUserStorage       = ""
-	EVUserStorageDB     = "users.db"
-	EVUserStorageBucket = "users"
+	evUserStorage       = ""
+	evUserStorageDB     = "users.db"
+	evUserStorageBucket = "users"
 
-	EVSecretStorage       = ""
-	EVSecretStorageDB     = "secrets.db"
-	EVSecretStorageBucket = "secrets"
+	evSecretStorage       = ""
+	evSecretStorageDB     = "secrets.db"
+	evSecretStorageBucket = "secrets"
 
-	EVSecretEncKey      = "TokenKeyEnc"
-	EVSecretEncKeyValue = ""
-	EVSecretSigKey      = "TokenKeySig"
-	EVSecretSigKeyValue = ""
+	evSecretEncKey      = "TokenKeyEnc"
+	evSecretEncKeyValue = ""
+	evSecretSigKey      = "TokenKeySig"
+	evSecretSigKeyValue = ""
 )
 
-func main() {
-
+func init() {
 	if len(os.Args) < 6 {
 		fmt.Println("please specify all the required arguments to initialize the eve environment")
 		fmt.Println("")
@@ -44,15 +43,17 @@ func main() {
 		fmt.Println("")
 		os.Exit(1)
 	}
+}
 
-	EVUserStorage = os.Args[1]
-	EVSecretStorage = os.Args[1]
+func main() {
+	evUserStorage = os.Args[1]
+	evSecretStorage = os.Args[1]
 	id := eve.Sha1(os.Args[2])
 	message := eve.Sha1(os.Args[3])
-	EVSecretEncKeyValue = os.Args[4]
-	EVSecretSigKeyValue = os.Args[5]
+	evSecretEncKeyValue = os.Args[4]
+	evSecretSigKeyValue = os.Args[5]
 
-	resp, err := eve.EVHttpSendForm(http.MethodPost, EVUserStorage, url.Values{"database": {EVUserStorageDB}, "bucket": {EVUserStorageBucket}, "key": {id}, "message": {message}, "evbolt.msgtype": {"string"}})
+	resp, err := eve.EVHttpSendForm(http.MethodPost, evUserStorage, url.Values{"database": {evUserStorageDB}, "bucket": {evUserStorageBucket}, "key": {id}, "message": {message}, "evbolt.msgtype": {"string"}})
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -63,7 +64,7 @@ func main() {
 	}
 	fmt.Println("the user id is :: ", string(rB))
 
-	resp, err = eve.EVHttpSendForm(http.MethodPost, EVSecretStorage, url.Values{"database": {EVSecretStorageDB}, "bucket": {EVSecretStorageBucket}, "key": {EVSecretEncKey}, "message": {EVSecretEncKeyValue}, "evbolt.msgtype": {"string"}})
+	resp, err = eve.EVHttpSendForm(http.MethodPost, evSecretStorage, url.Values{"database": {evSecretStorageDB}, "bucket": {evSecretStorageBucket}, "key": {evSecretEncKey}, "message": {evSecretEncKeyValue}, "evbolt.msgtype": {"string"}})
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -74,7 +75,7 @@ func main() {
 	}
 	fmt.Println("the id for the encryption secret is :: ", string(rB))
 
-	resp, err = eve.EVHttpSendForm(http.MethodPost, EVSecretStorage, url.Values{"database": {EVSecretStorageDB}, "bucket": {EVSecretStorageBucket}, "key": {EVSecretSigKey}, "message": {EVSecretSigKeyValue}, "evbolt.msgtype": {"string"}})
+	resp, err = eve.EVHttpSendForm(http.MethodPost, evSecretStorage, url.Values{"database": {evSecretStorageDB}, "bucket": {evSecretStorageBucket}, "key": {evSecretSigKey}, "message": {evSecretSigKeyValue}, "evbolt.msgtype": {"string"}})
 	if err != nil {
 		log.Fatal(err)
 	}
