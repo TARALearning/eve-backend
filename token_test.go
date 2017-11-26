@@ -43,3 +43,50 @@ func Test_TokenIsExpired(t *testing.T) {
 		t.Error("TokenIsExpired can not invalidate invalid token!")
 	}
 }
+
+func Test_TokenMakeSig(t *testing.T) {
+	res := tokenMakeSig("message", "secret")
+	if res != "89134b490722b4cc16ed03a8793a8287e0991244f79f30a041e812a589945245" {
+		t.Error("tokenMakeSig does not work as expected")
+	}
+}
+
+func Test_TokenToString(t *testing.T) {
+	token, err := TokenCreate("message", "123456789012345678901234567890ab", "secret")
+	if err != nil {
+		t.Error(err)
+	}
+	str, err := TokenToString(token, "123456789012345678901234567890ab")
+	if err != nil {
+		t.Error(err)
+	}
+	if str != "message#89134b490722b4cc16ed03a8793a8287e0991244f79f30a041e812a589945245" {
+		t.Error("TokenToString does not work as expected")
+	}
+}
+
+func Test_TokenCheckFailBase64(t *testing.T) {
+	errToken := "errorToken"
+	_, err := TokenCheck(errToken, "wrongSecret", "wrongSig")
+	if err == nil {
+		t.Error("TokenCheck does not work as expected")
+	}
+}
+
+func Test_TokenCheckFailSignature(t *testing.T) {
+	token, err := TokenCreate("message", "123456789012345678901234567890ab", "secret")
+	if err != nil {
+		t.Error(err)
+	}
+	_, err = TokenCheck(token, "123456789012345678901234567890ab", "wrongSig")
+	if err == nil {
+		t.Error("TokenCheck does not work as expected")
+	}
+}
+
+func Test_TokenCreateFailSignature(t *testing.T) {
+	_, err := TokenCreate("message", "wrongEncSecret", "secret")
+	if err == nil {
+		t.Error("TokenCreate does not work as expected")
+	}
+}
