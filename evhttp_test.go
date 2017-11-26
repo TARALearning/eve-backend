@@ -1,6 +1,7 @@
 package eve
 
 import (
+	"encoding/base64"
 	"errors"
 	"fmt"
 	"io/ioutil"
@@ -26,6 +27,13 @@ func Test_EVHttpNewClientCrt(t *testing.T) {
 	}
 	if !c.Transport.(*http.Transport).TLSClientConfig.InsecureSkipVerify {
 		t.Error("EVHttpNewClient does not work as expected")
+	}
+}
+
+func Test_EVHttpNewClientCrtFail(t *testing.T) {
+	_, err := EVHttpNewClientCrt("crt", "key")
+	if err == nil {
+		t.Error("EVHttpNewClientCrt does not work as expected")
 	}
 }
 
@@ -282,11 +290,33 @@ func Test_ReturnResultHtml(t *testing.T) {
 }
 
 func Test_DefineKeyType(t *testing.T) {
-	// todo implement test function
+	eyType := DefineKeyType("custom")
+	if eyType != EvBoltKeyTypeCustom {
+		t.Error("DefineKeyType does not work as expected")
+	}
+	eyType = DefineKeyType("default")
+	if eyType != EvBoltKeyTypeAuto {
+		t.Error("DefineKeyType does not work as expected")
+	}
 }
 
 func Test_DecodeMessage(t *testing.T) {
-	// todo implement test function
+	txtMessage := "message"
+	dMessage, err := DecodeMessage(txtMessage, "text")
+	if err != nil {
+		t.Error(err)
+	}
+	if txtMessage != dMessage {
+		t.Error("DecodeMessage does not work as expected")
+	}
+	b64Msg := base64.StdEncoding.EncodeToString([]byte(txtMessage))
+	eMessage, err := DecodeMessage(b64Msg, "base64")
+	if err != nil {
+		t.Error(err)
+	}
+	if txtMessage != eMessage {
+		t.Error("DecodeMessage does not work as expected")
+	}
 }
 
 func Test_EVHttpSendFile(t *testing.T) {
