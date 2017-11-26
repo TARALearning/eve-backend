@@ -25,8 +25,8 @@ func Test_SchedulerShutdown(t *testing.T) {
 		t.Error(err)
 	}
 	go func(s *Scheduler) {
-		log.Println("wait 5 sec and then quit the scheduler")
-		time.Sleep(5 * time.Second)
+		log.Println("wait 10 sec and then quit the scheduler")
+		time.Sleep(10 * time.Second)
 		log.Println(s.Shutdown())
 		return
 	}(s)
