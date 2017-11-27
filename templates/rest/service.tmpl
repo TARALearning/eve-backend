@@ -39,8 +39,13 @@ type RestHttpHandler struct{}
 
 func (hh *RestHttpHandler) ServeHTTP(w http.ResponseWriter, r *http.Request){
     {{if .ENABLE_CROSS_ORIGIN}}
+        w.Header().Add("Access-Control-Request-Headers", "*")
         w.Header().Add("Access-Control-Allow-Headers", "*")
-	    w.Header().Add("Access-Control-Allow-Origin", "*")
+        w.Header().Add("Access-Control-Expose-Headers", "*")
+	      w.Header().Add("Access-Control-Allow-Origin", "*")
+        w.Header().Add("Access-Control-Allow-Methods", "*")
+        w.Header().Add("Access-Control-Allow-Credentials", "true")
+        w.Header().Add("Access-Control-Max-Age", "86400")
     {{end}}
     format := path.Ext(r.URL.Path)
     log.Println("eve","::","requested format",format)
