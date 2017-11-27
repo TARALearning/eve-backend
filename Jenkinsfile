@@ -244,6 +244,11 @@ node('linux-ubuntu-16.04-amd64') {
 						sh("${gobin} test -coverprofile=dist/coverage.out")
 						sh("cd ${curr}/${build}/${gopath}/src/evalgo.org/eve && gocov test | gocov-xml > ${curr}/dist/coverage.xml")
 					}
+					stage("test build tools :: post to slack") {
+						withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: 'slack', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD']]) {
+		        	slackSend channel: '#build', color: 'good', message: "${env.JOB_NAME} ${env.BUILD_NUMBER} building tools now...", teamDomain: "${USERNAME}", token: "${PASSWORD}"
+						}
+		    	}
 					stage ('Build TOOLS'){
 						for (int t = 0; t < tools.size(); t++){
 							for (int o = 0; o < oses.size(); o++){
@@ -258,6 +263,11 @@ node('linux-ubuntu-16.04-amd64') {
 							}
 						}
 					}
+					stage("test build services :: post to slack") {
+						withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: 'slack', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD']]) {
+		        	slackSend channel: '#build', color: 'good', message: "${env.JOB_NAME} ${env.BUILD_NUMBER} building services now...", teamDomain: "${USERNAME}", token: "${PASSWORD}"
+						}
+		    	}
 					stage ('Build EVE SERVICES') {
 						for (int s = 0; s < services.size(); s++){
 							switch("${services[s]}".toString()){
