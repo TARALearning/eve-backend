@@ -15,8 +15,8 @@ import (
 	"strings"
 )
 
-// EVHttpNewClient creates a http client with the default values
-func EVHttpNewClient() *http.Client {
+// EvHTTPNewClient creates a http client with the default values
+func EvHTTPNewClient() *http.Client {
 	tr := &http.Transport{
 		TLSClientConfig: &tls.Config{
 			InsecureSkipVerify: true,
@@ -27,8 +27,8 @@ func EVHttpNewClient() *http.Client {
 	}
 }
 
-// EVHttpNewClientCrt creates a http client with certificate authentification enabled with the given cert and key
-func EVHttpNewClientCrt(crt, key string) (*http.Client, error) {
+// EvHTTPNewClientCrt creates a http client with certificate authentification enabled with the given cert and key
+func EvHTTPNewClientCrt(crt, key string) (*http.Client, error) {
 	cert, err := tls.LoadX509KeyPair(crt, key)
 	if err != nil {
 		return nil, err
@@ -44,9 +44,9 @@ func EVHttpNewClientCrt(crt, key string) (*http.Client, error) {
 	}, nil
 }
 
-// EVHttpSendForm sends form data with a given method and values to the given url
-func EVHttpSendForm(method string, url string, data url.Values) (*http.Response, error) {
-	client := EVHttpNewClient()
+// EvHTTPSendForm sends form data with a given method and values to the given url
+func EvHTTPSendForm(method string, url string, data url.Values) (*http.Response, error) {
+	client := EvHTTPNewClient()
 	req, err := http.NewRequest(method, url, strings.NewReader(data.Encode()))
 	if err != nil {
 		return nil, err
@@ -55,9 +55,9 @@ func EVHttpSendForm(method string, url string, data url.Values) (*http.Response,
 	return client.Do(req)
 }
 
-// EVHttpSendText sends a text with the given method url and values
-func EVHttpSendText(method string, url string, text string) (*http.Response, error) {
-	client := EVHttpNewClient()
+// EvHTTPSendText sends a text with the given method url and values
+func EvHTTPSendText(method string, url string, text string) (*http.Response, error) {
+	client := EvHTTPNewClient()
 	req, err := http.NewRequest(method, url, strings.NewReader(text))
 	if err != nil {
 		return nil, err
@@ -66,13 +66,13 @@ func EVHttpSendText(method string, url string, text string) (*http.Response, err
 	return client.Do(req)
 }
 
-// EVHttpReceive is mostly used for all types of GET requests like DELETE etc.
-func EVHttpReceive(method string, url string, values url.Values) (*http.Response, error) {
+// EvHTTPReceive is mostly used for all types of GET requests like DELETE etc.
+func EvHTTPReceive(method string, url string, values url.Values) (*http.Response, error) {
 	urlValues := ""
 	if values != nil {
 		urlValues = "?" + values.Encode()
 	}
-	client := EVHttpNewClient()
+	client := EvHTTPNewClient()
 	req, err := http.NewRequest(method, url+urlValues, nil)
 	if err != nil {
 		return nil, err
@@ -162,8 +162,8 @@ func DecodeMessage(msg, msgType string) (string, error) {
 	return message, nil
 }
 
-// EVHttpSendFile sends a file or with other words it is a file upload
-func EVHttpSendFile(uri, filename, filepath string) (*http.Response, error) {
+// EvHTTPSendFile sends a file or with other words it is a file upload
+func EvHTTPSendFile(uri, filename, filepath string) (*http.Response, error) {
 	body := &bytes.Buffer{}
 	bodyWriter := multipart.NewWriter(body)
 	fileWriter, err := bodyWriter.CreateFormFile(filename, filepath)
@@ -181,11 +181,66 @@ func EVHttpSendFile(uri, filename, filepath string) (*http.Response, error) {
 	}
 	contentType := bodyWriter.FormDataContentType()
 	bodyWriter.Close()
-	client := EVHttpNewClient()
+	client := EvHTTPNewClient()
 	req, err := http.NewRequest("POST", uri, body)
 	if err != nil {
 		return nil, err
 	}
 	req.Header.Set("Content-Type", contentType)
 	return client.Do(req)
+}
+
+// EvHTTPWebDavSendFile sends a file to a webdav server
+func EvHTTPWebDavSendFile(uri, filename, filepath, username, password string) (*http.Response, error) {
+	body := &bytes.Buffer{}
+	bodyWriter := multipart.NewWriter(body)
+	fileWriter, err := bodyWriter.CreateFormFile(filename, filepath)
+	if err != nil {
+		return nil, err
+	}
+	fh, err := os.Open(filepath)
+	if err != nil {
+		return nil, err
+	}
+	defer fh.Close()
+	_, err = io.Copy(fileWriter, fh)
+	if err != nil {
+		return nil, err
+	}
+	contentType := bodyWriter.FormDataContentType()
+	bodyWriter.Close()
+	client := EvHTTPNewClient()
+	req, err := http.NewRequest("POST", uri, body)
+	if err != nil {
+		return nil, err
+	}
+	req.SetBasicAuth(username, password)
+	req.Header.Set("Content-Type", contentType)
+	return client.Do(req)
+}
+
+// EvHTTPWebDavFileDownload returns the path of the written file or an error
+func EvHTTPWebDavFileDownload(url, target, username, password string) (string, error) {
+	client := EvHTTPNewClient()
+	req, err := http.NewRequest("GET", url, nil)
+	if err != nil {
+		return "", err
+	}
+	req.SetBasicAuth(username, password)
+	resp, err := client.Do(req)
+	if err != nil {
+		return "", err
+	}
+	if resp.StatusCode == 200 {
+		defer resp.Body.Close()
+		body, err := ioutil.ReadAll(resp.Body)
+		if err != nil {
+			return "", err
+		}
+		err = ioutil.WriteFile(target, body, 0777)
+		if err != nil {
+			return "", err
+		}
+	}
+	return target, nil
 }

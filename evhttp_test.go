@@ -13,36 +13,36 @@ import (
 	"testing"
 )
 
-func Test_EVHttpNewClient(t *testing.T) {
-	c := EVHttpNewClient()
+func Test_EvHTTPNewClient(t *testing.T) {
+	c := EvHTTPNewClient()
 	if !c.Transport.(*http.Transport).TLSClientConfig.InsecureSkipVerify {
-		t.Error("EVHttpNewClient does not work as expected")
+		t.Error("EvHTTPNewClient does not work as expected")
 	}
 }
 
-func Test_EVHttpNewClientCrt(t *testing.T) {
-	c, err := EVHttpNewClientCrt("tests/test.client.crt", "tests/test.client.key")
+func Test_EvHTTPNewClientCrt(t *testing.T) {
+	c, err := EvHTTPNewClientCrt("tests/test.client.crt", "tests/test.client.key")
 	if err != nil {
 		t.Error(err)
 	}
 	if !c.Transport.(*http.Transport).TLSClientConfig.InsecureSkipVerify {
-		t.Error("EVHttpNewClient does not work as expected")
+		t.Error("EvHTTPNewClient does not work as expected")
 	}
 }
 
-func Test_EVHttpNewClientCrtFail(t *testing.T) {
-	_, err := EVHttpNewClientCrt("crt", "key")
+func Test_EvHTTPNewClientCrtFail(t *testing.T) {
+	_, err := EvHTTPNewClientCrt("crt", "key")
 	if err == nil {
-		t.Error("EVHttpNewClientCrt does not work as expected")
+		t.Error("EvHTTPNewClientCrt does not work as expected")
 	}
 }
 
-func Test_EVHttpSendForm(t *testing.T) {
+func Test_EvHTTPSendForm(t *testing.T) {
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprintln(w, r.FormValue("testkey"))
 	}))
 	defer ts.Close()
-	res, err := EVHttpSendForm(http.MethodPost, ts.URL, url.Values{"testkey": []string{"testvalue"}})
+	res, err := EvHTTPSendForm(http.MethodPost, ts.URL, url.Values{"testkey": []string{"testvalue"}})
 	if err != nil {
 		t.Error(err)
 	}
@@ -52,11 +52,11 @@ func Test_EVHttpSendForm(t *testing.T) {
 		t.Error(err)
 	}
 	if strings.Trim(string(testvalue), "\n ") != "testvalue" {
-		t.Error("EVHttpSendForm does not work as expected")
+		t.Error("EvHTTPSendForm does not work as expected")
 	}
 }
 
-func Test_EVHttpSendText(t *testing.T) {
+func Test_EvHTTPSendText(t *testing.T) {
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		testvalue, err := ioutil.ReadAll(r.Body)
 		r.Body.Close()
@@ -69,7 +69,7 @@ func Test_EVHttpSendText(t *testing.T) {
 		w.Write(testvalue)
 	}))
 	defer ts.Close()
-	res, err := EVHttpSendText(http.MethodPost, ts.URL, "testvalue")
+	res, err := EvHTTPSendText(http.MethodPost, ts.URL, "testvalue")
 	if err != nil {
 		t.Error(err)
 	}
@@ -79,17 +79,17 @@ func Test_EVHttpSendText(t *testing.T) {
 		t.Error(err)
 	}
 	if strings.Trim(string(testvalue), "\n ") != "testvalue" {
-		t.Error("EVHttpSendText does not work as expected")
+		t.Error("EvHTTPSendText does not work as expected")
 	}
 }
 
-func Test_EVHttpReceive(t *testing.T) {
+func Test_EvHTTPReceive(t *testing.T) {
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(200)
 		w.Write([]byte("testvalue"))
 	}))
 	defer ts.Close()
-	res, err := EVHttpReceive(http.MethodGet, ts.URL, nil)
+	res, err := EvHTTPReceive(http.MethodGet, ts.URL, nil)
 	if err != nil {
 		t.Error(err)
 	}
@@ -99,7 +99,7 @@ func Test_EVHttpReceive(t *testing.T) {
 		t.Error(err)
 	}
 	if strings.Trim(string(testvalue), "\n ") != "testvalue" {
-		t.Error("EVHttpReceive does not work as expected")
+		t.Error("EvHTTPReceive does not work as expected")
 	}
 }
 
@@ -109,7 +109,7 @@ func Test_ResponseBodyAll(t *testing.T) {
 		w.Write([]byte("testvalue1 testvalue2 testvalue3"))
 	}))
 	defer ts.Close()
-	res, err := EVHttpReceive(http.MethodGet, ts.URL, nil)
+	res, err := EvHTTPReceive(http.MethodGet, ts.URL, nil)
 	if err != nil {
 		t.Error(err)
 	}
@@ -134,7 +134,7 @@ func Test_RequestBodyAll(t *testing.T) {
 		w.Write([]byte("OK"))
 	}))
 	defer ts.Close()
-	res, err := EVHttpSendText(http.MethodPost, ts.URL, "testvalue")
+	res, err := EvHTTPSendText(http.MethodPost, ts.URL, "testvalue")
 	if err != nil {
 		t.Error(err)
 	}
@@ -160,7 +160,7 @@ func Test_CheckRequiredFormValues(t *testing.T) {
 		w.Write([]byte("OK"))
 	}))
 	defer ts.Close()
-	res, err := EVHttpSendForm(http.MethodPost, ts.URL, url.Values{"testvalue": []string{"testvalue"}})
+	res, err := EvHTTPSendForm(http.MethodPost, ts.URL, url.Values{"testvalue": []string{"testvalue"}})
 	if err != nil {
 		t.Error(err)
 	}
@@ -179,7 +179,7 @@ func Test_ReturnErrorMessage(t *testing.T) {
 		ReturnErrorMessage(w, 500, errors.New("testerror"), ".txt")
 	}))
 	defer ts.Close()
-	res, err := EVHttpReceive(http.MethodGet, ts.URL, nil)
+	res, err := EvHTTPReceive(http.MethodGet, ts.URL, nil)
 	if err != nil {
 		t.Error(err)
 	}
@@ -198,7 +198,7 @@ func Test_ReturnErrorMessageJson(t *testing.T) {
 		ReturnErrorMessage(w, 500, errors.New("testerror"), ".json")
 	}))
 	defer ts.Close()
-	res, err := EVHttpReceive(http.MethodGet, ts.URL, nil)
+	res, err := EvHTTPReceive(http.MethodGet, ts.URL, nil)
 	if err != nil {
 		t.Error(err)
 	}
@@ -218,7 +218,7 @@ func Test_ReturnErrorMessageHtml(t *testing.T) {
 		ReturnErrorMessage(w, 500, errors.New("testerror"), ".html")
 	}))
 	defer ts.Close()
-	res, err := EVHttpReceive(http.MethodGet, ts.URL, nil)
+	res, err := EvHTTPReceive(http.MethodGet, ts.URL, nil)
 	if err != nil {
 		t.Error(err)
 	}
@@ -237,7 +237,7 @@ func Test_ReturnResult(t *testing.T) {
 		ReturnResult(w, 200, "testvalue", ".txt")
 	}))
 	defer ts.Close()
-	res, err := EVHttpReceive(http.MethodGet, ts.URL, nil)
+	res, err := EvHTTPReceive(http.MethodGet, ts.URL, nil)
 	if err != nil {
 		t.Error(err)
 	}
@@ -256,7 +256,7 @@ func Test_ReturnResultJson(t *testing.T) {
 		ReturnResult(w, 200, "testvalue", ".json")
 	}))
 	defer ts.Close()
-	res, err := EVHttpReceive(http.MethodGet, ts.URL, nil)
+	res, err := EvHTTPReceive(http.MethodGet, ts.URL, nil)
 	if err != nil {
 		t.Error(err)
 	}
@@ -275,7 +275,7 @@ func Test_ReturnResultHtml(t *testing.T) {
 		ReturnResult(w, 200, "testvalue", ".html")
 	}))
 	defer ts.Close()
-	res, err := EVHttpReceive(http.MethodGet, ts.URL, nil)
+	res, err := EvHTTPReceive(http.MethodGet, ts.URL, nil)
 	if err != nil {
 		t.Error(err)
 	}
@@ -319,7 +319,7 @@ func Test_DecodeMessage(t *testing.T) {
 	}
 }
 
-func Test_EVHttpSendFile(t *testing.T) {
+func Test_EvHTTPSendFile(t *testing.T) {
 	testfile := "tests/tmp/upload.file.txt"
 	uploadkey := "fileupload"
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -338,7 +338,7 @@ func Test_EVHttpSendFile(t *testing.T) {
 		t.Error(err)
 	}
 	defer os.Remove(testfile)
-	res, err := EVHttpSendFile(ts.URL, uploadkey, testfile)
+	res, err := EvHTTPSendFile(ts.URL, uploadkey, testfile)
 	if err != nil {
 		t.Error(err)
 	}
@@ -349,6 +349,6 @@ func Test_EVHttpSendFile(t *testing.T) {
 	}
 	if strings.Trim(string(resp), "\n") != testfile {
 		t.Log(string(resp))
-		t.Error("EVHttpSendFile does not work as expected")
+		t.Error("EvHTTPSendFile does not work as expected")
 	}
 }
