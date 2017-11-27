@@ -5,16 +5,15 @@ var EVSessionStorageDB =  "{{.SESSION_STORAGE_DB}}"
 var EVSessionStorageBucket = "{{.SESSION_STORAGE_BUCKET}}"
 
 func EVSessionSave(id , message string) (*http.Response, error){
-    return eve.EVHttpSendForm(http.MethodPost, EVSessionStorage, url.Values{"database": {EVSessionStorageDB}, "bucket": {EVSessionStorageBucket}, "key": {id}, "message": {message}, "evbolt.msgtype":{"string"}})
+    return eve.EvHTTPSendForm(http.MethodPost, EVSessionStorage, url.Values{"database": {EVSessionStorageDB}, "bucket": {EVSessionStorageBucket}, "key": {id}, "message": {message}, "evbolt.msgtype":{"string"}})
 }
 
 func EVSessionGet(id string) (*http.Response,error){
-    return eve.EVHttpReceive(http.MethodGet, EVSessionStorage, url.Values{"database":{EVSessionStorageDB}, "bucket":{EVSessionStorageBucket}, "evbolt.data":{"key"}, "evbolt.keytype":{"c"}, "key":{id}})
+    return eve.EvHTTPReceive(http.MethodGet, EVSessionStorage, url.Values{"database":{EVSessionStorageDB}, "bucket":{EVSessionStorageBucket}, "evbolt.data":{"key"}, "evbolt.keytype":{"c"}, "key":{id}})
 }
 
 func EVSessionDelete(id string)(*http.Response,error){
-    return eve.EVHttpReceive(http.MethodDelete, EVSessionStorage, url.Values{"database":{EVSessionStorageDB}, "bucket":{EVSessionStorageBucket}, "evbolt.data":{"key"}, "evbolt.keytype":{"c"}, "key":{id}})
+    return eve.EvHTTPReceive(http.MethodDelete, EVSessionStorage, url.Values{"database":{EVSessionStorageDB}, "bucket":{EVSessionStorageBucket}, "evbolt.data":{"key"}, "evbolt.keytype":{"c"}, "key":{id}})
 }
 
 {{end}}
-

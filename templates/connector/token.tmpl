@@ -4,15 +4,15 @@ var EVTokenStorageDB =  "{{.TOKEN_STORAGE_DB}}"
 var EVTokenStorageBucket = "{{.TOKEN_STORAGE_BUCKET}}"
 
 func EVTokenSave(id , message string) (*http.Response, error){
-    return eve.EVHttpSendForm(http.MethodPost, EVTokenStorage, url.Values{"database": {EVTokenStorageDB}, "bucket": {EVTokenStorageBucket}, "key": {id}, "message": {base64.StdEncoding.EncodeToString([]byte(message))}, "evbolt.msgtype":{"base64"}})
+    return eve.EvHTTPSendForm(http.MethodPost, EVTokenStorage, url.Values{"database": {EVTokenStorageDB}, "bucket": {EVTokenStorageBucket}, "key": {id}, "message": {base64.StdEncoding.EncodeToString([]byte(message))}, "evbolt.msgtype":{"base64"}})
 }
 
 func EVTokenGet(id string) (*http.Response,error){
-    return eve.EVHttpReceive(http.MethodGet, EVTokenStorage, url.Values{"database":{EVTokenStorageDB}, "bucket":{EVTokenStorageBucket}, "evbolt.data":{"key"}, "evbolt.keytype":{"c"}, "key":{id}})
+    return eve.EvHTTPReceive(http.MethodGet, EVTokenStorage, url.Values{"database":{EVTokenStorageDB}, "bucket":{EVTokenStorageBucket}, "evbolt.data":{"key"}, "evbolt.keytype":{"c"}, "key":{id}})
 }
 
 func EVTokenDelete(id string)(*http.Response,error){
-    return eve.EVHttpReceive(http.MethodDelete, EVTokenStorage, url.Values{"database":{EVTokenStorageDB}, "bucket":{EVTokenStorageBucket}, "evbolt.data":{"key"}, "evbolt.keytype":{"c"}, "key":{id}})
+    return eve.EvHTTPReceive(http.MethodDelete, EVTokenStorage, url.Values{"database":{EVTokenStorageDB}, "bucket":{EVTokenStorageBucket}, "evbolt.data":{"key"}, "evbolt.keytype":{"c"}, "key":{id}})
 }
 
 func EVTokenToStringFromRequest(r *http.Request, tokenHandler eve.TokenSecretHandler) (string, error) {

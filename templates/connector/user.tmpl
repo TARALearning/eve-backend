@@ -80,14 +80,14 @@ func EVUserIsAllowed(w http.ResponseWriter, r *http.Request) bool {
 }
 
 func EVUserSave(id , message string) (*http.Response, error){
-    return eve.EVHttpSendForm(http.MethodPost, EVUserStorage, url.Values{"database": {EVUserStorageDB}, "bucket": {EVUserStorageBucket}, "key": {id}, "message": {message}, "evbolt.msgtype":{"string"}})
+    return eve.EvHTTPSendForm(http.MethodPost, EVUserStorage, url.Values{"database": {EVUserStorageDB}, "bucket": {EVUserStorageBucket}, "key": {id}, "message": {message}, "evbolt.msgtype":{"string"}})
 }
 
 func EVUserGet(id string) (*http.Response,error){
-    return eve.EVHttpReceive(http.MethodGet, EVUserStorage, url.Values{"database":{EVUserStorageDB}, "bucket":{EVUserStorageBucket}, "evbolt.data":{"key"}, "evbolt.keytype":{"c"}, "key":{id}})
+    return eve.EvHTTPReceive(http.MethodGet, EVUserStorage, url.Values{"database":{EVUserStorageDB}, "bucket":{EVUserStorageBucket}, "evbolt.data":{"key"}, "evbolt.keytype":{"c"}, "key":{id}})
 }
 
 func EVUserDelete(id string)(*http.Response,error){
-    return eve.EVHttpReceive(http.MethodDelete, EVUserStorage, url.Values{"database":{EVUserStorageDB}, "bucket":{EVUserStorageBucket}, "evbolt.data":{"key"}, "evbolt.keytype":{"c"}, "key":{id}})
+    return eve.EvHTTPReceive(http.MethodDelete, EVUserStorage, url.Values{"database":{EVUserStorageDB}, "bucket":{EVUserStorageBucket}, "evbolt.data":{"key"}, "evbolt.keytype":{"c"}, "key":{id}})
 }
 {{end}}
