@@ -55,7 +55,7 @@ node('linux-ubuntu-16.04-amd64') {
 									ext = ""
 								}
 								for (int a = 0; a < archs.size(); a++){
-									sh("GOOS=${oses[o]} GOARCH=${archs[a]} ${gobin} build -o ${dist}/${oses[o]}-${archs[a]}-${version}_${tools[t]}${ext} ${src}/bin/${tools[t]}/main.go")
+									sh("GOOS=${oses[o]} GOARCH=${archs[a]} ${gobin} build -o ${curr}/${dist}/${oses[o]}-${archs[a]}-${version}_${tools[t]}${ext} ${src}/bin/${tools[t]}/main.go")
 								}
 							}
 						}
@@ -70,7 +70,7 @@ node('linux-ubuntu-16.04-amd64') {
 									use_flags = use_flags_default
 									break;
 							}
-							sh("${dist}/linux-amd64-${version}_eve-gen generate -service ${services[s]} ${use_flags}  -target ${tmp}/${services[s]}_main.go")
+							sh("${curr}/${dist}/linux-amd64-${version}_eve-gen generate -service ${services[s]} ${use_flags}  -target ${tmp}/${services[s]}_main.go")
 							for (int o = 0; o < oses.size(); o++){
 								if ("${oses[o]}" == "windows"){
 									ext = ".exe"
@@ -78,7 +78,7 @@ node('linux-ubuntu-16.04-amd64') {
 									ext = ""
 								}
 								for (int a = 0; a < archs.size(); a++){
-									sh("GOOS=${oses[o]} GOARCH=${archs[a]} ${gobin} build -o ${dist}/${oses[o]}-${archs[a]}-${version}_${services[s]}${ext} ${tmp}/${services[s]}_main.go")
+									sh("GOOS=${oses[o]} GOARCH=${archs[a]} ${gobin} build -o ${curr}/${dist}/${oses[o]}-${archs[a]}-${version}_${services[s]}${ext} ${tmp}/${services[s]}_main.go")
 								}
 							}
 						}
@@ -116,7 +116,7 @@ node('linux-ubuntu-16.04-amd64') {
 										if ("${oses[o]}" == "darwin"){
 											osrename = "macos"
 										}
-										sh("curl --user '${USERNAME}:${PASSWORD}' -T ${dist}/${oses[o]}-${archs[a]}-${version}_${tools[t]}${ext} https://u162240.your-storagebox.de/eve/backend/${osrename}/")
+										sh("curl --user '${USERNAME}:${PASSWORD}' -T ${curr}/${dist}/${oses[o]}-${archs[a]}-${version}_${tools[t]}${ext} https://u162240.your-storagebox.de/eve/backend/${osrename}/")
 									}
 								}
 							}
@@ -124,7 +124,7 @@ node('linux-ubuntu-16.04-amd64') {
 				}
 				stage ('CleanUp EVE ARTIFACTS at BinTray'){
 						withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: 'bintray', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD']]) {
-							sh("${dist}/eve-bintray evalgo eve-backend core ${version} https://api.bintray.com ${USERNAME} ${PASSWORD}")
+							sh("${curr}/${dist}/eve-bintray evalgo eve-backend core ${version} https://api.bintray.com ${USERNAME} ${PASSWORD}")
 						}
 				}
 				stage ('Deploy EVE ARTIFACTS to BinTray'){
@@ -248,7 +248,7 @@ node('linux-ubuntu-16.04-amd64') {
 									ext = ""
 								}
 								for (int a = 0; a < archs.size(); a++){
-									sh("GOOS=${oses[o]} GOARCH=${archs[a]} ${gobin} build -o ${dist}/${oses[o]}-${archs[a]}-${version}_${tools[t]}${ext} ${src}/bin/${tools[t]}/main.go")
+									sh("GOOS=${oses[o]} GOARCH=${archs[a]} ${gobin} build -o ${curr}/${dist}/${oses[o]}-${archs[a]}-${version}_${tools[t]}${ext} ${src}/bin/${tools[t]}/main.go")
 								}
 							}
 						}
@@ -271,7 +271,7 @@ node('linux-ubuntu-16.04-amd64') {
 									ext = ""
 								}
 								for (int a = 0; a < archs.size(); a++){
-									sh("GOOS=${oses[o]} GOARCH=${archs[a]} ${gobin} build -o ${dist}/${oses[o]}-${archs[a]}-${version}_${services[s]}${ext} ${tmp}/${services[s]}_main.go")
+									sh("GOOS=${oses[o]} GOARCH=${archs[a]} ${gobin} build -o ${curr}/${dist}/${oses[o]}-${archs[a]}-${version}_${services[s]}${ext} ${tmp}/${services[s]}_main.go")
 								}
 							}
 						}

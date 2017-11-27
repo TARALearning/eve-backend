@@ -17,6 +17,7 @@ const (
 	uint32max = (1 << 32) - 1
 )
 
+// FileInfo appends the Path to the os.FileInfo struct
 type FileInfo struct {
 	fName    string
 	fSize    int64
@@ -27,34 +28,42 @@ type FileInfo struct {
 	fPath    string
 }
 
+// Name implements the os.FileInfo interface
 func (fi *FileInfo) Name() string {
 	return fi.fName
 }
 
+// Size implements the os.FileInfo interface
 func (fi *FileInfo) Size() int64 {
 	return fi.fSize
 }
 
+// Mode implements the os.FileInfo interface
 func (fi *FileInfo) Mode() os.FileMode {
 	return fi.fMode
 }
 
+// ModTime implements the os.FileInfo interface
 func (fi *FileInfo) ModTime() time.Time {
 	return fi.fModTime
 }
 
+// Sys implements the os.FileInfo interface
 func (fi *FileInfo) Sys() interface{} {
 	return fi.fSys
 }
 
+// Path appends the path to the the os.FileInfo interface
 func (fi *FileInfo) Path() string {
 	return fi.fPath
 }
 
+// IsDir implements the os.FileInfo interface
 func (fi *FileInfo) IsDir() bool {
 	return fi.fisDir
 }
 
+// NewFileInfo appends the Path to the os.FileInfo struct
 func NewFileInfo(info os.FileInfo) FileInfo {
 	fi := new(FileInfo)
 	fi.fName = info.Name()
@@ -69,6 +78,7 @@ func NewFileInfo(info os.FileInfo) FileInfo {
 var files = make([]os.FileInfo, 0)
 var zipFiles = make([]FileInfo, 0)
 
+// GetFolderName returns the folder name from the original name
 func GetFolderName(originalName string) (string, error) {
 	splited := strings.Split(originalName, "-")
 	moduleNr, err := strconv.Atoi(splited[0])
@@ -78,6 +88,7 @@ func GetFolderName(originalName string) (string, error) {
 	return "m" + strconv.Itoa(moduleNr), nil
 }
 
+// saveFiles appends a file to the zipFiles
 func saveFiles(path string, info os.FileInfo, err error) error {
 	if err != nil {
 		return err
@@ -88,10 +99,12 @@ func saveFiles(path string, info os.FileInfo, err error) error {
 	return nil
 }
 
+// readFiles reads all files from the given src recursive into the zipFiles
 func readFiles(src string) error {
 	return filepath.Walk(src, saveFiles)
 }
 
+// FileInfoHeader returns a zip.FileHeader from the custom FileInfo
 func FileInfoHeader(fi FileInfo) (*zip.FileHeader, error) {
 	size := fi.Size()
 	fh := &zip.FileHeader{
@@ -108,6 +121,7 @@ func FileInfoHeader(fi FileInfo) (*zip.FileHeader, error) {
 	return fh, nil
 }
 
+// Zip compresses the given source into the given target zip file
 func Zip(src, target string) error {
 	fmt.Println("zipping", src, "into", target+".zip")
 	// reset zipFiles
@@ -122,9 +136,9 @@ func Zip(src, target string) error {
 	// create a new zip archive
 	w := zip.NewWriter(buf)
 	for _, file := range zipFiles {
-		header, err := FileInfoHeader(file)
-		if err != nil {
-			return err
+		header, herr := FileInfoHeader(file)
+		if herr != nil {
+			return herr
 		}
 		header.Name = file.Path()
 		if file.IsDir() {
@@ -132,18 +146,21 @@ func Zip(src, target string) error {
 		} else {
 			header.Method = zip.Deflate
 		}
-		writer, err := w.CreateHeader(header)
-		if err != nil {
-			return err
+		writer, werr := w.CreateHeader(header)
+		if werr != nil {
+			return werr
 		}
 		if file.IsDir() {
 			continue
 		}
-		fil, err := os.Open(file.Path())
-		if err != nil {
-			return err
+		fil, oerr := os.Open(file.Path())
+		if oerr != nil {
+			return oerr
 		}
-		_, err = io.Copy(writer, fil)
+		_, cerr := io.Copy(writer, fil)
+		if cerr != nil {
+			return cerr
+		}
 		fil.Close()
 	}
 	// make sure to check the error on close

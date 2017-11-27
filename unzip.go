@@ -7,6 +7,7 @@ import (
 	"path/filepath"
 )
 
+// UnZip extracts the given archive into the given path
 func UnZip(archive, target string) error {
 	reader, err := zip.OpenReader(archive)
 	if err != nil {
