@@ -48,7 +48,7 @@ node('linux-ubuntu-16.04-amd64') {
 					}
 					stage ('Upload CodeCoverage to codecov.io'){
 						withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: 'codecov', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD']]) {
-							sh("cd ${curr}/${build}/${gopath}/src/evalgo.org/eve && curl -O codecov.sh https://codecov.io/bash && chmod +x codecov.sh && ./codecov.sh -t ${PASSWORD}")
+							sh("cd ${curr}/${build}/${gopath}/src/evalgo.org/eve && curl -o codecov.sh https://codecov.io/bash && chmod +x codecov.sh && ./codecov.sh -t ${PASSWORD}")
 						}
 					}
 					stage ('Build TOOLS'){
@@ -211,7 +211,7 @@ node('linux-ubuntu-16.04-amd64') {
 					}
 					stage ('Upload CodeCoverage to codecov.io'){
 						withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: 'codecov', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD']]) {
-							sh("cd ${curr}/${build}/${gopath}/src/evalgo.org/eve && curl -O codecov.sh https://codecov.io/bash && chmod +x codecov.sh && ./codecov.sh -t ${PASSWORD}")
+							sh("cd ${curr}/${build}/${gopath}/src/evalgo.org/eve && curl -o codecov.sh https://codecov.io/bash && chmod +x codecov.sh && ./codecov.sh -t ${PASSWORD}")
 						}
 					}
 					stage("dev :: post to slack") {
@@ -251,7 +251,7 @@ node('linux-ubuntu-16.04-amd64') {
 					}
 					stage ('Upload CodeCoverage to codecov.io'){
 						withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: 'codecov', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD']]) {
-							sh("cd ${curr}/${build}/${gopath}/src/evalgo.org/eve && curl -O codecov.sh https://codecov.io/bash && chmod +x codecov.sh && ./codecov.sh -t ${PASSWORD}")
+							sh("cd ${curr}/${build}/${gopath}/src/evalgo.org/eve && curl -o codecov.sh https://codecov.io/bash && chmod +x codecov.sh && ./codecov.sh -t ${PASSWORD}")
 						}
 					}
 					stage ('Build TOOLS'){
