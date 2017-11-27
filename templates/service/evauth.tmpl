@@ -155,6 +155,8 @@
             return
         }
         log.Println(string(logg))
+        eve.ReturnResult(w, 200, "success", format)
+        return
     }
 
 {{end}}
