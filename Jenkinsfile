@@ -46,6 +46,11 @@ node('linux-ubuntu-16.04-amd64') {
 						sh("${gobin} test -coverprofile=dist/coverage.out")
 						sh("cd ${curr}/${build}/${gopath}/src/evalgo.org/eve && gocov test | gocov-xml > ${curr}/dist/coverage.xml")
 					}
+					stage ('Upload CodeCoverage to codecov.io'){
+						withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: 'codecov', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD']]) {
+							sh("cd ${curr}/${build}/${gopath}/src/evalgo.org/eve && bash <(curl -s https://codecov.io/bash) -t ${PASSWORD}")
+						}
+					}
 					stage ('Build TOOLS'){
 						for (int t = 0; t < tools.size(); t++){
 							for (int o = 0; o < oses.size(); o++){

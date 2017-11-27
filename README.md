@@ -24,6 +24,9 @@ The eve pkg contents are:
 ## DOWNLOAD
  [ ![Latest Version](https://api.bintray.com/packages/evalgo/eve-backend/core/images/download.svg) ](https://bintray.com/evalgo/eve-backend/core/_latestVersion)
 
+## CODE coverage
+[![codecov](https://codecov.io/gh/evalgo/eve-backend/branch/master/graph/badge.svg)](https://codecov.io/gh/evalgo/eve-backend)
+
 ## TOOLS
 * [eve-gen]()
 * [eve-setup]()
