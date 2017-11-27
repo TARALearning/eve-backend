@@ -211,7 +211,7 @@ node('linux-ubuntu-16.04-amd64') {
 		    	}
 				}
 			} catch (Exception e) {
-				stage("master dev :: post to slack") {
+				stage("dev error :: post to slack") {
 					withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: 'slack', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD']]) {
 						slackSend channel: '#build', color: 'danger', message: "${env.JOB_NAME} ${env.BUILD_NUMBER} failed", teamDomain: "${USERNAME}", token: "${PASSWORD}"
 					}
@@ -286,7 +286,7 @@ node('linux-ubuntu-16.04-amd64') {
 					}
 	    	}
 			} catch (Exception e) {
-				stage("master test :: post to slack") {
+				stage("test error :: post to slack") {
 					withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: 'slack', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD']]) {
 						slackSend channel: '#build', color: 'danger', message: "${env.JOB_NAME} ${env.BUILD_NUMBER} failed", teamDomain: "${USERNAME}", token: "${PASSWORD}"
 					}
