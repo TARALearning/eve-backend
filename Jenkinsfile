@@ -51,6 +51,11 @@ node('linux-ubuntu-16.04-amd64') {
 							sh("cd ${curr}/${dist} && curl -o codecov.sh https://codecov.io/bash && chmod +x codecov.sh && ./codecov.sh -t ${PASSWORD}")
 						}
 					}
+					stage("master build tools :: post to slack") {
+						withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: 'slack', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD']]) {
+		        	slackSend channel: '#build', color: 'good', message: "${env.JOB_NAME} ${env.BUILD_NUMBER} building tools now...", teamDomain: "${USERNAME}", token: "${PASSWORD}"
+						}
+		    	}
 					stage ('Build TOOLS'){
 						for (int t = 0; t < tools.size(); t++){
 							for (int o = 0; o < oses.size(); o++){
@@ -65,6 +70,11 @@ node('linux-ubuntu-16.04-amd64') {
 							}
 						}
 					}
+					stage("master build services :: post to slack") {
+						withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: 'slack', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD']]) {
+		        	slackSend channel: '#build', color: 'good', message: "${env.JOB_NAME} ${env.BUILD_NUMBER} building services now...", teamDomain: "${USERNAME}", token: "${PASSWORD}"
+						}
+		    	}
 					stage ('Build EVE SERVICES') {
 						for (int s = 0; s < services.size(); s++){
 							switch("${services[s]}".toString()){
@@ -90,6 +100,11 @@ node('linux-ubuntu-16.04-amd64') {
 				}
 				stage ('Archive EVE ARTIFACTS'){
 					archiveArtifacts("${dist}/*")
+				}
+				stage("master deploy storagebox :: post to slack") {
+					withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: 'slack', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD']]) {
+						slackSend channel: '#build', color: 'good', message: "${env.JOB_NAME} ${env.BUILD_NUMBER} deploy to storagebox now...", teamDomain: "${USERNAME}", token: "${PASSWORD}"
+					}
 				}
 				stage ('Deploy EVE ARTIFACTS to StorageBox'){
 					withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: 'storagebox', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD']]) {
@@ -127,10 +142,20 @@ node('linux-ubuntu-16.04-amd64') {
 							}
 					}
 				}
+				stage("master cleanup bintray :: post to slack") {
+					withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: 'slack', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD']]) {
+						slackSend channel: '#build', color: 'good', message: "${env.JOB_NAME} ${env.BUILD_NUMBER} cleanup old bintray versions...", teamDomain: "${USERNAME}", token: "${PASSWORD}"
+					}
+				}
 				stage ('CleanUp EVE ARTIFACTS at BinTray'){
 						withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: 'bintray', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD']]) {
 							sh("${curr}/${dist}/linux-amd64-0.0.2_eve-bintray evalgo eve-backend core ${version} https://api.bintray.com ${USERNAME} ${PASSWORD}")
 						}
+				}
+				stage("master deploy to bintray :: post to slack") {
+					withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: 'slack', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD']]) {
+						slackSend channel: '#build', color: 'good', message: "${env.JOB_NAME} ${env.BUILD_NUMBER} deploy to bintray now...", teamDomain: "${USERNAME}", token: "${PASSWORD}"
+					}
 				}
 				stage ('Deploy EVE ARTIFACTS to BinTray'){
 						withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: 'bintray', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD']]) {
