@@ -54,7 +54,6 @@ func (hh *RestHttpHandler) ServeHTTP(w http.ResponseWriter, r *http.Request){
         w.Header().Add("Access-Control-Expose-Headers", strings.Join(allowedResponseHeaders,","))
 	      w.Header().Add("Access-Control-Allow-Origin", "*")
         w.Header().Add("Access-Control-Allow-Methods", "*")
-        w.Header().Add("Access-Control-Allow-Credentials", "false")
         w.Header().Add("Access-Control-Max-Age", "86400")
     {{end}}
     format := path.Ext(r.URL.Path)
