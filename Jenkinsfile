@@ -209,11 +209,6 @@ node('linux-ubuntu-16.04-amd64') {
 						sh("${gobin} test -coverprofile=dist/coverage.out")
 						sh("cd ${curr}/${build}/${gopath}/src/evalgo.org/eve && gocov test | gocov-xml > ${curr}/dist/coverage.xml")
 					}
-					stage ('Upload CodeCoverage to codecov.io'){
-						withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: 'codecov', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD']]) {
-							sh("cd ${curr}/${dist} && curl -o codecov.sh https://codecov.io/bash && chmod +x codecov.sh && ./codecov.sh -t ${PASSWORD}")
-						}
-					}
 					stage("dev :: post to slack") {
 						withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: 'slack', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD']]) {
 		        	slackSend channel: '#build', color: 'good', message: "${env.JOB_NAME} ${env.BUILD_NUMBER} success", teamDomain: "${USERNAME}", token: "${PASSWORD}"
@@ -248,11 +243,6 @@ node('linux-ubuntu-16.04-amd64') {
 						sh("${gobin} test -v")
 						sh("${gobin} test -coverprofile=dist/coverage.out")
 						sh("cd ${curr}/${build}/${gopath}/src/evalgo.org/eve && gocov test | gocov-xml > ${curr}/dist/coverage.xml")
-					}
-					stage ('Upload CodeCoverage to codecov.io'){
-						withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: 'codecov', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD']]) {
-							sh("cd ${curr}/${dist} && curl -o codecov.sh https://codecov.io/bash && chmod +x codecov.sh && ./codecov.sh -t ${PASSWORD}")
-						}
 					}
 					stage ('Build TOOLS'){
 						for (int t = 0; t < tools.size(); t++){
