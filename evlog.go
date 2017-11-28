@@ -3,7 +3,6 @@ package eve
 import (
 	"bytes"
 	"log"
-	"os"
 )
 
 var (
@@ -21,5 +20,5 @@ func EVLogPrintln(v ...interface{}) {
 // EVLogFatal writes the message into the buffer and quits the execution with an error 1 message
 func EVLogFatal(v ...interface{}) {
 	EVLogPrintln(v...)
-	os.Exit(1)
+	panic(EVLogBuffer.String())
 }
