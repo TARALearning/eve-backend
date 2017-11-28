@@ -352,3 +352,84 @@ func Test_EvHTTPSendFile(t *testing.T) {
 		t.Error("EvHTTPSendFile does not work as expected")
 	}
 }
+
+func Test_EvHTTPWebDavSendFile(t *testing.T) {
+	testfile := "tests/tmp/upload.file.txt"
+	uploadkey := "fileupload"
+	username := "testuser"
+	userpass := "secret"
+	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		uname, pass, ok := r.BasicAuth()
+		if ok {
+			if uname != username || pass != userpass {
+				w.WriteHeader(403)
+				w.Write([]byte("Forbidden"))
+			}
+			_, header, err := r.FormFile(uploadkey)
+			if err != nil {
+				w.WriteHeader(500)
+				w.Write([]byte(err.Error()))
+				return
+			}
+			w.WriteHeader(200)
+			w.Write([]byte(header.Filename))
+			return
+		}
+		w.WriteHeader(403)
+		w.Write([]byte("Forbidden"))
+	}))
+	defer ts.Close()
+	err := ioutil.WriteFile(testfile, []byte("content"), 0777)
+	if err != nil {
+		t.Error(err)
+	}
+	defer os.Remove(testfile)
+	res, err := EvHTTPWebDavSendFile(ts.URL, uploadkey, testfile, username, userpass)
+	if err != nil {
+		t.Error(err)
+	}
+	resp, err := ioutil.ReadAll(res.Body)
+	res.Body.Close()
+	if err != nil {
+		t.Error(err)
+	}
+	if strings.Trim(string(resp), "\n") != testfile {
+		t.Log(string(resp))
+		t.Error("EvHTTPWebDavSendFile does not work as expected")
+	}
+}
+
+func Test_EvHTTPWebDavFileDownload(t *testing.T) {
+	testfile := "tests/tmp/upload.file.txt"
+	testfileDownload := "tests/tmp/upload.file.download.txt"
+	username := "testuser"
+	userpass := "secret"
+	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		name := strings.TrimLeft(r.URL.Path, "/")
+		uname, pass, ok := r.BasicAuth()
+		if ok {
+			if uname != username || pass != userpass {
+				w.WriteHeader(403)
+				w.Write([]byte("Forbidden"))
+			}
+			http.ServeFile(w, r, name)
+			return
+		}
+		w.WriteHeader(403)
+		w.Write([]byte("Forbidden"))
+	}))
+	defer ts.Close()
+	err := ioutil.WriteFile(testfile, []byte("content"), 0777)
+	if err != nil {
+		t.Error(err)
+	}
+	defer os.Remove(testfile)
+	res, err := EvHTTPWebDavFileDownload(ts.URL+"/"+testfile, testfileDownload, username, userpass)
+	if err != nil {
+		t.Error(err)
+	}
+	if os.Remove(testfileDownload) != nil {
+		t.Log(res)
+		t.Error("EvHTTPWebDavFileDownload does not work as expected")
+	}
+}
