@@ -80,6 +80,62 @@ func Test_SchedulerDisableProcess(t *testing.T) {
 	}
 }
 
+func Test_SchedulerCmdFind(t *testing.T) {
+	s := NewScheduler()
+	err := s.AppendCmd("test", "./test", "testuser", []string{})
+	if err != nil {
+		t.Error(err)
+	}
+	pID := s.CmdFind("test")
+	if pID != 0 {
+		t.Error("Scheduler CmdFind does not work as expected")
+	}
+}
+
+func Test_StartCmd(t *testing.T) {
+	cmd := NewSCmd()
+	cmd.ID = "echo"
+	cmd.ServiceType = "enabled"
+	cmd.Owner = os.Getenv("USER")
+	cmd.Cmd = exec.Command("echo", "test")
+	err := startCmd(cmd)
+	if err != nil {
+		t.Error(err)
+	}
+}
+
+func Test_SchedulerStartProcess(t *testing.T) {
+	s := NewScheduler()
+	err := s.AppendCmd("echo", "echo", os.Getenv("USER"), []string{"test"})
+	if err != nil {
+		t.Error(err)
+	}
+	err = s.EnableProcess("echo")
+	if err != nil {
+		t.Error(err)
+	}
+	err = s.StartProcess("echo")
+	if err != nil {
+		t.Error(err)
+	}
+}
+
+func Test_SchedulerStartAllProcesses(t *testing.T) {
+	s := NewScheduler()
+	err := s.AppendCmd("echo", "echo", os.Getenv("USER"), []string{"test"})
+	if err != nil {
+		t.Error(err)
+	}
+	err = s.EnableProcess("echo")
+	if err != nil {
+		t.Error(err)
+	}
+	err = s.StartAllProcesses()
+	if err != nil {
+		t.Error(err)
+	}
+}
+
 // Test_SchedulerShutdown is used to test the scheduler shutdown
 func Test_SchedulerShutdown(t *testing.T) {
 	s := NewScheduler()
