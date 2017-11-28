@@ -8,8 +8,6 @@ import (
 	"io/ioutil"
 	"os"
 	"path/filepath"
-	"strconv"
-	"strings"
 	"time"
 )
 
@@ -77,16 +75,6 @@ func NewFileInfo(info os.FileInfo) FileInfo {
 
 var files = make([]os.FileInfo, 0)
 var zipFiles = make([]FileInfo, 0)
-
-// GetFolderName returns the folder name from the original name
-func GetFolderName(originalName string) (string, error) {
-	splited := strings.Split(originalName, "-")
-	moduleNr, err := strconv.Atoi(splited[0])
-	if err != nil {
-		return "", err
-	}
-	return "m" + strconv.Itoa(moduleNr), nil
-}
 
 // saveFiles appends a file to the zipFiles
 func saveFiles(path string, info os.FileInfo, err error) error {
@@ -169,4 +157,42 @@ func Zip(src, target string) error {
 		return err
 	}
 	return ioutil.WriteFile(target+".zip", buf.Bytes(), 0777)
+}
+
+// UnZip extracts the given archive into the given path
+func UnZip(archive, target string) error {
+	reader, err := zip.OpenReader(archive)
+	if err != nil {
+		return err
+	}
+
+	if err := os.MkdirAll(target, 0755); err != nil {
+		return err
+	}
+
+	for _, file := range reader.File {
+		path := filepath.Join(target, file.Name)
+		if file.FileInfo().IsDir() {
+			os.MkdirAll(path, file.Mode())
+			continue
+		}
+
+		fileReader, err := file.Open()
+		if err != nil {
+			return err
+		}
+		defer fileReader.Close()
+
+		targetFile, err := os.OpenFile(path, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, file.Mode())
+		if err != nil {
+			return err
+		}
+		defer targetFile.Close()
+
+		if _, err := io.Copy(targetFile, fileReader); err != nil {
+			return err
+		}
+	}
+
+	return nil
 }
