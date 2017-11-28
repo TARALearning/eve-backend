@@ -29,6 +29,11 @@ node('linux-ubuntu-16.04-amd64') {
 		case "master":
 			try {
 				withEnv(["GOROOT=${curr}/${build}/${goroot}", "GOPATH=${curr}/${build}/${gopath}", "PATH+GOPATHBIN=${curr}/${build}/${gopath}/bin", "PATH+GOROOTBIN=${curr}/${build}/${goroot}/bin"]){
+					stage("master build start :: post to slack") {
+						withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: 'slack', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD']]) {
+							slackSend channel: '#build', color: 'good', message: "${env.JOB_NAME} ${env.BUILD_NUMBER} starting build...", teamDomain: "${USERNAME}", token: "${PASSWORD}"
+						}
+					}
 					stage ('Init GO ENV'){
 						sh("rm -rf ${build} .goget ${dist}")
 						sh("mkdir ${build} ${dist}")
@@ -40,6 +45,11 @@ node('linux-ubuntu-16.04-amd64') {
 							sh("${gobin} get -v ${dependencies[i]}")
 						}
 					}
+					stage("master running tests and codecoverage :: post to slack") {
+						withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: 'slack', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD']]) {
+		        	slackSend channel: '#build', color: 'good', message: "${env.JOB_NAME} ${env.BUILD_NUMBER} running tests and code coverage analysis...", teamDomain: "${USERNAME}", token: "${PASSWORD}"
+						}
+		    	}
 					stage ('Run TESTS'){
 						sh("cd tests && chmod +x gen.ssl.client.crt.sh && ./gen.ssl.client.crt.sh")
 						sh("${gobin} test -v")
@@ -53,7 +63,7 @@ node('linux-ubuntu-16.04-amd64') {
 					}
 					stage("master build tools :: post to slack") {
 						withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: 'slack', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD']]) {
-		        	slackSend channel: '#build', color: 'good', message: "${env.JOB_NAME} ${env.BUILD_NUMBER} building tools now...", teamDomain: "${USERNAME}", token: "${PASSWORD}"
+		        	slackSend channel: '#build', color: 'good', message: "${env.JOB_NAME} ${env.BUILD_NUMBER} building tools...", teamDomain: "${USERNAME}", token: "${PASSWORD}"
 						}
 		    	}
 					stage ('Build TOOLS'){
@@ -72,7 +82,7 @@ node('linux-ubuntu-16.04-amd64') {
 					}
 					stage("master build services :: post to slack") {
 						withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: 'slack', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD']]) {
-		        	slackSend channel: '#build', color: 'good', message: "${env.JOB_NAME} ${env.BUILD_NUMBER} building services now...", teamDomain: "${USERNAME}", token: "${PASSWORD}"
+		        	slackSend channel: '#build', color: 'good', message: "${env.JOB_NAME} ${env.BUILD_NUMBER} building services...", teamDomain: "${USERNAME}", token: "${PASSWORD}"
 						}
 		    	}
 					stage ('Build EVE SERVICES') {
@@ -103,7 +113,7 @@ node('linux-ubuntu-16.04-amd64') {
 				}
 				stage("master deploy storagebox :: post to slack") {
 					withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: 'slack', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD']]) {
-						slackSend channel: '#build', color: 'good', message: "${env.JOB_NAME} ${env.BUILD_NUMBER} deploy to storagebox now...", teamDomain: "${USERNAME}", token: "${PASSWORD}"
+						slackSend channel: '#build', color: 'good', message: "${env.JOB_NAME} ${env.BUILD_NUMBER} deploy to storagebox...", teamDomain: "${USERNAME}", token: "${PASSWORD}"
 					}
 				}
 				stage ('Deploy EVE ARTIFACTS to StorageBox'){
@@ -154,7 +164,7 @@ node('linux-ubuntu-16.04-amd64') {
 				}
 				stage("master deploy to bintray :: post to slack") {
 					withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: 'slack', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD']]) {
-						slackSend channel: '#build', color: 'good', message: "${env.JOB_NAME} ${env.BUILD_NUMBER} deploy to bintray now...", teamDomain: "${USERNAME}", token: "${PASSWORD}"
+						slackSend channel: '#build', color: 'good', message: "${env.JOB_NAME} ${env.BUILD_NUMBER} deploy to bintray...", teamDomain: "${USERNAME}", token: "${PASSWORD}"
 					}
 				}
 				stage ('Deploy EVE ARTIFACTS to BinTray'){
@@ -271,7 +281,7 @@ node('linux-ubuntu-16.04-amd64') {
 					}
 					stage("test build tools :: post to slack") {
 						withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: 'slack', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD']]) {
-		        	slackSend channel: '#build', color: 'good', message: "${env.JOB_NAME} ${env.BUILD_NUMBER} building tools now...", teamDomain: "${USERNAME}", token: "${PASSWORD}"
+		        	slackSend channel: '#build', color: 'good', message: "${env.JOB_NAME} ${env.BUILD_NUMBER} building tools...", teamDomain: "${USERNAME}", token: "${PASSWORD}"
 						}
 		    	}
 					stage ('Build TOOLS'){
@@ -290,7 +300,7 @@ node('linux-ubuntu-16.04-amd64') {
 					}
 					stage("test build services :: post to slack") {
 						withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: 'slack', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD']]) {
-		        	slackSend channel: '#build', color: 'good', message: "${env.JOB_NAME} ${env.BUILD_NUMBER} building services now...", teamDomain: "${USERNAME}", token: "${PASSWORD}"
+		        	slackSend channel: '#build', color: 'good', message: "${env.JOB_NAME} ${env.BUILD_NUMBER} building services...", teamDomain: "${USERNAME}", token: "${PASSWORD}"
 						}
 		    	}
 					stage ('Build EVE SERVICES') {

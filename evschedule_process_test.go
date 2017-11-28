@@ -6,6 +6,80 @@ import (
 	"testing"
 )
 
+func Test_NewSCmd(t *testing.T) {
+	c := NewSCmd()
+	if c.ID != "N/A" {
+		t.Error("NewSCmd does not work as expected")
+	}
+}
+
+func Test_NewCronCmd(t *testing.T) {
+	c := NewCronCmd()
+	if c.Running {
+		t.Error("NewCronCmd does not work as expected")
+	}
+}
+
+func Test_SchedulerDeleteCmd(t *testing.T) {
+	s := NewScheduler()
+	err := s.AppendCmd("test", "./test", "testuser", []string{})
+	if err != nil {
+		t.Error(err)
+	}
+	err = s.DeleteCmd("test")
+	if err != nil {
+		t.Error(err)
+	}
+	if len(s.Cmds) > 0 {
+		t.Error("Scheduler DeleteCmd does not work as expected")
+	}
+}
+
+func Test_SchedulerReplaceCmd(t *testing.T) {
+	s := NewScheduler()
+	err := s.AppendCmd("test", "./test", "testuser", []string{})
+	if err != nil {
+		t.Error(err)
+	}
+	err = s.ReplaceCmd("test", "./test2", "testuser2", []string{})
+	if err != nil {
+		t.Error(err)
+	}
+	if s.Cmds[0].ID != "test" {
+		t.Error("Scheduler ReplaceCmd does not work as expected")
+	}
+}
+
+func Test_SchedulerEnableProcess(t *testing.T) {
+	s := NewScheduler()
+	err := s.AppendCmd("test", "./test", "testuser", []string{})
+	if err != nil {
+		t.Error(err)
+	}
+	err = s.EnableProcess("test")
+	if err != nil {
+		t.Error(err)
+	}
+	if s.Cmds[0].ServiceType != "enabled" {
+		t.Error("Scheduler EnableProcess does not work as expected")
+	}
+}
+
+func Test_SchedulerDisableProcess(t *testing.T) {
+	s := NewScheduler()
+	err := s.AppendCmd("test", "./test", "testuser", []string{})
+	if err != nil {
+		t.Error(err)
+	}
+	err = s.DisableProcess("test")
+	if err != nil {
+		t.Error(err)
+	}
+	if s.Cmds[0].ServiceType != "disabled" {
+		t.Error("Scheduler DisableProcess does not work as expected")
+	}
+}
+
 // Test_SchedulerShutdown is used to test the scheduler shutdown
 func Test_SchedulerShutdown(t *testing.T) {
 	s := NewScheduler()
