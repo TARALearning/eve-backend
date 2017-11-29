@@ -52,7 +52,7 @@ node('linux-ubuntu-16.04-amd64') {
 		    	}
 					stage ('Run TESTS'){
 						sh("cd tests && chmod +x gen.ssl.client.crt.sh && ./gen.ssl.client.crt.sh")
-						sh("${gobin} test -v")
+						sh("${gobin} test -v -race -timeout=5m")
 						sh("${gobin} test -coverprofile=dist/coverage.out")
 						sh("cd ${curr}/${build}/${gopath}/src/evalgo.org/eve && gocov test | gocov-xml > ${curr}/dist/coverage.xml")
 					}
@@ -240,7 +240,7 @@ node('linux-ubuntu-16.04-amd64') {
 					}
 					stage ('Run TESTS'){
 						sh("cd tests && chmod +x gen.ssl.client.crt.sh && ./gen.ssl.client.crt.sh")
-						sh("${gobin} test -v")
+						sh("${gobin} test -v -race -timeout=5m")
 						sh("${gobin} test -coverprofile=dist/coverage.out")
 						sh("cd ${curr}/${build}/${gopath}/src/evalgo.org/eve && gocov test | gocov-xml > ${curr}/dist/coverage.xml")
 					}
@@ -275,7 +275,7 @@ node('linux-ubuntu-16.04-amd64') {
 					}
 					stage ('Run TESTS'){
 						sh("cd tests && chmod +x gen.ssl.client.crt.sh && ./gen.ssl.client.crt.sh")
-						sh("${gobin} test -v")
+						sh("${gobin} test -v -race -timeout=5m")
 						sh("${gobin} test -coverprofile=dist/coverage.out")
 						sh("cd ${curr}/${build}/${gopath}/src/evalgo.org/eve && gocov test | gocov-xml > ${curr}/dist/coverage.xml")
 					}
