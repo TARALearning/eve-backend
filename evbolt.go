@@ -47,7 +47,7 @@ func EVBoltBoti(b []byte) int {
 
 // EVBoltPut puts a message with given custom/string id as a evschema html string into the given db bucket
 func EVBoltPut(id, message, db, bucket string) (string, error) {
-	if DEBUG {
+	if debug {
 		log.Println("EVBoltPut message::", message, "into", db, "::", bucket)
 	}
 	cdb, err := bolt.Open(evBoltRoot+string(os.PathSeparator)+db, 0777, &bolt.Options{Timeout: 1 * time.Second})
@@ -65,7 +65,7 @@ func EVBoltPut(id, message, db, bucket string) (string, error) {
 	})
 	err = cdb.Update(func(tx *bolt.Tx) error {
 		sb := tx.Bucket([]byte(bucket))
-		if DEBUG {
+		if debug {
 			log.Println("EVBoltPut message to id::", id)
 		}
 		return sb.Put([]byte(id), []byte(message))
@@ -93,7 +93,7 @@ func EVBoltAutoPut(message, db, bucket string) (string, error) {
 		log.Println(err)
 		return "", err
 	}
-	if DEBUG {
+	if debug {
 		log.Println("EVBoltAutoPut message::", message, "into", db, "::", bucket)
 	}
 	cdb, err := bolt.Open(evBoltRoot+string(os.PathSeparator)+db, 0777, &bolt.Options{Timeout: 1 * time.Second})
@@ -116,7 +116,7 @@ func EVBoltAutoPut(message, db, bucket string) (string, error) {
 		if err != nil {
 			return err
 		}
-		if DEBUG {
+		if debug {
 			log.Println("EVBoltAutoPut message to id::", id)
 		}
 		return sb.Put(EVBoltItob(int(id)), []byte(message))
@@ -134,7 +134,7 @@ func EVBoltCustomUpdate(message, db, bucket, id string) (string, error) {
 		log.Println(err)
 		return id, err
 	}
-	if DEBUG {
+	if debug {
 		log.Println("EVBoltCustomUpdate message::", message, "into", db, "::", bucket, "with the given key::", id)
 	}
 	cdb, err := bolt.Open(evBoltRoot+string(os.PathSeparator)+db, 0777, &bolt.Options{Timeout: 1 * time.Second})
@@ -152,7 +152,7 @@ func EVBoltCustomUpdate(message, db, bucket, id string) (string, error) {
 	})
 	err = cdb.Update(func(tx *bolt.Tx) error {
 		sb := tx.Bucket([]byte(bucket))
-		if DEBUG {
+		if debug {
 			log.Println("EVBoltCustomUpdate message to id::", id)
 		}
 		return sb.Put([]byte(id), []byte(message))
@@ -170,7 +170,7 @@ func EVBoltAutoUpdate(message, db, bucket, id string) (string, error) {
 		log.Println(err)
 		return "", err
 	}
-	if DEBUG {
+	if debug {
 		log.Println("EVBoltAutoUpdate message::", message, "into", db, "::", bucket)
 	}
 	cdb, err := bolt.Open(evBoltRoot+string(os.PathSeparator)+db, 0777, &bolt.Options{Timeout: 1 * time.Second})
@@ -192,7 +192,7 @@ func EVBoltAutoUpdate(message, db, bucket, id string) (string, error) {
 	}
 	err = cdb.Update(func(tx *bolt.Tx) error {
 		sb := tx.Bucket([]byte(bucket))
-		if DEBUG {
+		if debug {
 			log.Println("EVBoltAutoUpdate message to id::", id)
 		}
 		return sb.Put(EVBoltItob(nid), []byte(message))
@@ -237,7 +237,7 @@ func EVBoltLast(db, bucket string) (string, error) {
 	if string(rkey) == "" && string(value) == "" {
 		return "", errors.New(NA)
 	}
-	if DEBUG {
+	if debug {
 		log.Println("EVBoltLast::value", string(value))
 	}
 	return string(value), nil
@@ -277,7 +277,7 @@ func EVBoltFirst(db, bucket string) (string, error) {
 	if string(rkey) == "" && string(value) == "" {
 		return "", errors.New(NA)
 	}
-	if DEBUG {
+	if debug {
 		log.Println("EVBoltFirst::value", string(value))
 	}
 	return string(value), nil
@@ -315,7 +315,7 @@ func EVBoltCustomGet(db, bucket, key string) (string, error) {
 	if result == "" {
 		return "", errors.New(NA)
 	}
-	if DEBUG {
+	if debug {
 		log.Println("EVBoltCustomGet::value", result)
 	}
 	return result, nil
@@ -358,7 +358,7 @@ func EVBoltAutoGet(db, bucket, key string) (string, error) {
 	if result == "" {
 		return "", errors.New(NA)
 	}
-	if DEBUG {
+	if debug {
 		log.Println("EVBoltAutoGet::value", result)
 	}
 	return result, nil
@@ -391,7 +391,7 @@ func EVBoltAll(db, bucket string) (map[string]string, error) {
 	if err != nil {
 		return nil, err
 	}
-	if DEBUG {
+	if debug {
 		log.Println("EVBoltAll::values", results)
 	}
 	return results, nil
@@ -464,7 +464,7 @@ func EVBoltAutoDelete(db, bucket, id string) (string, error) {
 		log.Println(err)
 		return "", err
 	}
-	if DEBUG {
+	if debug {
 		log.Println("EVBoltAutoDelete message from", db, "::", bucket)
 	}
 	cdb, err := bolt.Open(evBoltRoot+string(os.PathSeparator)+db, 0777, &bolt.Options{Timeout: 1 * time.Second})
@@ -486,7 +486,7 @@ func EVBoltAutoDelete(db, bucket, id string) (string, error) {
 	}
 	err = cdb.Update(func(tx *bolt.Tx) error {
 		sb := tx.Bucket([]byte(bucket))
-		if DEBUG {
+		if debug {
 			log.Println("EVBoltAutoDelete message with id::", id)
 		}
 		return sb.Delete(EVBoltItob(nid))
@@ -504,7 +504,7 @@ func EVBoltCustomDelete(db, bucket, id string) (string, error) {
 		log.Println(err)
 		return "", err
 	}
-	if DEBUG {
+	if debug {
 		log.Println("EVBoltCustomDelete message from", db, "::", bucket)
 	}
 	cdb, err := bolt.Open(evBoltRoot+string(os.PathSeparator)+db, 0777, &bolt.Options{Timeout: 1 * time.Second})
@@ -522,7 +522,7 @@ func EVBoltCustomDelete(db, bucket, id string) (string, error) {
 	})
 	err = cdb.Update(func(tx *bolt.Tx) error {
 		sb := tx.Bucket([]byte(bucket))
-		if DEBUG {
+		if debug {
 			log.Println("EVBoltCustomDelete message with id::", id)
 		}
 		return sb.Delete([]byte(id))

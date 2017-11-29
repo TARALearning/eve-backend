@@ -7,8 +7,8 @@ import (
 )
 
 func Test_EVBoltItob(t *testing.T) {
-	DEBUG = true
-	defer func() { DEBUG = false }()
+	debug = true
+	defer func() { debug = false }()
 	testID := 5
 	rBytes := EVBoltItob(testID)
 	if testID != EVBoltBoti(rBytes) {
@@ -24,8 +24,8 @@ func Test_EVBoltItob(t *testing.T) {
 }
 
 func Test_EVBoltPut(t *testing.T) {
-	DEBUG = true
-	defer func() { DEBUG = false }()
+	debug = true
+	defer func() { debug = false }()
 	res, err := EVBoltPut("key", "value", "test.db", "testbucket")
 	if err != nil {
 		t.Error(err)
@@ -38,8 +38,8 @@ func Test_EVBoltPut(t *testing.T) {
 }
 
 func Test_EVBoltCustomPut(t *testing.T) {
-	DEBUG = true
-	defer func() { DEBUG = false }()
+	debug = true
+	defer func() { debug = false }()
 	res, err := EVBoltCustomPut("key", "value", "test.db", "testbucket")
 	if err != nil {
 		t.Error(err)
@@ -52,8 +52,8 @@ func Test_EVBoltCustomPut(t *testing.T) {
 }
 
 func Test_EVBoltAutoPut(t *testing.T) {
-	DEBUG = true
-	defer func() { DEBUG = false }()
+	debug = true
+	defer func() { debug = false }()
 	res, err := EVBoltAutoPut("value", "testnr.db", "testbucket")
 	if err != nil {
 		t.Error(err)
@@ -66,8 +66,8 @@ func Test_EVBoltAutoPut(t *testing.T) {
 }
 
 func Test_EVBoltCustomUpdate(t *testing.T) {
-	DEBUG = true
-	defer func() { DEBUG = false }()
+	debug = true
+	defer func() { debug = false }()
 	value := "value"
 	key, err := EVBoltCustomPut("key", value, "test.db", "testbucket")
 	if err != nil {
@@ -89,8 +89,8 @@ func Test_EVBoltCustomUpdate(t *testing.T) {
 }
 
 func Test_EVBoltAutoUpdate(t *testing.T) {
-	DEBUG = true
-	defer func() { DEBUG = false }()
+	debug = true
+	defer func() { debug = false }()
 	key, err := EVBoltAutoPut("value", "test.db", "testbucket")
 	if err != nil {
 		t.Error(err)
@@ -111,8 +111,8 @@ func Test_EVBoltAutoUpdate(t *testing.T) {
 }
 
 func Test_EVBoltLast(t *testing.T) {
-	DEBUG = true
-	defer func() { DEBUG = false }()
+	debug = true
+	defer func() { debug = false }()
 	_, err := EVBoltAutoPut("value", "test.db", "testbucket")
 	if err != nil {
 		t.Error(err)
@@ -137,8 +137,8 @@ func Test_EVBoltLast(t *testing.T) {
 }
 
 func Test_EVBoltFirst(t *testing.T) {
-	DEBUG = true
-	defer func() { DEBUG = false }()
+	debug = true
+	defer func() { debug = false }()
 	_, err := EVBoltAutoPut("value", "test.db", "testbucket")
 	if err != nil {
 		t.Error(err)
@@ -164,8 +164,8 @@ func Test_EVBoltFirst(t *testing.T) {
 
 // todo fix this test
 func Test_EVBoltAllHTML(t *testing.T) {
-	DEBUG = true
-	defer func() { DEBUG = false }()
+	debug = true
+	defer func() { debug = false }()
 	_, err := EVBoltAutoPut("value", "test.db", "testbucket")
 	if err != nil {
 		t.Error(err)
@@ -193,8 +193,8 @@ func Test_EVBoltAllHTML(t *testing.T) {
 
 // todo fix thist test auto put keys need to be converted to int and then to string
 func Test_EVBoltAllJSON(t *testing.T) {
-	DEBUG = true
-	defer func() { DEBUG = false }()
+	debug = true
+	defer func() { debug = false }()
 	_, err := EVBoltAutoPut("value", "test.db", "testbucket")
 	if err != nil {
 		t.Error(err)
@@ -223,8 +223,8 @@ func Test_EVBoltAllJSON(t *testing.T) {
 // todo fix this test because it returns the key also but in the string it is not displayed
 // check the bytes format for more information
 func Test_EVBoltAllString(t *testing.T) {
-	DEBUG = true
-	defer func() { DEBUG = false }()
+	debug = true
+	defer func() { debug = false }()
 	_, err := EVBoltAutoPut("value", "test.db", "testbucket")
 	if err != nil {
 		t.Error(err)
@@ -252,8 +252,8 @@ func Test_EVBoltAllString(t *testing.T) {
 }
 
 func Test_EVBoltAutoDelete(t *testing.T) {
-	DEBUG = true
-	defer func() { DEBUG = false }()
+	debug = true
+	defer func() { debug = false }()
 	_, err := EVBoltAutoPut("value", "test.db", "testbucket")
 	if err != nil {
 		t.Error(err)
@@ -278,8 +278,8 @@ func Test_EVBoltAutoDelete(t *testing.T) {
 }
 
 func Test_EVBoltCustomDelete(t *testing.T) {
-	DEBUG = true
-	defer func() { DEBUG = false }()
+	debug = true
+	defer func() { debug = false }()
 	_, err := EVBoltCustomPut("key1", "value", "test.db", "testbucket")
 	if err != nil {
 		t.Error(err)
@@ -304,8 +304,8 @@ func Test_EVBoltCustomDelete(t *testing.T) {
 }
 
 func Test_SetEvBoltRoot(t *testing.T) {
-	DEBUG = true
-	defer func() { DEBUG = false }()
+	debug = true
+	defer func() { debug = false }()
 	old := evBoltRoot
 	defer SetEvBoltRoot(old)
 	SetEvBoltRoot("test")
