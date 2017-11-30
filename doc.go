@@ -10,7 +10,7 @@ package eve
 
 const (
 	// VERSION of the eve library and all its's services
-	VERSION = "0.0.2"
+	VERSION = "0.0.3"
 )
 
 var (

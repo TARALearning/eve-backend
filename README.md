@@ -19,7 +19,7 @@ The eve pkg contents are:
 ## RELEASES/VERSION(S)
 | Master   |     Testing      |  Development |
 |----------|:-------------:|------:|
-| 0.0.2    |     0.0.2     |    RC 0.0.3 |
+| 0.0.3    |     0.0.3     |    RC 0.0.4 |
 
 ## DOWNLOAD
  [ ![Latest Version](https://api.bintray.com/packages/evalgo/eve-backend/core/images/download.svg) ](https://bintray.com/evalgo/eve-backend/core/_latestVersion)

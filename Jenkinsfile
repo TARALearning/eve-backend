@@ -7,7 +7,7 @@ node('linux-ubuntu-16.04-amd64') {
 	def dependencies = ['github.com/boltdb/bolt', 'github.com/gorilla/mux', 'github.com/prometheus/client_golang/prometheus', 'github.com/prometheus/client_golang/prometheus/promhttp', 'github.com/dchest/uniuri', 'github.com/mitchellh/go-ps', 'github.com/axw/gocov/...', 'github.com/AlekSi/gocov-xml','github.com/kless/osutil/user/crypt/sha512_crypt']
 	def oses = ['darwin', 'linux', 'windows']
 	def archs = ['amd64']
-	def version = '0.0.2'
+	def version = '0.0.3'
 	def ext = ''
 	def dist = 'dist'
 	def curr = pwd()
@@ -159,7 +159,7 @@ node('linux-ubuntu-16.04-amd64') {
 				}
 				stage ('CleanUp EVE ARTIFACTS at BinTray'){
 						withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: 'bintray', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD']]) {
-							sh("${curr}/${dist}/linux-amd64-0.0.2_eve-bintray evalgo eve-backend core ${version} https://api.bintray.com ${USERNAME} ${PASSWORD}")
+							sh("${curr}/${dist}/linux-amd64-${version}_eve-bintray evalgo eve-backend core ${version} https://api.bintray.com ${USERNAME} ${PASSWORD}")
 						}
 				}
 				stage("master deploy to bintray :: post to slack") {
