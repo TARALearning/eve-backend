@@ -7,8 +7,6 @@ import (
 	"os"
 	"os/exec"
 	"path"
-	"runtime"
-	"strconv"
 	"sync"
 	"time"
 )
@@ -258,6 +256,9 @@ func (s *Scheduler) ServiceStop(ID int) error {
 	s.Cmds[ID].StderrQuitChannel <- true
 	s.Cmds[ID].StdoutQuitChannel <- true
 	s.CmdKillerChannel <- s.Cmds[ID].PID
+	if debug {
+		fmt.Println("wait 5 sec for the service " + s.Cmds[ID].ID + " to stop...")
+	}
 	s.Cmds[ID].mux.Unlock()
 	// fmt.Println("wait 5 sec for the process to stop")
 	time.Sleep(time.Second * 5)
@@ -321,157 +322,12 @@ func (s *Scheduler) ServiceStart(ID int, syncGroup *sync.WaitGroup) error {
 			}
 		}
 	}(s.Cmds[ID], syncGroup)
-	return nil
-}
-
-// AppendCronCmd will append a new cron command to the Scheduler
-func (s *Scheduler) AppendCronCmd(cmd string, args []string, minutes, hours, monthday, month, weekday string) error {
-	eCmd := exec.Command(cmd, args...)
-	evCmd := NewCronCmd()
-	evCmd.Cmd = eCmd
-	evCmd.LastMinutes = ""
-	evCmd.Minutes = minutes
-	evCmd.LastHours = ""
-	evCmd.Hours = hours
-	evCmd.LastMonthDays = ""
-	evCmd.MonthDays = monthday
-	evCmd.LastMonths = ""
-	evCmd.Months = month
-	evCmd.LastWeekDays = ""
-	evCmd.WeekDays = weekday
-	s.CronCmds = append(s.CronCmds, evCmd)
-	return nil
-}
-
-// RunCron will start/check all cron jobs
-func (s *Scheduler) RunCron() error {
-	goroutines := runtime.NumGoroutine()
-	for _, cronjob := range s.CronCmds {
-		now := time.Now()
-
-		runMonth := false
-		runDay := false
-		runHour := false
-		runMinute := false
-
-		// month 1-12
-		if strconv.Itoa(int(now.Month())) == cronjob.Months || cronjob.Months == "*" {
-			runMonth = true
-		}
-
-		// weekday 0-6 ==> 1-7
-		weekday := int(now.Weekday()) + 1
-		if strconv.Itoa(weekday) == cronjob.WeekDays || cronjob.WeekDays == "*" {
-			runDay = true
-		}
-
-		// monthday 1-31
-		if strconv.Itoa(now.Day()) == cronjob.MonthDays || cronjob.MonthDays == "*" {
-			runDay = true
-		}
-
-		// hours 0-23
-		if strconv.Itoa(now.Hour()) == cronjob.Hours || cronjob.Hours == "*" {
-			runHour = true
-		}
-
-		// minutes 0-59
-		if strconv.Itoa(now.Minute()) == cronjob.Minutes || cronjob.Minutes == "*" {
-			runMinute = true
-		}
-
-		if runMonth && runDay && runHour && runMinute {
-			cronjob.Running = true
-			// start stderror scanner routine
-			wg.Add(1)
-			go func(cronjob *CronCmd, wg *sync.WaitGroup) {
-				defer wg.Done()
-				for {
-					// if cronjob.Stderr.Scan() {
-					// 	if debug {
-					// 		fmt.Println(cronjob.Stderr.Text())
-					// 	}
-					// }
-					cronjob.mux.Lock()
-					if cronjob.Finished {
-						cronjob.mux.Unlock()
-						return
-					}
-					cronjob.mux.Unlock()
-				}
-			}(cronjob, &wg)
-			// start stdout scanner routine
-			wg.Add(1)
-			go func(cronjob *CronCmd, wg *sync.WaitGroup) {
-				defer wg.Done()
-				for {
-					// if cronjob.Stdout.Scan() {
-					// 	if debug {
-					// 		fmt.Println(cronjob.Stdout.Text())
-					// 	}
-					// }
-					cronjob.mux.Lock()
-					if cronjob.Finished {
-						cronjob.mux.Unlock()
-						return
-					}
-					cronjob.mux.Unlock()
-				}
-			}(cronjob, &wg)
-			// start cronjob routine
-			wg.Add(1)
-			go func(cronjob *CronCmd, wg *sync.WaitGroup) {
-				defer wg.Done()
-				if debug {
-					fmt.Println("running: " + cronjob.Cmd.Path)
-				}
-				cronjob.mux.Lock()
-				err := cronjob.Cmd.Run()
-				cronjob.mux.Unlock()
-				if err != nil {
-					log.Println(err.Error())
-				}
-				cronjob.mux.Lock()
-				cronjob.Finished = true
-				cronjob.mux.Unlock()
-				return
-			}(cronjob, &wg)
-		}
-
+	if debug {
+		s.Cmds[ID].mux.Lock()
+		fmt.Println("waiting 3 sec for the service " + s.Cmds[ID].ID + " to start...")
+		s.Cmds[ID].mux.Unlock()
 	}
-	// todo we need to refactor this one
-	wg.Add(1)
-	go func(cronjobs []*CronCmd, wg *sync.WaitGroup, goroutines int) {
-		defer wg.Done()
-		for {
-			finished := make([]bool, 0)
-			for _, cronjob := range cronjobs {
-				cronjob.mux.Lock()
-				if cronjob.Running {
-					if cronjob.Finished {
-						finished = append(finished, true)
-					}
-				}
-				cronjob.mux.Unlock()
-			}
-			closemsgs := true
-			for _, closemsg := range finished {
-				if !closemsg {
-					closemsgs = closemsg
-				}
-			}
-			if closemsgs {
-				for {
-					// wait for all routines to finish
-					if (goroutines + 1) == runtime.NumGoroutine() {
-						// exit goroutine
-						return
-					}
-				}
-			}
-		}
-		// unreachable code hopefully
-		// return
-	}(s.CronCmds, &wg, goroutines)
+	// wait 3 sec for the service to initialize
+	time.Sleep(time.Second * 3)
 	return nil
 }

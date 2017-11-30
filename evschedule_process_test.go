@@ -6,7 +6,6 @@ import (
 	"os/exec"
 	"runtime"
 	"testing"
-	"time"
 )
 
 func Test_NewSCmd(t *testing.T) {
@@ -59,18 +58,12 @@ func Test_SchedulerServicesRun(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	// wait 10 seconds for the commands to start
-	time.Sleep(time.Second * 10)
 	// stop the command and all the routines running for the command
 	err = s.Shutdown()
 	if err != nil {
 		t.Error(err)
 	}
-	// wait 5 sec for the commands to stop
-	time.Sleep(time.Second * 5)
 	s.CmdKillerQuitChannel <- true
-	// wait 3 seconds for the killer routine to finish
-	time.Sleep(time.Second * 3)
 	// wait for all routines to finish
 	wg.Wait()
 	// close all channels
@@ -130,40 +123,30 @@ func Test_SchedulerServicesRestart(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	// wait 10 seconds for the commands to start
-	time.Sleep(time.Second * 10)
-	fmt.Println("stop service 0...")
+	fmt.Println("stop service " + srv1 + "...")
 	// restart the srv1 executable
 	err = s.ServiceStop(0)
 	if err != nil {
 		t.Error(err)
 	}
-	// wait 10 sec for the command to stop
-	time.Sleep(time.Second * 6)
-	fmt.Println("reset service 0...")
-	// reset for restart the srv1 executable
+	fmt.Println("replace service " + srv1 + "...")
+	// replace for restart the srv1 executable
 	s.ReplaceServiceCmd("./tests/tmp/"+srv1, []string{"1m"})
 	s.Cmds[0].mux.Lock()
 	s.Cmds[0].Enable()
 	s.Cmds[0].mux.Unlock()
-	fmt.Println("start service 0...")
+	fmt.Println("start service " + srv1 + "...")
 	err = s.ServiceStart(0, &wg)
 	if err != nil {
 		t.Error(err)
 	}
-	// wait 10 sec for the command to start again
-	time.Sleep(time.Second * 6)
 	// stop the command and all the routines running for the command
 	fmt.Println("shutdown all services...")
 	err = s.Shutdown()
 	if err != nil {
 		t.Error(err)
 	}
-	// wait 5 sec for the commands to stop
-	time.Sleep(time.Second * 6)
 	s.CmdKillerQuitChannel <- true
-	// wait 3 seconds for the killer routine to finish
-	time.Sleep(time.Second * 3)
 	// wait for all routines to finish
 	wg.Wait()
 	// close all channels
@@ -173,28 +156,5 @@ func Test_SchedulerServicesRestart(t *testing.T) {
 	if startRoutines != current {
 		t.Log(current)
 		t.Error("SchedulerServicesRestart does not work as expected")
-	}
-}
-
-func Test_SchedulerCronJobs(t *testing.T) {
-	startRoutines := runtime.NumGoroutine()
-	s := NewScheduler()
-	err := s.AppendCronCmd("echo", []string{"test"}, "*", "*", "*", "*", "*")
-	if err != nil {
-		t.Error(err)
-	}
-	err = s.AppendCronCmd("echo", []string{"test 2"}, "*", "*", "*", "*", "*")
-	if err != nil {
-		t.Error(err)
-	}
-	err = s.RunCron()
-	if err != nil {
-		t.Error(err)
-	}
-	wg.Wait()
-	current := runtime.NumGoroutine()
-	if startRoutines != current {
-		t.Log(current)
-		t.Error("SchedulerCronJobs does not work as expected")
 	}
 }
