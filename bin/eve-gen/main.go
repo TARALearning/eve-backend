@@ -80,7 +80,7 @@ func init() {
 func main() {
 	flags.Parse(os.Args[2:])
 	if debug {
-		eve.DEBUG = true
+		eve.SetDebug(true)
 	}
 
 	switch command {
