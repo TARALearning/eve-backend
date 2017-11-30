@@ -1,7 +1,7 @@
 package eve
 
 import (
-	"bufio"
+	"fmt"
 	"os"
 	"os/exec"
 	"runtime"
@@ -53,16 +53,6 @@ func Test_SchedulerServicesRun(t *testing.T) {
 	sleep.Enabled = false
 	sleep.ID = "sleep"
 	sleep.Cmd = exec.Command("sleep", "60")
-	cmdStdoutReader, err := sleep.Cmd.StdoutPipe()
-	if err != nil {
-		t.Error(err)
-	}
-	sleep.Stdout = bufio.NewScanner(cmdStdoutReader)
-	cmdStderrReader, err := sleep.Cmd.StderrPipe()
-	if err != nil {
-		t.Error(err)
-	}
-	sleep.Stderr = bufio.NewScanner(cmdStderrReader)
 	s.AppendService(sleep)
 	s.AppendServiceCmd("./tests/tmp/eve-test.exe", []string{"1m"})
 	err = s.ServicesRun(&wg)
@@ -94,7 +84,7 @@ func Test_SchedulerServicesRun(t *testing.T) {
 }
 
 func Test_SchedulerServicesRestart(t *testing.T) {
-	SetDebug(true)
+	// SetDebug(true)
 	startRoutines := runtime.NumGoroutine()
 	srv1 := "evtest.exe"
 	srv2 := "evtest-2.exe"
@@ -115,38 +105,43 @@ func Test_SchedulerServicesRestart(t *testing.T) {
 	}
 	t.Log(out)
 	s := NewScheduler()
-	s.AppendServiceCmd("./tests/tmp/"+srv1, []string{"1m"})
-	s.AppendServiceCmd("./tests/tmp/"+srv2, []string{"1m"})
+	s.AppendServiceCmd("./tests/tmp/"+srv1, []string{"2m"})
+	s.AppendServiceCmd("./tests/tmp/"+srv2, []string{"2m"})
 	err = s.ServicesRun(&wg)
 	if err != nil {
 		t.Error(err)
 	}
 	// wait 10 seconds for the commands to start
 	time.Sleep(time.Second * 10)
+	fmt.Println("stop service 0...")
 	// restart the srv1 executable
 	err = s.ServiceStop(0)
 	if err != nil {
 		t.Error(err)
 	}
-	// wait 5 sec for the command to stops
-	// time.Sleep(time.Second * 15)
-	s.Cmds[0].ResetCmd("./tests/tmp/"+srv1, []string{"1m"})
+	// wait 10 sec for the command to stop
+	time.Sleep(time.Second * 6)
+	fmt.Println("reset service 0...")
+	// reset for restart the srv1 executable
+	s.ReplaceServiceCmd("./tests/tmp/"+srv1, []string{"1m"})
+	s.Cmds[0].mux.Lock()
 	s.Cmds[0].Enable()
-	//  give the command 10 sec to reinitialize
-	// time.Sleep(time.Second * 10)
+	s.Cmds[0].mux.Unlock()
+	fmt.Println("start service 0...")
 	err = s.ServiceStart(0, &wg)
 	if err != nil {
 		t.Error(err)
 	}
 	// wait 10 sec for the command to start again
-	time.Sleep(time.Second * 10)
+	time.Sleep(time.Second * 6)
 	// stop the command and all the routines running for the command
+	fmt.Println("shutdown all services...")
 	err = s.Shutdown()
 	if err != nil {
 		t.Error(err)
 	}
 	// wait 5 sec for the commands to stop
-	time.Sleep(time.Second * 5)
+	time.Sleep(time.Second * 6)
 	s.CmdKillerQuitChannel <- true
 	// wait 3 seconds for the killer routine to finish
 	time.Sleep(time.Second * 3)

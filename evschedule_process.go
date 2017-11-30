@@ -1,7 +1,7 @@
 package eve
 
 import (
-	"bufio"
+	"errors"
 	"fmt"
 	"log"
 	"os"
@@ -16,9 +16,6 @@ import (
 // wg is that syncing waiting group variable for the goroutines
 var wg sync.WaitGroup
 
-// mutex is the variable which is needed for mutexing the running commands map
-var mutex = &sync.Mutex{}
-
 // SCmd is the struct which is used to store the executed command and the
 // stdin stderr output related to the given command
 // please be careful with the Id definition because it should be the exact name of
@@ -29,12 +26,11 @@ type SCmd struct {
 	PID               int
 	ID                string
 	Cmd               *exec.Cmd
-	Stdout            *bufio.Scanner
-	Stderr            *bufio.Scanner
 	CmdQuitChannel    chan bool
 	StdoutQuitChannel chan bool
 	StderrQuitChannel chan bool
 	Enabled           bool
+	mux               sync.Mutex
 }
 
 // NewSCmd will create a new SchedulerCommand object
@@ -44,8 +40,6 @@ func NewSCmd() *SCmd {
 	c.PID = 0
 	c.ID = "N/A"
 	c.Cmd = nil
-	c.Stdout = nil
-	c.Stderr = nil
 	c.CmdQuitChannel = make(chan bool, 100)
 	c.StdoutQuitChannel = make(chan bool, 100)
 	c.StderrQuitChannel = make(chan bool, 100)
@@ -68,6 +62,7 @@ type CronCmd struct {
 	Months        string
 	LastWeekDays  string
 	WeekDays      string
+	mux           sync.Mutex
 }
 
 // NewCronCmd creates a new cron command object
@@ -76,8 +71,6 @@ func NewCronCmd() *CronCmd {
 	cc.Finished = false
 	cc.Running = false
 	cc.Cmd = nil
-	cc.Stdout = nil
-	cc.Stderr = nil
 	cc.LastMinutes = ""
 	cc.Minutes = "*"
 	cc.LastHours = ""
@@ -93,39 +86,24 @@ func NewCronCmd() *CronCmd {
 
 // Enable the service to be run
 func (srv *SCmd) Enable() {
-	mutex.Lock()
 	srv.Running = false
 	srv.Enabled = true
-	mutex.Unlock()
 }
 
 // Disable the service to be stopped or skiped
 func (srv *SCmd) Disable() {
-	mutex.Lock()
 	srv.Running = true
 	srv.Enabled = false
-	mutex.Unlock()
 }
 
 // ResetCmd the service to be stopped or skiped
 func (srv *SCmd) ResetCmd(cmdPath string, args []string) error {
-	fmt.Println("reset", cmdPath, args)
-	mutex.Lock()
 	srv.Enabled = false
 	srv.Running = false
 	srv.ID = path.Base(cmdPath)
 	srv.Cmd = exec.Command(cmdPath, args...)
-	cmdStdoutReader, err := srv.Cmd.StdoutPipe()
-	if err != nil {
-		return err
-	}
-	srv.Stdout = bufio.NewScanner(cmdStdoutReader)
-	cmdStderrReader, err := srv.Cmd.StderrPipe()
-	if err != nil {
-		return err
-	}
-	srv.Stderr = bufio.NewScanner(cmdStderrReader)
-	mutex.Unlock()
+	srv.Cmd.Stderr = os.Stderr
+	srv.Cmd.Stdout = os.Stdout
 	return nil
 }
 
@@ -138,6 +116,7 @@ type Scheduler struct {
 	CmdKillerChannel      chan int
 	MonitoringQuitChannel chan bool
 	MainQuitChannel       chan bool
+	mux                   sync.Mutex
 }
 
 // NewScheduler will create a new Scheduler object
@@ -155,8 +134,10 @@ func NewScheduler() *Scheduler {
 
 // AppendService appends a service to the scheduler
 func (s *Scheduler) AppendService(cmd *SCmd) error {
+	s.mux.Lock()
 	ID := len(s.Cmds)
 	s.Cmds[ID] = cmd
+	s.mux.Unlock()
 	return nil
 }
 
@@ -166,20 +147,32 @@ func (s *Scheduler) AppendServiceCmd(cmdPath string, cmdArgs []string) error {
 	sCmd.Enabled = true
 	sCmd.ID = path.Base(cmdPath)
 	sCmd.Cmd = exec.Command(cmdPath, cmdArgs...)
-	cmdStdoutReader, err := sCmd.Cmd.StdoutPipe()
-	if err != nil {
-		return err
-	}
-	sCmd.Stdout = bufio.NewScanner(cmdStdoutReader)
-	cmdStderrReader, err := sCmd.Cmd.StderrPipe()
-	if err != nil {
-		return err
-	}
-	sCmd.Stderr = bufio.NewScanner(cmdStderrReader)
+	sCmd.Cmd.Stderr = os.Stderr
+	sCmd.Cmd.Stdout = os.Stdout
 	ID := len(s.Cmds)
+	s.mux.Lock()
 	s.Cmds[ID] = sCmd
-	// fmt.Println(sCmd.Cmd)
+	s.mux.Unlock()
 	return nil
+}
+
+// ReplaceServiceCmd replaces a given service command
+func (s *Scheduler) ReplaceServiceCmd(cmdPath string, args []string) error {
+	sCmd := NewSCmd()
+	sCmd.Enabled = true
+	sCmd.ID = path.Base(cmdPath)
+	sCmd.Cmd = exec.Command(cmdPath, args...)
+	sCmd.Cmd.Stderr = os.Stderr
+	sCmd.Cmd.Stdout = os.Stdout
+	for key, cmd := range s.Cmds {
+		if cmd.ID == path.Base(cmdPath) {
+			s.mux.Lock()
+			s.Cmds[key] = sCmd
+			s.mux.Unlock()
+			return nil
+		}
+	}
+	return errors.New("could not find the given command")
 }
 
 // ServicesRun is starting all the services which have the flag srv.Enabled set to true
@@ -191,7 +184,9 @@ func (s *Scheduler) ServicesRun(syncGroup *sync.WaitGroup) error {
 		for {
 			select {
 			case srvID := <-s.CmdKillerChannel:
-				// log.Println("---> kill", srvID)
+				if debug {
+					log.Println("---> kill", srvID)
+				}
 				proc, err := os.FindProcess(srvID)
 				if err != nil {
 					fmt.Println("process killer find error", err)
@@ -205,10 +200,14 @@ func (s *Scheduler) ServicesRun(syncGroup *sync.WaitGroup) error {
 					fmt.Println("process killer kill error", err)
 				}
 			case <-s.CmdKillerQuitChannel:
-				// fmt.Println("quit process killer")
+				if debug {
+					fmt.Println("quit process killer")
+				}
 				return
 			default:
-				// fmt.Println("process killer default state reached waiting 1 seconds")
+				if debug {
+					fmt.Println("process killer default state reached waiting 1 seconds")
+				}
 				time.Sleep(time.Second * 1)
 			}
 		}
@@ -247,22 +246,19 @@ func (s *Scheduler) ServicesStopChannels() {
 
 // ServiceStop stops a running services
 func (s *Scheduler) ServiceStop(ID int) error {
-	mutex.Lock()
-	srv := s.Cmds[ID]
-	if !srv.Enabled {
-		mutex.Unlock()
+	s.Cmds[ID].mux.Lock()
+	if !s.Cmds[ID].Enabled {
+		s.Cmds[ID].mux.Unlock()
 		return nil
 	}
-	fmt.Println("stopping service", srv.ID, "with PID", srv.PID)
-	srv.Running = false
-	srv.Enabled = false
-	mutex.Unlock()
-	srv.CmdQuitChannel <- true
-	srv.StderrQuitChannel <- true
-	srv.StdoutQuitChannel <- true
-	mutex.Lock()
-	s.CmdKillerChannel <- srv.PID
-	mutex.Unlock()
+	fmt.Println("stopping service", s.Cmds[ID].ID, "with PID", s.Cmds[ID].PID)
+	s.Cmds[ID].Running = false
+	s.Cmds[ID].Enabled = false
+	s.Cmds[ID].CmdQuitChannel <- true
+	s.Cmds[ID].StderrQuitChannel <- true
+	s.Cmds[ID].StdoutQuitChannel <- true
+	s.CmdKillerChannel <- s.Cmds[ID].PID
+	s.Cmds[ID].mux.Unlock()
 	// fmt.Println("wait 5 sec for the process to stop")
 	time.Sleep(time.Second * 5)
 	return nil
@@ -270,118 +266,61 @@ func (s *Scheduler) ServiceStop(ID int) error {
 
 // ServiceStart starts a running services
 func (s *Scheduler) ServiceStart(ID int, syncGroup *sync.WaitGroup) error {
-	mutex.Lock()
-	srv := s.Cmds[ID]
-	fmt.Println("running service", srv.ID, "...")
-	if !srv.Enabled || srv.Running {
-		fmt.Println("skip disabled or already running service", srv.ID)
-		mutex.Unlock()
+	s.Cmds[ID].mux.Lock()
+	if !s.Cmds[ID].Enabled || s.Cmds[ID].Running {
+		fmt.Println("skip disabled or already running service", s.Cmds[ID].ID)
+		s.Cmds[ID].mux.Unlock()
 		return nil
 	}
-	mutex.Unlock()
-	// start the error scanner
+	fmt.Println("running service", s.Cmds[ID].ID, "...")
+	s.Cmds[ID].mux.Unlock()
 	syncGroup.Add(1)
 	go func(srv *SCmd, wg *sync.WaitGroup) {
-		// fmt.Println("start stderr scanner for", srv.ID)
 		defer syncGroup.Done()
 		for {
-			select {
-			case <-srv.StderrQuitChannel:
-				mutex.Lock()
-				fmt.Println("quit stderr for", srv.ID)
-				mutex.Unlock()
-				return
-			default:
-				if srv.Stderr.Scan() {
-					mutex.Lock()
-					fmt.Println(srv.ID, ":: stderr", srv.Stderr.Text())
-					mutex.Unlock()
-				}
-				mutex.Lock()
-				err := srv.Stdout.Err()
-				mutex.Unlock()
-				if err != nil {
-					fmt.Println("stderr ERROR :: ", err)
-				}
+			if debug {
+				srv.mux.Lock()
+				fmt.Println("wait 1 seconds before (re)start the service", srv.ID)
+				srv.mux.Unlock()
 			}
-		}
-	}(srv, syncGroup)
-	// start the output scanner
-	syncGroup.Add(1)
-	go func(srv *SCmd, wg *sync.WaitGroup) {
-		// fmt.Println("start stdout scanner for", srv.ID)
-		defer syncGroup.Done()
-		for {
-			select {
-			case <-srv.StdoutQuitChannel:
-				mutex.Lock()
-				fmt.Println("quit stdout for", srv.ID)
-				mutex.Unlock()
-				return
-			default:
-				if srv.Stdout.Scan() {
-					mutex.Lock()
-					fmt.Println(srv.ID, ":: stdout", srv.Stdout.Text())
-					mutex.Unlock()
-				}
-				mutex.Lock()
-				err := srv.Stdout.Err()
-				mutex.Unlock()
-				if err != nil {
-					fmt.Println("stdout :: ERROR ", err)
-				}
-			}
-		}
-	}(srv, syncGroup)
-	// start the process
-	syncGroup.Add(1)
-	go func(srv *SCmd, wg *sync.WaitGroup) {
-		defer syncGroup.Done()
-		for {
-			// fmt.Println("wait 1 seconds before (re)start the service", srv.ID)
 			time.Sleep(time.Second * 1)
 			select {
 			case <-srv.CmdQuitChannel:
-				mutex.Lock()
-				fmt.Println("quit cmd", srv.ID)
-				mutex.Unlock()
+				if debug {
+					srv.mux.Lock()
+					fmt.Println("quit cmd", srv.ID)
+					srv.mux.Unlock()
+				}
 				return
 			default:
-				mutex.Lock()
+				srv.mux.Lock()
 				// if the services was disabled do not try to rerun
 				if !srv.Enabled {
-					fmt.Println("the service", srv.ID, "was disabled return from cmd routine")
+					if debug {
+						fmt.Println("the service", srv.ID, "was disabled return from cmd routine")
+					}
+					srv.mux.Unlock()
 					return
 				}
 				err := srv.Cmd.Start()
 				if err != nil {
-					// seems like the process is already running so do nothing
-					if err.Error() == "exec: already started" {
-						mutex.Unlock()
-						continue
-					}
-					fmt.Println("cmd", srv.ID, "could not be started because of an error", err)
-				} else {
-					srv.PID = srv.Cmd.Process.Pid
+					fmt.Println(err)
 				}
-				mutex.Unlock()
+				srv.PID = srv.Cmd.Process.Pid
+				srv.mux.Unlock()
+				// check if mux lock is required here
 				err = srv.Cmd.Wait()
 				if err != nil {
-					// seems like somebody, probably the killer killed the process
 					if err.Error() == "signal: killed" {
-						continue
+						// do nothing this was probably done by the killer or the user
+					} else {
+						// this unknown error should be displayed
+						fmt.Println(err)
 					}
-					mutex.Lock()
-					fmt.Println("cmd", srv.ID, "Wait created an error", err)
-					mutex.Unlock()
-				} else {
-					mutex.Lock()
-					fmt.Println("cmd", srv.ID, "stopped by itself", err)
-					mutex.Unlock()
 				}
 			}
 		}
-	}(srv, syncGroup)
+	}(s.Cmds[ID], syncGroup)
 	return nil
 }
 
@@ -390,16 +329,6 @@ func (s *Scheduler) AppendCronCmd(cmd string, args []string, minutes, hours, mon
 	eCmd := exec.Command(cmd, args...)
 	evCmd := NewCronCmd()
 	evCmd.Cmd = eCmd
-	cmdStdoutReader, err := eCmd.StdoutPipe()
-	if err != nil {
-		return err
-	}
-	evCmd.Stdout = bufio.NewScanner(cmdStdoutReader)
-	cmdStderrReader, err := eCmd.StderrPipe()
-	if err != nil {
-		return err
-	}
-	evCmd.Stderr = bufio.NewScanner(cmdStderrReader)
 	evCmd.LastMinutes = ""
 	evCmd.Minutes = minutes
 	evCmd.LastHours = ""
@@ -458,17 +387,17 @@ func (s *Scheduler) RunCron() error {
 			go func(cronjob *CronCmd, wg *sync.WaitGroup) {
 				defer wg.Done()
 				for {
-					if cronjob.Stderr.Scan() {
-						if debug {
-							fmt.Println(cronjob.Stderr.Text())
-						}
-					}
-					mutex.Lock()
+					// if cronjob.Stderr.Scan() {
+					// 	if debug {
+					// 		fmt.Println(cronjob.Stderr.Text())
+					// 	}
+					// }
+					cronjob.mux.Lock()
 					if cronjob.Finished {
-						mutex.Unlock()
+						cronjob.mux.Unlock()
 						return
 					}
-					mutex.Unlock()
+					cronjob.mux.Unlock()
 				}
 			}(cronjob, &wg)
 			// start stdout scanner routine
@@ -476,17 +405,17 @@ func (s *Scheduler) RunCron() error {
 			go func(cronjob *CronCmd, wg *sync.WaitGroup) {
 				defer wg.Done()
 				for {
-					if cronjob.Stdout.Scan() {
-						if debug {
-							fmt.Println(cronjob.Stdout.Text())
-						}
-					}
-					mutex.Lock()
+					// if cronjob.Stdout.Scan() {
+					// 	if debug {
+					// 		fmt.Println(cronjob.Stdout.Text())
+					// 	}
+					// }
+					cronjob.mux.Lock()
 					if cronjob.Finished {
-						mutex.Unlock()
+						cronjob.mux.Unlock()
 						return
 					}
-					mutex.Unlock()
+					cronjob.mux.Unlock()
 				}
 			}(cronjob, &wg)
 			// start cronjob routine
@@ -496,15 +425,15 @@ func (s *Scheduler) RunCron() error {
 				if debug {
 					fmt.Println("running: " + cronjob.Cmd.Path)
 				}
-				mutex.Lock()
+				cronjob.mux.Lock()
 				err := cronjob.Cmd.Run()
-				mutex.Unlock()
+				cronjob.mux.Unlock()
 				if err != nil {
 					log.Println(err.Error())
 				}
-				mutex.Lock()
+				cronjob.mux.Lock()
 				cronjob.Finished = true
-				mutex.Unlock()
+				cronjob.mux.Unlock()
 				return
 			}(cronjob, &wg)
 		}
@@ -517,13 +446,13 @@ func (s *Scheduler) RunCron() error {
 		for {
 			finished := make([]bool, 0)
 			for _, cronjob := range cronjobs {
-				mutex.Lock()
+				cronjob.mux.Lock()
 				if cronjob.Running {
 					if cronjob.Finished {
 						finished = append(finished, true)
 					}
 				}
-				mutex.Unlock()
+				cronjob.mux.Unlock()
 			}
 			closemsgs := true
 			for _, closemsg := range finished {
