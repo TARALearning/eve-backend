@@ -20,6 +20,8 @@ var wg sync.WaitGroup
 // the given command because it is used to check for the command if it is already running
 // if there is another command with the same name it will kill it during bootstrap
 type SCmd struct {
+	Path              string
+	Args              []string
 	Running           bool
 	PID               int
 	ID                string
@@ -34,6 +36,8 @@ type SCmd struct {
 // NewSCmd will create a new SchedulerCommand object
 func NewSCmd() *SCmd {
 	c := new(SCmd)
+	c.Path = ""
+	c.Args = make([]string, 0)
 	c.Running = false
 	c.PID = 0
 	c.ID = "N/A"
@@ -101,6 +105,8 @@ func (srv *SCmd) Disable() {
 
 // ResetCmd the service to be stopped or skiped
 func (srv *SCmd) ResetCmd(cmdPath string, args []string) error {
+	srv.Path = cmdPath
+	srv.Args = args
 	srv.Enabled = false
 	srv.Running = false
 	srv.ID = path.Base(cmdPath)
@@ -147,6 +153,8 @@ func (s *Scheduler) AppendService(cmd *SCmd) error {
 // AppendServiceCmd creates a service object from the given command arguments
 func (s *Scheduler) AppendServiceCmd(cmdPath string, cmdArgs []string) error {
 	sCmd := NewSCmd()
+	sCmd.Args = cmdArgs
+	sCmd.Path = cmdPath
 	sCmd.Enabled = true
 	sCmd.ID = path.Base(cmdPath)
 	sCmd.Cmd = exec.Command(cmdPath, cmdArgs...)
@@ -162,6 +170,8 @@ func (s *Scheduler) AppendServiceCmd(cmdPath string, cmdArgs []string) error {
 // ReplaceServiceCmd replaces a given service command
 func (s *Scheduler) ReplaceServiceCmd(cmdPath string, args []string) error {
 	sCmd := NewSCmd()
+	sCmd.Args = args
+	sCmd.Path = cmdPath
 	sCmd.Enabled = true
 	sCmd.ID = path.Base(cmdPath)
 	sCmd.Cmd = exec.Command(cmdPath, args...)
@@ -338,6 +348,14 @@ func (s *Scheduler) ServiceStart(ID int, syncGroup *sync.WaitGroup) error {
 				}
 				err := srv.Cmd.Start()
 				if err != nil {
+					// check if the command exited from it self
+					// in this case just restart the command
+					if err.Error() == "exec: already started" {
+						srv.Cmd = exec.Command(srv.Path, srv.Args...)
+						srv.Cmd.Stderr = os.Stderr
+						srv.Cmd.Stdout = os.Stdout
+						err = srv.Cmd.Start()
+					}
 					fmt.Println(err)
 				}
 				srv.PID = srv.Cmd.Process.Pid

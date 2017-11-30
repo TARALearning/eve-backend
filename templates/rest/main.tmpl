@@ -69,10 +69,12 @@ func main(){
 		fmt.Println("running http service at", address)
 		fmt.Println("root assets are served from webroot", webroot)
 		fmt.Println("service specific assets are served from evwebroot", evwebroot)
+		log.Fatal(http.ListenAndServe(address, nil))
 	case "https":
 		fmt.Println("running https service at", address, "with cert", crt, "and key", key)
 		fmt.Println("root assets are served from webroot", webroot)
 		fmt.Println("service specific assets are served from evwebroot", evwebroot)
+		log.Fatal(http.ListenAndServeTLS(address, crt, key, nil))
 	case "version":
 		fmt.Println("version " + VERSION)
 		os.Exit(0)

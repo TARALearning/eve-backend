@@ -3,12 +3,27 @@ type Scheduler struct {
     EVSched *eve.Scheduler
 }
 
+// RESTGetCommand
 func (s *Scheduler) RESTGetCommand(w http.ResponseWriter, r *http.Request) error {
+	w.WriteHeader(200)
+	w.Write([]byte("RESTGetCommand"))
 	return nil
 }
 
+// RESTAppendCommand
 func (s *Scheduler) RESTAppendCommand(w http.ResponseWriter, r *http.Request) error {
-		return nil
+	{{if .DEBUG}}
+		fmt.Println(r.FormValue("Cmd"))
+		fmt.Println(r.FormValue("Args"))
+	{{end}}
+	err := s.EVSched.AppendServiceCmd(r.FormValue("Cmd"), strings.Split(r.FormValue("Args"), ","))
+	if err != nil{
+		w.WriteHeader(500)
+		w.Write([]byte(err.Error()))
+	}
+	w.WriteHeader(200)
+	w.Write([]byte("OK"))
+	return nil
 }
 
 // RESTUpdateCommand will update a running command in the Scheduler Running map
@@ -30,8 +45,11 @@ func (s *Scheduler) RESTUpdateCommand(w http.ResponseWriter, r *http.Request) er
 	return errors.New("No Mode was choosen please use one the following modes: Replace.Process|Kill.Process|Kill.Processes|Start.Process|Start.Processes|Shutdown")
 }
 
+// RESTDeleteCommand
 func (s *Scheduler) RESTDeleteCommand(w http.ResponseWriter, r *http.Request) error {
-		return nil
+	w.WriteHeader(200)
+	w.Write([]byte("RESTDeleteCommand"))
+	return nil
 }
 
 // RESTServicesStop 
