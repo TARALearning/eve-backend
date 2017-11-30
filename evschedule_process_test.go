@@ -83,6 +83,25 @@ func Test_SchedulerServicesRun(t *testing.T) {
 	}
 }
 
+func Test_EnableDisableCmd(t *testing.T) {
+	cmd := NewSCmd()
+	cmd.Enable()
+	cmd.Disable()
+	if cmd.Enabled {
+		t.Error("Disable does not work as expected")
+	}
+}
+
+func Test_ResetCmd(t *testing.T) {
+	cmd := NewSCmd()
+	cmd.Enable()
+	cmd.Running = true
+	cmd.ResetCmd("test", []string{})
+	if cmd.Enabled && cmd.Running {
+		t.Error("ResetCmd does not work as expected")
+	}
+}
+
 func Test_SchedulerServicesRestart(t *testing.T) {
 	// SetDebug(true)
 	startRoutines := runtime.NumGoroutine()
