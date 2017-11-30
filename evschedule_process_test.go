@@ -123,20 +123,7 @@ func Test_SchedulerServicesRestart(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	fmt.Println("stop service " + srv1 + "...")
-	// restart the srv1 executable
-	err = s.ServiceStop(0)
-	if err != nil {
-		t.Error(err)
-	}
-	fmt.Println("replace service " + srv1 + "...")
-	// replace for restart the srv1 executable
-	s.ReplaceServiceCmd("./tests/tmp/"+srv1, []string{"1m"})
-	s.Cmds[0].mux.Lock()
-	s.Cmds[0].Enable()
-	s.Cmds[0].mux.Unlock()
-	fmt.Println("start service " + srv1 + "...")
-	err = s.ServiceStart(0, &wg)
+	err = s.ServiceRestart(0, "./tests/tmp/"+srv1, []string{"1m"})
 	if err != nil {
 		t.Error(err)
 	}
@@ -156,5 +143,44 @@ func Test_SchedulerServicesRestart(t *testing.T) {
 	if startRoutines != current {
 		t.Log(current)
 		t.Error("SchedulerServicesRestart does not work as expected")
+	}
+}
+
+func Test_WaitGroup(t *testing.T) {
+	s := NewScheduler()
+	if s.WaitGroup() == nil {
+		t.Error("WaitGroup does not work as expected")
+	}
+}
+
+func Test_ServicesStop(t *testing.T) {
+	srv1 := "evtest.exe"
+	srv2 := "evtest-2.exe"
+	defer os.Remove("tests/tmp/" + srv1)
+	defer os.Remove("tests/tmp/" + srv2)
+	gobin := "go"
+	if os.Getenv("GOROOT") != "" {
+		gobin = os.Getenv("GOROOT") + string(os.PathSeparator) + "bin" + string(os.PathSeparator) + "go"
+	}
+	out, err := exec.Command(gobin, "build", "-o", "tests/tmp/"+srv1, "tests/evschedule/main.go").Output()
+	if err != nil {
+		t.Error(err)
+	}
+	t.Log(out)
+	out, err = exec.Command(gobin, "build", "-o", "tests/tmp/"+srv2, "tests/evschedule/main.go").Output()
+	if err != nil {
+		t.Error(err)
+	}
+	t.Log(out)
+	s := NewScheduler()
+	s.AppendServiceCmd("./tests/tmp/"+srv1, []string{"2m"})
+	s.AppendServiceCmd("./tests/tmp/"+srv2, []string{"2m"})
+	err = s.ServicesRun(&wg)
+	if err != nil {
+		t.Error(err)
+	}
+	err = s.ServicesStop()
+	if err != nil {
+		t.Error(err)
 	}
 }

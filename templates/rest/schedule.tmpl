@@ -3,11 +3,19 @@ type Scheduler struct {
     EVSched *eve.Scheduler
 }
 
+func (s *Scheduler) RESTGetCommand(w http.ResponseWriter, r *http.Request) error {
+	return nil
+}
+
+func (s *Scheduler) RESTAppendCommand(w http.ResponseWriter, r *http.Request) error {
+		return nil
+}
+
 // RESTUpdateCommand will update a running command in the Scheduler Running map
 func (s *Scheduler) RESTUpdateCommand(w http.ResponseWriter, r *http.Request) error {
 	switch r.FormValue("Mode") {
 	case "Start.Processes":
-		return s.RESTServicesRun(w, r)
+		return s.RESTServicesStart(w, r)
 	case "Stop.Processes":
 		return s.RESTServicesStop(w, r)
 	case "Start.Process":
@@ -22,41 +30,51 @@ func (s *Scheduler) RESTUpdateCommand(w http.ResponseWriter, r *http.Request) er
 	return errors.New("No Mode was choosen please use one the following modes: Replace.Process|Kill.Process|Kill.Processes|Start.Process|Start.Processes|Shutdown")
 }
 
-// RESTServicesRun 
-func (s *Scheduler) RESTServicesRun(w http.ResponseWriter, r *http.Request) error {
-	{{if .DEBUG}}
-		fmt.Println(r.FormValue("Cmd"))
-		fmt.Println(r.FormValue("Args"))
-	{{end}}
-	return s.EVSched.AppendServiceCmd(r.FormValue("Cmd"), r.Form["Args"])
+func (s *Scheduler) RESTDeleteCommand(w http.ResponseWriter, r *http.Request) error {
+		return nil
 }
 
 // RESTServicesStop 
 func (s *Scheduler) RESTServicesStop(w http.ResponseWriter, r *http.Request) error {
-	return s.EVSched.DeleteCmd(r.FormValue("Id"))
+	return s.EVSched.ServicesStop()
 }
 
 // RESTServicesStart
 func (s *Scheduler) RESTServicesStart(w http.ResponseWriter, r *http.Request) error {
-	return s.EVSched.KillCmd(r.FormValue("Id"))
+	return s.EVSched.ServicesRun(s.EVSched.WaitGroup())
 }
 
 // RESTServiceStop
 func (s *Scheduler) RESTServiceStop(w http.ResponseWriter, r *http.Request) error {
-	return s.EVSched.KillAllCmds()
+	{{if .DEBUG}}
+		fmt.Println(r.FormValue("Id"))
+	{{end}}
+	ID, err := strconv.Atoi(r.FormValue("Id"))
+	if err != nil{
+		w.WriteHeader(500)
+		w.Write([]byte(err.Error()))
+	}
+	return s.EVSched.ServiceStop(ID)
 }
 
 // RESTServiceRestart
 func (s *Scheduler) RESTServiceRestart(w http.ResponseWriter, r *http.Request) error {
 	{{if .DEBUG}}
-		fmt.Println("start process with id", r.FormValue("Id"))
+		fmt.Println(r.FormValue("Id"))
+		fmt.Println(r.FormValue("cmd"))
+		fmt.Println(r.FormValue("args"))
 	{{end}}
-	return s.EVSched.StartProcess(r.FormValue("Id"))
+	ID, err := strconv.Atoi(r.FormValue("Id"))
+	if err != nil{
+		w.WriteHeader(500)
+		w.Write([]byte(err.Error()))
+	}
+	return s.EVSched.ServiceRestart(ID, r.FormValue("cmd"), strings.Split(r.FormValue("args"), ","))
 }
 
 // RESTShutdown 
 func (s *Scheduler) RESTShutdown(w http.ResponseWriter, r *http.Request) error {
-	return s.EVSched.StartAllProcesses()
+	return s.EVSched.Shutdown()
 }
 
 var EVSchedulerObj *Scheduler = &Scheduler{

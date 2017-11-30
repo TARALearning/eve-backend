@@ -82,6 +82,11 @@ func NewCronCmd() *CronCmd {
 	return cc
 }
 
+// WaitGroup returns the sync WaitGroup
+func (s *Scheduler) WaitGroup() *sync.WaitGroup {
+	return &wg
+}
+
 // Enable the service to be run
 func (srv *SCmd) Enable() {
 	srv.Running = false
@@ -240,6 +245,34 @@ func (s *Scheduler) ServicesStopChannels() {
 		close(srv.StdoutQuitChannel)
 		// }
 	}
+}
+
+// ServicesStop stops all running services
+func (s *Scheduler) ServicesStop() error {
+	for ID := range s.Cmds {
+		err := s.ServiceStop(ID)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+// ServiceRestart stops all running services
+func (s *Scheduler) ServiceRestart(ID int, cmdPath string, args []string) error {
+	err := s.ServiceStop(ID)
+	if err != nil {
+		return err
+	}
+	s.ReplaceServiceCmd(cmdPath, args)
+	s.Cmds[ID].mux.Lock()
+	s.Cmds[ID].Enable()
+	s.Cmds[ID].mux.Unlock()
+	err = s.ServiceStart(0, &wg)
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 // ServiceStop stops a running services

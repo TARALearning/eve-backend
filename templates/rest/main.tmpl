@@ -10,9 +10,6 @@ var flags *flag.FlagSet
 var separator string = "----------------------------------------"
 var command string = ""
 {{commandFlagsVars .Commands}}
-{{if .USE_EVSCHEDULE}}
-var wg sync.WaitGroup
-{{end}}
 
 func {{.UsageFunc}}(){
 	fmt.Println(`{{commandUsage .Commands .}}`)
@@ -39,7 +36,7 @@ func init() {
 func main(){
     flags.Parse(os.Args[2:])
 	if debug {
-		eve.DEBUG = true
+		eve.SetDebug(true)
 	}
 
 	if address == "" {
@@ -72,28 +69,10 @@ func main(){
 		fmt.Println("running http service at", address)
 		fmt.Println("root assets are served from webroot", webroot)
 		fmt.Println("service specific assets are served from evwebroot", evwebroot)
-		{{if .USE_EVSCHEDULE}}
-		wg.Add(1)
-		go func(address string, wg *sync.WaitGroup) {
-			defer wg.Done()
-			log.Fatal(http.ListenAndServe(address, nil))
-		}(address, &wg)
-		{{else}}
-			log.Fatal(http.ListenAndServe(address, nil))
-		{{end}}
 	case "https":
 		fmt.Println("running https service at", address, "with cert", crt, "and key", key)
 		fmt.Println("root assets are served from webroot", webroot)
 		fmt.Println("service specific assets are served from evwebroot", evwebroot)
-		{{if .USE_EVSCHEDULE}}
-		wg.Add(1)
-		go func(address, crt, key string, wg *sync.WaitGroup) {
-			defer wg.Done()
-			log.Fatal(http.ListenAndServeTLS(address, crt, key, nil))
-		}(address, crt, key, &wg)
-		{{else}}
-			log.Fatal(http.ListenAndServeTLS(address, crt, key, nil))
-		{{end}}
 	case "version":
 		fmt.Println("version " + VERSION)
 		os.Exit(0)
@@ -105,23 +84,5 @@ func main(){
 		fmt.Println(separator)
 		os.Exit(2)
 	}
-	{{if .USE_EVSCHEDULE}}
-		wg.Add(1)
-		go func(s *Scheduler, wg *sync.WaitGroup) {
-			fmt.Println("EVSchedule :: starting scheduling...")
-			defer wg.Done()
-			time.Sleep(1 * time.Second)
-			err := s.Run()
-			if err != nil {
-				log.Println(err)
-			}
-		}(EVSchedulerObj, &wg)
-		// normally wg.Wait() should be used but in our case we want to
-		// shutdown the scheduler so we need to wait for the shutdown quit message
-		// on the MainQuitChannel
-		qMsg := <-EVSchedulerObj.EVSched.MainQuitChannel
-		close(EVSchedulerObj.EVSched.MainQuitChannel)
-		log.Println("received main quit channel message::", qMsg)
-	{{end}}
 }
 {{end}}

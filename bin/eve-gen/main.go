@@ -339,9 +339,8 @@ func main() {
 					"evalgo.org/eve",
 					"errors",
 					"strings",
-					"sync",
-					"time",
 					"path",
+					"strconv",
 				}
 				vars = map[string]interface{}{
 					"Package":                "main",
