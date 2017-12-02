@@ -159,7 +159,7 @@ node('linux-ubuntu-16.04-amd64') {
 				}
 				stage ('CleanUp EVE ARTIFACTS at BinTray'){
 						withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: 'bintray', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD']]) {
-							sh("${curr}/${dist}/linux-amd64-${version}_eve-bintray evalgo eve-backend core ${version} https://api.bintray.com ${USERNAME} ${PASSWORD}")
+							sh("eve-bintray delete evalgo eve-backend core ${version} https://api.bintray.com ${USERNAME} ${PASSWORD}")
 						}
 				}
 				stage("master deploy to bintray :: post to slack") {
@@ -172,41 +172,8 @@ node('linux-ubuntu-16.04-amd64') {
 							sh("cp -Rf ${dist} "+dateFormat.format(date))
 							sh("zip -r "+dateFormat.format(date)+".zip "+dateFormat.format(date))
 							sh("curl -v -X PUT --header 'X-Bintray-Package: core' --header 'X-Bintray-Version: ${version}' --header 'X-Bintray-Publish: 1' --header 'X-Bintray-Override: 1' --header 'X-Bintray-Explode: 1' --user '${USERNAME}:${PASSWORD}' -T "+dateFormat.format(date)+".zip 'https://api.bintray.com/content/evalgo/eve-backend/"+dateFormat.format(date)+".zip'")
-							sh("sleep 20")
-							for (int s = 0; s < services.size(); s++){
-								for (int o = 0; o < oses.size(); o++){
-									if ("${oses[o]}" == "windows"){
-										ext = ".exe"
-									}else{
-										ext = ""
-									}
-									for (int a = 0; a < archs.size(); a++){
-										def osrename = "${oses[o]}"
-										if ("${oses[o]}" == "darwin"){
-											osrename = "macos"
-										}
-										sh("sleep 10")
-										sh("curl -v -X PUT -d '{\"list_in_downloads\":true}' --header 'Content-Type: application/json' --user '${USERNAME}:${PASSWORD}' 'https://api.bintray.com/file_metadata/evalgo/eve-backend/"+dateFormat.format(date)+"%2F${oses[o]}-${archs[a]}-${version}_${services[s]}${ext}'")
-									}
-								}
-							}
-							for (int t = 0; t < tools.size(); t++){
-								for (int o = 0; o < oses.size(); o++){
-									if ("${oses[o]}" == "windows"){
-										ext = ".exe"
-									}else{
-										ext = ""
-									}
-									for (int a = 0; a < archs.size(); a++){
-										def osrename = "${oses[o]}"
-										if ("${oses[o]}" == "darwin"){
-											osrename = "macos"
-										}
-										sh("sleep 10")
-										sh("curl -v -X PUT -d '{\"list_in_downloads\":true}' --header 'Content-Type: application/json' --user '${USERNAME}:${PASSWORD}' 'https://api.bintray.com/file_metadata/evalgo/eve-backend/"+dateFormat.format(date)+"%2F${oses[o]}-${archs[a]}-${version}_${tools[t]}${ext}'")
-									}
-								}
-							}
+							sh("sleep 10")
+							sh("eve-bintray publish eve-backend core ${version} https://api.bintray.com ${USERNAME} ${PASSWORD}")
 						}
 					}
 					stage("master :: post to slack") {
