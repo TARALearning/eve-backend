@@ -33,7 +33,7 @@ func init() {
 		fmt.Println("example:")
 		fmt.Println("")
 		fmt.Println("eve-bintray \\")
-		fmt.Println("    delete | publish \\")
+		fmt.Println("    delete | list | publish \\")
 		fmt.Println("    evalgo \\")
 		fmt.Println("    eve-backend \\")
 		fmt.Println("    core \\")
@@ -128,6 +128,8 @@ func main() {
 				if err != nil {
 					log.Fatal(err)
 				}
+			case "list":
+				fmt.Println(bTFile["path"].(string))
 			case "publish":
 				err = publishFile(bTFile["path"].(string))
 				if err != nil {
