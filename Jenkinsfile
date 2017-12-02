@@ -173,7 +173,7 @@ node('linux-ubuntu-16.04-amd64') {
 							sh("zip -r "+dateFormat.format(date)+".zip "+dateFormat.format(date))
 							sh("curl -v -X PUT --header 'X-Bintray-Package: core' --header 'X-Bintray-Version: ${version}' --header 'X-Bintray-Publish: 1' --header 'X-Bintray-Override: 1' --header 'X-Bintray-Explode: 1' --user '${USERNAME}:${PASSWORD}' -T "+dateFormat.format(date)+".zip 'https://api.bintray.com/content/evalgo/eve-backend/"+dateFormat.format(date)+".zip'")
 							sh("sleep 10")
-							sh("eve-bintray publish eve-backend core ${version} https://api.bintray.com ${USERNAME} ${PASSWORD}")
+							sh("eve-bintray publish evalgo eve-backend core ${version} https://api.bintray.com ${USERNAME} ${PASSWORD}")
 						}
 					}
 					stage("master :: post to slack") {
