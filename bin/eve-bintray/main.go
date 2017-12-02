@@ -10,6 +10,7 @@ import (
 	"net/http"
 	"net/url"
 	"os"
+	"time"
 )
 
 var (
@@ -65,6 +66,8 @@ func deleteFile(filepath string) error {
 }
 
 func publishFile(filepath string) error {
+	fmt.Println("waint 5 second before publishing " + filepath)
+	time.Sleep(time.Second * 5)
 	url := bintrayURL + "/file_metadata/" + subject + "/" + repo + "/" + url.QueryEscape(filepath)
 	fmt.Println("publish file ::", url, "...")
 	buff := bytes.NewBuffer(nil)
