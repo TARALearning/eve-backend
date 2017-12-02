@@ -121,23 +121,21 @@ func main() {
 	}
 	for _, binTrayFile := range respObj {
 		bTFile := binTrayFile.(map[string]interface{})
-		if bTFile["repo"].(string) == "eve-backend" {
-			switch command {
-			case "delete":
-				err = deleteFile(bTFile["path"].(string))
-				if err != nil {
-					log.Fatal(err)
-				}
-			case "list":
-				fmt.Println(bTFile["path"].(string))
-			case "publish":
-				err = publishFile(bTFile["path"].(string))
-				if err != nil {
-					log.Fatal(err)
-				}
-			default:
-				log.Fatal(errors.New("the given command " + command + " is not supported!"))
+		switch command {
+		case "delete":
+			err = deleteFile(bTFile["path"].(string))
+			if err != nil {
+				log.Fatal(err)
 			}
+		case "list":
+			fmt.Println(bTFile["path"].(string))
+		case "publish":
+			err = publishFile(bTFile["path"].(string))
+			if err != nil {
+				log.Fatal(err)
+			}
+		default:
+			log.Fatal(errors.New("the given command " + command + " is not supported!"))
 		}
 	}
 }
