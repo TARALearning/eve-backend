@@ -413,7 +413,7 @@ func EVBoltAllHTML(db, bucket string) (string, error) {
 	counter := 0
 	for k := range res {
 		counter++
-		allEntries += `<div itemprop="itemListElement" itemscope="" itemtype="http://schema.org/ListItem"><a itemprop="item" evboltkey="` + k + `" href="http://localhost:9092/` + VERSION + `eve/evbolt.html?database=` + db + `&bucket=` + bucket + `&key=` + k + `"><div itemprop="name">` + res[k] + `</div><meta itemprop="position" content="` + strconv.Itoa(counter) + `"/></a></div>`
+		allEntries += `<div itemprop="itemListElement" itemscope="" itemtype="http://schema.org/ListItem"><a itemprop="item" evboltkey="` + k + `" href="http://127.0.0.1:9092/` + VERSION + `eve/evbolt.html?database=` + db + `&bucket=` + bucket + `&key=` + k + `"><div itemprop="name">` + res[k] + `</div><meta itemprop="position" content="` + strconv.Itoa(counter) + `"/></a></div>`
 	}
 	return allEntries + `</div>`, nil
 }

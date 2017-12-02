@@ -6,7 +6,7 @@ import (
 )
 
 func Test_MuxValueNotFound(t *testing.T) {
-	req, err := http.NewRequest("GET", "http://localhost/users/test", nil)
+	req, err := http.NewRequest("GET", "http://127.0.0.1/users/test", nil)
 	if err != nil {
 		t.Error(err)
 	}

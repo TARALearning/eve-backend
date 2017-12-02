@@ -109,7 +109,7 @@ The eve pkg contents are:
 ## SETUP
 ```bash
     go run bin/eve-setup/main.go \
-        http://localhost:9092/{VERSION}/eve/evbolt  \
+        http://127.0.0.1:9092/{VERSION}/eve/evbolt  \
         francisc.simon@evalgo.org \
         secret \
         123456789012345678901234567890ab \
