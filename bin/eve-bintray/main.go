@@ -83,7 +83,7 @@ func publishFile(filepath string) error {
 		return err
 	}
 	if resp.StatusCode != 200 {
-		return errors.New("return status for deleting file <" + url + "> was not 200!")
+		return errors.New("return status for publishing file <" + url + "> was not 200!")
 	}
 	return nil
 }
