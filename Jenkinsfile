@@ -71,7 +71,7 @@ node('linux-ubuntu-16.04-amd64') {
 									ext = ""
 								}
 								for (int a = 0; a < archs.size(); a++){
-									sh("GOOS=${oses[o]} GOARCH=${archs[a]} go build -o ${curr}/${dist}/${oses[o]}-${archs[a]}-${version}_${tools[t]}${ext} ${src}/bin/${tools[t]}/main.go")
+									sh("GOOS=${oses[o]} GOARCH=${archs[a]} go build -o ${dist}/${oses[o]}-${archs[a]}-${version}_${tools[t]}${ext} ${src}/bin/${tools[t]}/main.go")
 								}
 							}
 						}
@@ -99,7 +99,7 @@ node('linux-ubuntu-16.04-amd64') {
 									ext = ""
 								}
 								for (int a = 0; a < archs.size(); a++){
-									sh("GOOS=${oses[o]} GOARCH=${archs[a]} go build -o ${curr}/${dist}/${oses[o]}-${archs[a]}-${version}_${services[s]}${ext} ${tmp}/${services[s]}_main.go")
+									sh("GOOS=${oses[o]} GOARCH=${archs[a]} go build -o ${dist}/${oses[o]}-${archs[a]}-${version}_${services[s]}${ext} ${tmp}/${services[s]}_main.go")
 								}
 							}
 						}
@@ -176,7 +176,7 @@ node('linux-ubuntu-16.04-amd64') {
 									ext = ""
 								}
 								for (int a = 0; a < archs.size(); a++){
-									sh("GOOS=${oses[o]} GOARCH=${archs[a]} go build -o ${curr}/${dist}/${oses[o]}-${archs[a]}-${version}_${tools[t]}${ext} ${src}/bin/${tools[t]}/main.go")
+									sh("GOOS=${oses[o]} GOARCH=${archs[a]} go build -o ${dist}/${oses[o]}-${archs[a]}-${version}_${tools[t]}${ext} ${src}/bin/${tools[t]}/main.go")
 								}
 							}
 						}
@@ -204,7 +204,7 @@ node('linux-ubuntu-16.04-amd64') {
 									ext = ""
 								}
 								for (int a = 0; a < archs.size(); a++){
-									sh("GOOS=${oses[o]} GOARCH=${archs[a]} go build -o ${curr}/${dist}/${oses[o]}-${archs[a]}-${version}_${services[s]}${ext} ${tmp}/${services[s]}_main.go")
+									sh("GOOS=${oses[o]} GOARCH=${archs[a]} go build -o ${dist}/${oses[o]}-${archs[a]}-${version}_${services[s]}${ext} ${tmp}/${services[s]}_main.go")
 								}
 							}
 						}
