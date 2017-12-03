@@ -50,10 +50,3 @@ func Test_NewEVServiceFlagWebRoot(t *testing.T) {
 		t.Error("NewEVServiceFlagWebRoot does not work as expected")
 	}
 }
-
-func Test_NewEVServiceFlagEvWebRoot(t *testing.T) {
-	evwebroot := NewEVServiceFlagEvWebRoot()
-	if evwebroot.FName != "evwebroot" {
-		t.Error("NewEVServiceFlagEvWebRoot does not work as expected")
-	}
-}
