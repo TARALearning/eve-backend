@@ -150,7 +150,7 @@ node('linux-ubuntu-16.04-amd64') {
 			break;
 		case "dev":
 			try {
-				withEnv(["GOROOT=${curr}/${build}/${goroot}", "GOPATH=${curr}/${build}/${gopath}", , "PATH+GOPATHBIN=${curr}/${build}/${gopath}/bin", "PATH+GOROOTBIN=${curr}/${build}/${goroot}/bin"]){
+				withEnv(["GOROOT=${goroot}", "GOPATH=${gopath}", , "PATH+GOPATHBIN=${gopath}/bin", "PATH+GOROOTBIN=${goroot}/bin"]){
 					stage ('init go environment'){
 						sh("rm -rf ${build} ${dist}")
 						sh("mkdir ${build} ${dist}")
@@ -183,7 +183,7 @@ node('linux-ubuntu-16.04-amd64') {
 			break;
 		case "test":
 			try {
-				withEnv(["GOROOT=${curr}/${build}/${goroot}", "GOPATH=${curr}/${build}/${gopath}", , "PATH+GOPATHBIN=${curr}/${build}/${gopath}/bin", "PATH+GOROOTBIN=${curr}/${build}/${goroot}/bin"]){
+				withEnv(["GOROOT=${goroot}", "GOPATH=${gopath}", , "PATH+GOPATHBIN=${gopath}/bin", "PATH+GOROOTBIN=${goroot}/bin"]){
 					stage ('init go environment'){
 						sh("rm -rf ${build} ${dist}")
 						sh("mkdir ${build} ${dist}")
