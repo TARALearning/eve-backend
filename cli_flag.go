@@ -82,13 +82,3 @@ func NewEVServiceFlagWebRoot() *EVServiceFlag {
 		FDesc:  "path to the webroot where all root assets [*.css,*.js,...] are stored",
 	}
 }
-
-// NewEVServiceFlagEvWebRoot returns the webroot flat for the service specific assets to be used
-func NewEVServiceFlagEvWebRoot() *EVServiceFlag {
-	return &EVServiceFlag{
-		FName:  "evwebroot",
-		FType:  "string",
-		FValue: ".",
-		FDesc:  "path to the webroot where all service specific assets [*.css,*.js,...] are stored",
-	}
-}

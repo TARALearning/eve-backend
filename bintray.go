@@ -4,19 +4,26 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
+	"io/ioutil"
 	"net/http"
 	"net/url"
+	"strconv"
 	"time"
 )
 
 var (
-	binTrayURL      = ""
-	binTrayUser     = ""
-	binTrayPassword = ""
+	binTrayURL         = ""
+	binTrayDownloadURL = ""
+	binTrayUser        = ""
+	binTrayPassword    = ""
 )
 
 func SetBinTrayURL(URL string) {
 	binTrayURL = URL
+}
+
+func SetBinTrayDownloadURL(URL string) {
+	binTrayDownloadURL = URL
 }
 
 func SetBinTrayUser(username string) {
@@ -41,7 +48,7 @@ func BinTrayDeleteFile(subject, repo, filepath string) error {
 		return err
 	}
 	if resp.StatusCode != 200 {
-		return errors.New("return status for deleting file <" + url + "> was not 200!")
+		return errors.New("return status for deleting file <" + url + "> was not 200! it was " + strconv.Itoa(resp.StatusCode))
 	}
 	return nil
 }
@@ -65,7 +72,29 @@ func BinTrayPublishFile(subject, repo, filepath string) error {
 		return err
 	}
 	if resp.StatusCode != 200 {
-		return errors.New("return status for publishing file <" + url + "> was not 200!")
+		return errors.New("return status for publishing file <" + url + "> was not 200! it was " + strconv.Itoa(resp.StatusCode))
 	}
 	return nil
+}
+
+func BinTrayDownloadFile(subject, repo, filepath string) ([]byte, error) {
+	client := EvHTTPNewClient()
+	fmt.Println("waint 3 second before downloading " + filepath)
+	time.Sleep(time.Second * 3)
+	url := binTrayDownloadURL + "/" + subject + "/" + repo + "/" + url.QueryEscape(filepath)
+	fmt.Println("downloading file ::", url, "...")
+	req, err := http.NewRequest(http.MethodGet, url, nil)
+	if err != nil {
+		return nil, err
+	}
+	req.SetBasicAuth(binTrayUser, binTrayPassword)
+	resp, err := client.Do(req)
+	if err != nil {
+		return nil, err
+	}
+	if resp.StatusCode != 200 {
+		return nil, errors.New("return status for downloading file <" + url + "> was not 200! it was " + strconv.Itoa(resp.StatusCode))
+	}
+	defer resp.Body.Close()
+	return ioutil.ReadAll(resp.Body)
 }

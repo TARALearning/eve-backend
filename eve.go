@@ -414,6 +414,69 @@ func GenEvAuth(config string, use Uses, filepath string) (string, error) {
 	}
 	return genEvService(srv, srvConfig, use, filepath)
 }
+
+func GenEvWeb(config string, use Uses, filepath string) (string, error) {
+	srv := &EVServiceConfigObj{}
+	SetDefaultCType("web")
+	var srvConfig *EVServiceConfig
+	fmt.Println("eve-gen :: check if config file was provided...")
+	if config != "" {
+		fmt.Println("eve-gen :: found config file <" + config + ">")
+		srvJSON, err := ioutil.ReadFile(config)
+		if err != nil {
+			log.Fatal(err)
+		}
+		fmt.Println("eve-gen :: reading config file from:", config+"...")
+		err = json.Unmarshal(srvJSON, srv)
+		if err != nil {
+			log.Fatal(err)
+		}
+		srvConfig = srv.EVServiceConfiguration()
+	} else {
+		var vars map[string]interface{}
+		var imports []string
+		imports = []string{
+			"fmt",
+			"flag",
+			"os",
+			"log",
+			"net/http",
+			"github.com/prometheus/client_golang/prometheus",
+			"github.com/prometheus/client_golang/prometheus/promhttp",
+			"evalgo.org/eve",
+		}
+		vars = map[string]interface{}{
+			"Package":        "main",
+			"DefaultAddress": "127.0.0.1:9000",
+			"UsageFunc":      "EVUsage",
+			"Version":        VERSION,
+			"Name":           "EVWeb",
+			"Description":    "EVWeb is a rest micro service to be used for the frontend",
+			"Src":            "https://git.evalgo.de:8443/",
+			"DEBUG":          false,
+			"USE_PROMETHEUS": true,
+			"USE_EVLOG":      true,
+			"EVLOG_URL":      "http://127.0.0.1:9091/" + VERSION + "/eve/evlog",
+			"URLS": []string{
+				"/help",
+				"/evlog",
+				"/metrics",
+			},
+			"ROUTE_PATH_PREFIX": "/" + VERSION + "/eve/",
+		}
+		commands := SrvConfigCommands()
+		commands[0].Flags = append(commands[0].Flags, NewEVServiceFlagWebRoot())
+		srvConfig = &EVServiceConfig{
+			Main:      "EVWEB",
+			Imports:   imports,
+			Templates: SrvConfigTemplates(),
+			Commands:  commands,
+			Vars:      vars,
+		}
+	}
+	return genEvService(srv, srvConfig, use, filepath)
+}
+
 func genEvService(srv *EVServiceConfigObj, srvConfig *EVServiceConfig, use Uses, filepath string) (string, error) {
 	srv.Config = srvConfig
 	fmt.Println("eve-gen :: check use flags...")

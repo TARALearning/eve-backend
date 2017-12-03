@@ -14,8 +14,6 @@ func NewEVServiceDefaultCommandFlags() *EVServiceCommand {
 		Desc: "help command to be used for detailed information",
 		Flags: []*EVServiceFlag{
 			NewEVServiceFlagHelpHTTP(),
-			NewEVServiceFlagWebRoot(),
-			NewEVServiceFlagEvWebRoot(),
 			NewEVServiceFlagDebug(),
 			NewEVServiceFlagVersion(),
 			NewEVServiceFlagHTTPAddress(),

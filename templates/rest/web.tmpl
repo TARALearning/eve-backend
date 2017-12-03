@@ -1,4 +1,4 @@
-{{define "EVREST"}}
+{{define "EVWEB"}}
 package {{.Package}}
 import(
     {{imports .Imports}}
@@ -15,7 +15,9 @@ func {{.UsageFunc}}(){
 	fmt.Println(`{{commandUsage .Commands .}}`)
 }
 
-{{template "EVRestHttpHandler" .}}
+{{if .USE_PROMETHEUS}}
+    {{template "EVRestPrometheus" .}}
+{{end}}
 
 func init() {
 	if len(os.Args) <= 1 {
@@ -42,19 +44,14 @@ func main(){
 		address = "{{.DefaultAddress}}"
 	}
 
-	ro := NewRestHttpHandler()
-	r := mux.NewRouter()
-	s := r.PathPrefix("{{.ROUTE_PATH_PREFIX}}").Subrouter()
-	s.Handle("/", ro){{range $idx, $url := .URLS}}
-	s.Handle("{{$url}}", ro){{end}}
-	http.Handle("/", r)
+    http.Handle("/", http.FileServer(http.Dir(webroot)))
 
 	switch command {
 
 	case "help":
 		if hhttp != "" {
 			fmt.Println("running http service at", hhttp)
-			fmt.Println("help is now available at ::", "http://" + hhttp + "{{.ROUTE_PATH_PREFIX}}help")
+			fmt.Println("help is now available at ::", "http://" + hhttp + "/help")
 			log.Fatal(http.ListenAndServe(hhttp, nil))
 		} else {
 			{{.UsageFunc}}()

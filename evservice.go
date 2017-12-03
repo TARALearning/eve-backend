@@ -34,7 +34,6 @@ var (
 		"templates/connector/session.tmpl",
 		"templates/connector/token.tmpl",
 		"templates/connector/user.tmpl",
-		"templates/rest/assets.tmpl",
 		"templates/rest/help.tmpl",
 		"templates/rest/main.tmpl",
 		"templates/rest/prometheus.init.tmpl",
@@ -42,6 +41,7 @@ var (
 		"templates/rest/schedule.tmpl",
 		"templates/rest/service.tmpl",
 		"templates/rest/time_zone_location.tmpl",
+		"templates/rest/web.tmpl",
 		"templates/service/evauth.tmpl",
 		"templates/service/evbolt.tmpl",
 		"templates/service/evlog.tmpl",
@@ -206,6 +206,30 @@ func (tco *EVServiceConfigObj) NewEVServiceConfig(cType string) *EVServiceConfig
 		}
 		tco.Config = &EVServiceConfig{
 			Main:      main,
+			Imports:   imports,
+			Templates: templates,
+			Commands:  commands,
+			Vars:      vars,
+		}
+	case "web":
+		vars["ROUTE_PATH_PREFIX"] = "/" + VERSION + "/eve/"
+		imports = []string{
+			"fmt",
+			"flag",
+			"os",
+			"log",
+			"net/http",
+			"github.com/prometheus/client_golang/prometheus",
+			"github.com/prometheus/client_golang/prometheus/promhttp",
+			"evalgo.org/eve",
+			"errors",
+			"strings",
+			"time",
+			"sync",
+		}
+		commands[0].Flags = append(commands[0].Flags, NewEVServiceFlagWebRoot())
+		tco.Config = &EVServiceConfig{
+			Main:      "EVWEB",
 			Imports:   imports,
 			Templates: templates,
 			Commands:  commands,
