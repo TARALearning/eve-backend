@@ -107,7 +107,7 @@ node('linux-ubuntu-16.04-amd64') {
 						}
 				}
 				stage ('archive artifacts'){
-					archiveArtifacts("${dist}/*")
+					archiveArtifacts("dist/*")
 				}
 				stage("master cleanup bintray :: post to slack") {
 					withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: 'slack', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD']]) {
@@ -141,39 +141,6 @@ node('linux-ubuntu-16.04-amd64') {
 				}
 			} catch (Exception e) {
 				stage("master error :: post to slack") {
-					withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: 'slack', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD']]) {
-						slackSend channel: '#build', color: 'danger', message: "${env.JOB_NAME} ${env.BUILD_NUMBER} failed", teamDomain: "${USERNAME}", token: "${PASSWORD}"
-					}
-				}
-				throw e;
-			}
-			break;
-		case "dev":
-			try {
-				withEnv(["GOROOT=${goroot}", "GOPATH=${gopath}", , "PATH+GOPATHBIN=${gopath}/bin", "PATH+GOROOTBIN=${goroot}/bin"]){
-					stage ('init go environment'){
-						sh("rm -rf ${build} ${dist}")
-						sh("mkdir ${build} ${dist}")
-						sh("mkdir -p ${src}")
-						sh("rsync -av --exclude='build' --exclude='dist' ./ ${src}/")
-						for(int i = 0; i < dependencies.size(); i++) {
-							sh("go get -v ${dependencies[i]}")
-						}
-					}
-					stage ('run unit tests'){
-						sh("cd tests && chmod +x gen.ssl.client.crt.sh && ./gen.ssl.client.crt.sh")
-						sh("go test -v -race -timeout=5m")
-						sh("go test -coverprofile=dist/coverage.out")
-						sh("cd ${src} && gocov test | gocov-xml > ${dist}/coverage.xml")
-					}
-					stage("dev :: post to slack") {
-						withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: 'slack', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD']]) {
-		        	slackSend channel: '#build', color: 'good', message: "${env.JOB_NAME} ${env.BUILD_NUMBER} success", teamDomain: "${USERNAME}", token: "${PASSWORD}"
-						}
-		    	}
-				}
-			} catch (Exception e) {
-				stage("dev error :: post to slack") {
 					withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: 'slack', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD']]) {
 						slackSend channel: '#build', color: 'danger', message: "${env.JOB_NAME} ${env.BUILD_NUMBER} failed", teamDomain: "${USERNAME}", token: "${PASSWORD}"
 					}
@@ -248,7 +215,7 @@ node('linux-ubuntu-16.04-amd64') {
 					}
 				}
 				stage ('archive artifacts'){
-					archiveArtifacts("${dist}/*")
+					archiveArtifacts("dist/*")
 				}
 				stage("test :: post to slack") {
 					withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: 'slack', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD']]) {
@@ -257,6 +224,39 @@ node('linux-ubuntu-16.04-amd64') {
 	    	}
 			} catch (Exception e) {
 				stage("test error :: post to slack") {
+					withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: 'slack', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD']]) {
+						slackSend channel: '#build', color: 'danger', message: "${env.JOB_NAME} ${env.BUILD_NUMBER} failed", teamDomain: "${USERNAME}", token: "${PASSWORD}"
+					}
+				}
+				throw e;
+			}
+			break;
+		case "dev":
+			try {
+				withEnv(["GOROOT=${goroot}", "GOPATH=${gopath}", , "PATH+GOPATHBIN=${gopath}/bin", "PATH+GOROOTBIN=${goroot}/bin"]){
+					stage ('init go environment'){
+						sh("rm -rf ${build} ${dist}")
+						sh("mkdir ${build} ${dist}")
+						sh("mkdir -p ${src}")
+						sh("rsync -av --exclude='build' --exclude='dist' ./ ${src}/")
+						for(int i = 0; i < dependencies.size(); i++) {
+							sh("go get -v ${dependencies[i]}")
+						}
+					}
+					stage ('run unit tests'){
+						sh("cd tests && chmod +x gen.ssl.client.crt.sh && ./gen.ssl.client.crt.sh")
+						sh("go test -v -race -timeout=5m")
+						sh("go test -coverprofile=dist/coverage.out")
+						sh("cd ${src} && gocov test | gocov-xml > ${dist}/coverage.xml")
+					}
+					stage("dev :: post to slack") {
+						withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: 'slack', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD']]) {
+		        	slackSend channel: '#build', color: 'good', message: "${env.JOB_NAME} ${env.BUILD_NUMBER} success", teamDomain: "${USERNAME}", token: "${PASSWORD}"
+						}
+		    	}
+				}
+			} catch (Exception e) {
+				stage("dev error :: post to slack") {
 					withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: 'slack', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD']]) {
 						slackSend channel: '#build', color: 'danger', message: "${env.JOB_NAME} ${env.BUILD_NUMBER} failed", teamDomain: "${USERNAME}", token: "${PASSWORD}"
 					}
