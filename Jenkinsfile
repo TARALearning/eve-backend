@@ -3,7 +3,7 @@ import java.text.SimpleDateFormat
 node('linux-ubuntu-16.04-amd64') {
 	checkout scm
 	def services = ['evauth', 'evbolt', 'evlog', 'evschedule']
-	def tools = ['eve-bintray', 'eve-gen', 'eve-setup']
+	def tools = ['eve']
 	def dependencies = ['github.com/boltdb/bolt', 'github.com/gorilla/mux', 'github.com/prometheus/client_golang/prometheus', 'github.com/prometheus/client_golang/prometheus/promhttp', 'github.com/dchest/uniuri', 'github.com/mitchellh/go-ps', 'github.com/axw/gocov/...', 'github.com/AlekSi/gocov-xml','github.com/kless/osutil/user/crypt/sha512_crypt']
 	def oses = ['darwin', 'linux', 'windows']
 	def archs = ['amd64']
@@ -95,7 +95,7 @@ node('linux-ubuntu-16.04-amd64') {
 									use_flags = use_flags_default
 									break;
 							}
-							sh("${curr}/${dist}/linux-amd64-${version}_eve-gen generate -service ${services[s]} ${use_flags}  -target ${tmp}/${services[s]}_main.go")
+							sh("eve generate golang -service ${services[s]} ${use_flags}  -target ${tmp}/${services[s]}_main.go")
 							for (int o = 0; o < oses.size(); o++){
 								if ("${oses[o]}" == "windows"){
 									ext = ".exe"
@@ -159,7 +159,7 @@ node('linux-ubuntu-16.04-amd64') {
 				}
 				stage ('CleanUp EVE ARTIFACTS at BinTray'){
 						withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: 'bintray', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD']]) {
-							sh("eve-bintray delete evalgo eve-backend core ${version} https://api.bintray.com ${USERNAME} ${PASSWORD}")
+							sh("eve delete bintray evalgo eve-backend core ${version} https://api.bintray.com ${USERNAME} ${PASSWORD}")
 						}
 				}
 				stage("master deploy to bintray :: post to slack") {
@@ -173,7 +173,7 @@ node('linux-ubuntu-16.04-amd64') {
 							sh("zip -r "+dateFormat.format(date)+".zip "+dateFormat.format(date))
 							sh("curl -v -X PUT --header 'X-Bintray-Package: core' --header 'X-Bintray-Version: ${version}' --header 'X-Bintray-Publish: 1' --header 'X-Bintray-Override: 1' --header 'X-Bintray-Explode: 1' --user '${USERNAME}:${PASSWORD}' -T "+dateFormat.format(date)+".zip 'https://api.bintray.com/content/evalgo/eve-backend/"+dateFormat.format(date)+".zip'")
 							sh("sleep 10")
-							sh("eve-bintray publish evalgo eve-backend core ${version} https://api.bintray.com ${USERNAME} ${PASSWORD}")
+							sh("eve publish bintray evalgo eve-backend core ${version} https://api.bintray.com ${USERNAME} ${PASSWORD}")
 						}
 					}
 					stage("master :: post to slack") {
@@ -280,7 +280,7 @@ node('linux-ubuntu-16.04-amd64') {
 									use_flags = use_flags_default
 									break;
 							}
-							sh("${dist}/linux-amd64-${version}_eve-gen generate -service ${services[s]} ${use_flags}  -target ${tmp}/${services[s]}_main.go")
+							sh("eve generate golang -service ${services[s]} ${use_flags}  -target ${tmp}/${services[s]}_main.go")
 							for (int o = 0; o < oses.size(); o++){
 								if ("${oses[o]}" == "windows"){
 									ext = ".exe"
