@@ -9,16 +9,16 @@ node('linux-ubuntu-16.04-amd64') {
 	def archs = ['amd64']
 	def version = '0.0.3'
 	def ext = ''
-	def dist = 'dist'
 	def curr = pwd()
-	def build = 'build'
-	def go_version = '1.9.2'
-	def go = "go${go_version}.linux-amd64"
-	def goroot = "go-${go_version}"
-	def gopath = "${go}-${go_version}-packages"
-	def gobin = "${curr}/${build}/${goroot}/bin/go"
-	def gopathbin = "${build}/${gopath}/bin"
-	def src = "${build}/${gopath}/src/evalgo.org/eve"
+	def build = "${curr}/build"
+	def dist = "${curr}/dist"
+	def go_version = '1.9'
+	def api_bintray = "https://api.bintray.com"
+	def goroot = "/usr/lib/go-${go_version}"
+	def gopath = "${curr}/${build}/go-${go_version}-packages"
+	def gorootbin = "${goroot}/bin"
+	def gopathbin = "${gopath}/bin"
+	def src = "${gopath}/src/evalgo.org/eve"
 	def tmp = "tests/tmp"
 	def dateFormat = new SimpleDateFormat("yyyy-MM-dd-HH-mm")
 	def date = new Date()
@@ -28,21 +28,19 @@ node('linux-ubuntu-16.04-amd64') {
 	switch (env.BRANCH_NAME) {
 		case "master":
 			try {
-				withEnv(["GOROOT=${curr}/${build}/${goroot}", "GOPATH=${curr}/${build}/${gopath}", "PATH+GOPATHBIN=${curr}/${build}/${gopath}/bin", "PATH+GOROOTBIN=${curr}/${build}/${goroot}/bin"]){
+				withEnv(["GOROOT=${goroot}", "GOPATH=${gopath}", "PATH+GOPATHBIN=/${gopath}/bin", "PATH+GOROOTBIN=${goroot}/bin"]){
 					stage("master build start :: post to slack") {
 						withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: 'slack', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD']]) {
 							slackSend channel: '#build', color: 'good', message: "${env.JOB_NAME} ${env.BUILD_NUMBER} starting build...", teamDomain: "${USERNAME}", token: "${PASSWORD}"
 						}
 					}
-					stage ('Init GO ENV'){
-						sh("rm -rf ${build} .goget ${dist}")
+					stage ('init go environment'){
+						sh("rm -rf ${build} ${dist}")
 						sh("mkdir ${build} ${dist}")
-						sh("cd ${build} && wget -q https://redirector.gvt1.com/edgedl/go/${go}.tar.gz")
-						sh("cd ${build} && tar xfz ${go}.tar.gz && mv go go-${go_version} && rm -f ${go}.tar.gz")
-						sh("mkdir -p ${build}/${gopath}/src/evalgo.org/eve")
-						sh("rsync -av --exclude='${build}' ./ ${src}/")
+						sh("mkdir -p ${gopath}/src/evalgo.org/eve")
+						sh("rsync -av --exclude='build' --exclude='dist' ./ ${src}/")
 						for(int i = 0; i < dependencies.size(); i++) {
-							sh("${gobin} get -v ${dependencies[i]}")
+							sh("go get -v ${dependencies[i]}")
 						}
 					}
 					stage("master running tests and codecoverage :: post to slack") {
@@ -50,15 +48,15 @@ node('linux-ubuntu-16.04-amd64') {
 		        	slackSend channel: '#build', color: 'good', message: "${env.JOB_NAME} ${env.BUILD_NUMBER} running tests and code coverage analysis...", teamDomain: "${USERNAME}", token: "${PASSWORD}"
 						}
 		    	}
-					stage ('Run TESTS'){
+					stage ('run unit tests'){
 						sh("cd tests && chmod +x gen.ssl.client.crt.sh && ./gen.ssl.client.crt.sh")
-						sh("${gobin} test -v -race -timeout=5m")
-						sh("${gobin} test -coverprofile=dist/coverage.out")
-						sh("cd ${curr}/${build}/${gopath}/src/evalgo.org/eve && gocov test | gocov-xml > ${curr}/dist/coverage.xml")
+						sh("go test -v -race -timeout=5m")
+						sh("go test -coverprofile=dist/coverage.out")
+						sh("cd ${src} && gocov test | gocov-xml > ${dist}/coverage.xml")
 					}
 					stage ('Upload CodeCoverage to codecov.io'){
 						withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: 'codecov', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD']]) {
-							sh("cd ${curr}/${dist} && curl -o codecov.sh https://codecov.io/bash && chmod +x codecov.sh && ./codecov.sh -t ${PASSWORD}")
+							sh("cd ${dist} && curl -o codecov.sh https://codecov.io/bash && chmod +x codecov.sh && ./codecov.sh -t ${PASSWORD}")
 						}
 					}
 					stage("master build tools :: post to slack") {
@@ -66,7 +64,7 @@ node('linux-ubuntu-16.04-amd64') {
 		        	slackSend channel: '#build', color: 'good', message: "${env.JOB_NAME} ${env.BUILD_NUMBER} building tools...", teamDomain: "${USERNAME}", token: "${PASSWORD}"
 						}
 		    	}
-					stage ('Build TOOLS'){
+					stage ('build tools'){
 						for (int t = 0; t < tools.size(); t++){
 							for (int o = 0; o < oses.size(); o++){
 								if ("${oses[o]}" == "windows"){
@@ -75,7 +73,7 @@ node('linux-ubuntu-16.04-amd64') {
 									ext = ""
 								}
 								for (int a = 0; a < archs.size(); a++){
-									sh("GOOS=${oses[o]} GOARCH=${archs[a]} ${gobin} build -o ${curr}/${dist}/${oses[o]}-${archs[a]}-${version}_${tools[t]}${ext} ${src}/bin/${tools[t]}/main.go")
+									sh("GOOS=${oses[o]} GOARCH=${archs[a]} go build -o ${curr}/${dist}/${oses[o]}-${archs[a]}-${version}_${tools[t]}${ext} ${src}/bin/${tools[t]}/main.go")
 								}
 							}
 						}
@@ -85,7 +83,7 @@ node('linux-ubuntu-16.04-amd64') {
 		        	slackSend channel: '#build', color: 'good', message: "${env.JOB_NAME} ${env.BUILD_NUMBER} building services...", teamDomain: "${USERNAME}", token: "${PASSWORD}"
 						}
 		    	}
-					stage ('Build EVE SERVICES') {
+					stage ('build services') {
 						for (int s = 0; s < services.size(); s++){
 							switch("${services[s]}".toString()){
 								case "evbolt":
@@ -95,7 +93,7 @@ node('linux-ubuntu-16.04-amd64') {
 									use_flags = use_flags_default
 									break;
 							}
-							sh("eve generate golang -service ${services[s]} ${use_flags}  -target ${tmp}/${services[s]}_main.go")
+							sh("eve generate golang -service ${services[s]} ${use_flags} -target ${tmp}/${services[s]}_main.go")
 							for (int o = 0; o < oses.size(); o++){
 								if ("${oses[o]}" == "windows"){
 									ext = ".exe"
@@ -103,54 +101,13 @@ node('linux-ubuntu-16.04-amd64') {
 									ext = ""
 								}
 								for (int a = 0; a < archs.size(); a++){
-									sh("GOOS=${oses[o]} GOARCH=${archs[a]} ${gobin} build -o ${curr}/${dist}/${oses[o]}-${archs[a]}-${version}_${services[s]}${ext} ${tmp}/${services[s]}_main.go")
+									sh("GOOS=${oses[o]} GOARCH=${archs[a]} go build -o ${curr}/${dist}/${oses[o]}-${archs[a]}-${version}_${services[s]}${ext} ${tmp}/${services[s]}_main.go")
 								}
 							}
 						}
 				}
-				stage ('Archive EVE ARTIFACTS'){
+				stage ('archive artifacts'){
 					archiveArtifacts("${dist}/*")
-				}
-				stage("master deploy storagebox :: post to slack") {
-					withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: 'slack', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD']]) {
-						slackSend channel: '#build', color: 'good', message: "${env.JOB_NAME} ${env.BUILD_NUMBER} deploy to storagebox...", teamDomain: "${USERNAME}", token: "${PASSWORD}"
-					}
-				}
-				stage ('Deploy EVE ARTIFACTS to StorageBox'){
-					withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: 'storagebox', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD']]) {
-							for (int s = 0; s < services.size(); s++){
-								for (int o = 0; o < oses.size(); o++){
-									if ("${oses[o]}" == "windows"){
-										ext = ".exe"
-									}else{
-										ext = ""
-									}
-									for (int a = 0; a < archs.size(); a++){
-										def osrename = "${oses[o]}"
-										if ("${oses[o]}" == "darwin"){
-											osrename = "macos"
-										}
-										sh("curl --user '${USERNAME}:${PASSWORD}' -T ${dist}/${oses[o]}-${archs[a]}-${version}_${services[s]}${ext} https://u162240.your-storagebox.de/eve/backend/${osrename}/")
-									}
-								}
-							}
-							for (int t = 0; t < tools.size(); t++){
-								for (int o = 0; o < oses.size(); o++){
-									if ("${oses[o]}" == "windows"){
-										ext = ".exe"
-									}else{
-										ext = ""
-									}
-									for (int a = 0; a < archs.size(); a++){
-										def osrename = "${oses[o]}"
-										if ("${oses[o]}" == "darwin"){
-											osrename = "macos"
-										}
-										sh("curl --user '${USERNAME}:${PASSWORD}' -T ${curr}/${dist}/${oses[o]}-${archs[a]}-${version}_${tools[t]}${ext} https://u162240.your-storagebox.de/eve/backend/${osrename}/")
-									}
-								}
-							}
-					}
 				}
 				stage("master cleanup bintray :: post to slack") {
 					withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: 'slack', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD']]) {
@@ -159,7 +116,7 @@ node('linux-ubuntu-16.04-amd64') {
 				}
 				stage ('CleanUp EVE ARTIFACTS at BinTray'){
 						withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: 'bintray', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD']]) {
-							sh("eve delete bintray evalgo eve-backend core ${version} https://api.bintray.com ${USERNAME} ${PASSWORD}")
+							sh("eve delete bintray -subject evalgo -repo eve-backend -rpackage core -version ${version} -url ${api_bintray} -username ${USERNAME} -password ${PASSWORD}")
 						}
 				}
 				stage("master deploy to bintray :: post to slack") {
@@ -167,13 +124,13 @@ node('linux-ubuntu-16.04-amd64') {
 						slackSend channel: '#build', color: 'good', message: "${env.JOB_NAME} ${env.BUILD_NUMBER} deploy to bintray...", teamDomain: "${USERNAME}", token: "${PASSWORD}"
 					}
 				}
-				stage ('Deploy EVE ARTIFACTS to BinTray'){
+				stage ('deploy artifacst to bintray'){
 						withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: 'bintray', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD']]) {
 							sh("cp -Rf ${dist} "+dateFormat.format(date))
 							sh("zip -r "+dateFormat.format(date)+".zip "+dateFormat.format(date))
-							sh("curl -v -X PUT --header 'X-Bintray-Package: core' --header 'X-Bintray-Version: ${version}' --header 'X-Bintray-Publish: 1' --header 'X-Bintray-Override: 1' --header 'X-Bintray-Explode: 1' --user '${USERNAME}:${PASSWORD}' -T "+dateFormat.format(date)+".zip 'https://api.bintray.com/content/evalgo/eve-backend/"+dateFormat.format(date)+".zip'")
+							sh("curl -v -X PUT --header 'X-Bintray-Package: core' --header 'X-Bintray-Version: ${version}' --header 'X-Bintray-Publish: 1' --header 'X-Bintray-Override: 1' --header 'X-Bintray-Explode: 1' --user '${USERNAME}:${PASSWORD}' -T "+dateFormat.format(date)+".zip '"+api_bintray+"/content/evalgo/eve-backend/"+dateFormat.format(date)+".zip'")
 							sh("sleep 10")
-							sh("eve publish bintray evalgo eve-backend core ${version} https://api.bintray.com ${USERNAME} ${PASSWORD}")
+							sh("eve publish bintray -subject evalgo -repo eve-backend -rpackage core -version ${version} -url ${api_bintray} -username ${USERNAME} -password ${PASSWORD}")
 						}
 					}
 					stage("master :: post to slack") {
@@ -194,22 +151,20 @@ node('linux-ubuntu-16.04-amd64') {
 		case "dev":
 			try {
 				withEnv(["GOROOT=${curr}/${build}/${goroot}", "GOPATH=${curr}/${build}/${gopath}", , "PATH+GOPATHBIN=${curr}/${build}/${gopath}/bin", "PATH+GOROOTBIN=${curr}/${build}/${goroot}/bin"]){
-					stage ('Init GO ENV'){
-						sh("rm -rf ${build} .goget ${dist}")
+					stage ('init go environment'){
+						sh("rm -rf ${build} ${dist}")
 						sh("mkdir ${build} ${dist}")
-						sh("cd ${build} && wget -q https://redirector.gvt1.com/edgedl/go/${go}.tar.gz")
-						sh("cd ${build} && tar xfz ${go}.tar.gz && mv go go-${go_version} && rm -f ${go}.tar.gz")
-						sh("mkdir -p ${build}/${gopath}/src/evalgo.org/eve")
-						sh("rsync -av --exclude='${build}' ./ ${src}/")
+						sh("mkdir -p ${src}")
+						sh("rsync -av --exclude='build' --exclude='dist' ./ ${src}/")
 						for(int i = 0; i < dependencies.size(); i++) {
-							sh("${gobin} get -v ${dependencies[i]}")
+							sh("go get -v ${dependencies[i]}")
 						}
 					}
-					stage ('Run TESTS'){
+					stage ('run unit tests'){
 						sh("cd tests && chmod +x gen.ssl.client.crt.sh && ./gen.ssl.client.crt.sh")
-						sh("${gobin} test -v -race -timeout=5m")
-						sh("${gobin} test -coverprofile=dist/coverage.out")
-						sh("cd ${curr}/${build}/${gopath}/src/evalgo.org/eve && gocov test | gocov-xml > ${curr}/dist/coverage.xml")
+						sh("go test -v -race -timeout=5m")
+						sh("go test -coverprofile=dist/coverage.out")
+						sh("cd ${src} && gocov test | gocov-xml > ${dist}/coverage.xml")
 					}
 					stage("dev :: post to slack") {
 						withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: 'slack', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD']]) {
@@ -229,29 +184,27 @@ node('linux-ubuntu-16.04-amd64') {
 		case "test":
 			try {
 				withEnv(["GOROOT=${curr}/${build}/${goroot}", "GOPATH=${curr}/${build}/${gopath}", , "PATH+GOPATHBIN=${curr}/${build}/${gopath}/bin", "PATH+GOROOTBIN=${curr}/${build}/${goroot}/bin"]){
-					stage ('Init GO ENV'){
-						sh("rm -rf ${build} .goget ${dist}")
+					stage ('init go environment'){
+						sh("rm -rf ${build} ${dist}")
 						sh("mkdir ${build} ${dist}")
-						sh("cd ${build} && wget -q https://redirector.gvt1.com/edgedl/go/${go}.tar.gz")
-						sh("cd ${build} && tar xfz ${go}.tar.gz && mv go go-${go_version} && rm -f ${go}.tar.gz")
-						sh("mkdir -p ${build}/${gopath}/src/evalgo.org/eve")
-						sh("rsync -av --exclude='${build}' ./ ${src}/")
+						sh("mkdir -p ${src}")
+						sh("rsync -av --exclude='build' --exclude='dist' ./ ${src}/")
 						for(int i = 0; i < dependencies.size(); i++) {
-							sh("${gobin} get -v ${dependencies[i]}")
+							sh("go get -v ${dependencies[i]}")
 						}
 					}
-					stage ('Run TESTS'){
+					stage ('run unit tests'){
 						sh("cd tests && chmod +x gen.ssl.client.crt.sh && ./gen.ssl.client.crt.sh")
-						sh("${gobin} test -v -race -timeout=5m")
-						sh("${gobin} test -coverprofile=dist/coverage.out")
-						sh("cd ${curr}/${build}/${gopath}/src/evalgo.org/eve && gocov test | gocov-xml > ${curr}/dist/coverage.xml")
+						sh("go test -v -race -timeout=5m")
+						sh("go test -coverprofile=dist/coverage.out")
+						sh("cd ${src} && gocov test | gocov-xml > ${dist}/coverage.xml")
 					}
 					stage("test build tools :: post to slack") {
 						withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: 'slack', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD']]) {
 		        	slackSend channel: '#build', color: 'good', message: "${env.JOB_NAME} ${env.BUILD_NUMBER} building tools...", teamDomain: "${USERNAME}", token: "${PASSWORD}"
 						}
 		    	}
-					stage ('Build TOOLS'){
+					stage ('build tools'){
 						for (int t = 0; t < tools.size(); t++){
 							for (int o = 0; o < oses.size(); o++){
 								if ("${oses[o]}" == "windows"){
@@ -260,7 +213,7 @@ node('linux-ubuntu-16.04-amd64') {
 									ext = ""
 								}
 								for (int a = 0; a < archs.size(); a++){
-									sh("GOOS=${oses[o]} GOARCH=${archs[a]} ${gobin} build -o ${curr}/${dist}/${oses[o]}-${archs[a]}-${version}_${tools[t]}${ext} ${src}/bin/${tools[t]}/main.go")
+									sh("GOOS=${oses[o]} GOARCH=${archs[a]} go build -o ${curr}/${dist}/${oses[o]}-${archs[a]}-${version}_${tools[t]}${ext} ${src}/bin/${tools[t]}/main.go")
 								}
 							}
 						}
@@ -270,7 +223,7 @@ node('linux-ubuntu-16.04-amd64') {
 		        	slackSend channel: '#build', color: 'good', message: "${env.JOB_NAME} ${env.BUILD_NUMBER} building services...", teamDomain: "${USERNAME}", token: "${PASSWORD}"
 						}
 		    	}
-					stage ('Build EVE SERVICES') {
+					stage ('build services') {
 						for (int s = 0; s < services.size(); s++){
 							switch("${services[s]}".toString()){
 								case "evbolt":
@@ -288,13 +241,13 @@ node('linux-ubuntu-16.04-amd64') {
 									ext = ""
 								}
 								for (int a = 0; a < archs.size(); a++){
-									sh("GOOS=${oses[o]} GOARCH=${archs[a]} ${gobin} build -o ${curr}/${dist}/${oses[o]}-${archs[a]}-${version}_${services[s]}${ext} ${tmp}/${services[s]}_main.go")
+									sh("GOOS=${oses[o]} GOARCH=${archs[a]} go build -o ${curr}/${dist}/${oses[o]}-${archs[a]}-${version}_${services[s]}${ext} ${tmp}/${services[s]}_main.go")
 								}
 							}
 						}
 					}
 				}
-				stage ('Archive EVE ARTIFACTS'){
+				stage ('archive artifacts'){
 					archiveArtifacts("${dist}/*")
 				}
 				stage("test :: post to slack") {
