@@ -187,6 +187,9 @@ func main() {
 	case "delete":
 		switch subcommand {
 		case "bintray":
+			eve.SetBinTrayURL(URL)
+			eve.SetBinTrayUser(username)
+			eve.SetBinTrayPassword(password)
 			bintray()
 		default:
 			fmt.Println("error: the given " + command + "/" + subcommand + " is not supported yet")
@@ -196,6 +199,9 @@ func main() {
 	case "list":
 		switch subcommand {
 		case "bintray":
+			eve.SetBinTrayURL(URL)
+			eve.SetBinTrayUser(username)
+			eve.SetBinTrayPassword(password)
 			bintray()
 		default:
 			fmt.Println("error: the given " + command + "/" + subcommand + " is not supported yet")
@@ -205,6 +211,9 @@ func main() {
 	case "publish":
 		switch subcommand {
 		case "bintray":
+			eve.SetBinTrayURL(URL)
+			eve.SetBinTrayUser(username)
+			eve.SetBinTrayPassword(password)
 			bintray()
 		default:
 			fmt.Println("error: the given " + command + "/" + subcommand + " is not supported yet")

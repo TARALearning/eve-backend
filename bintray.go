@@ -15,6 +15,18 @@ var (
 	binTrayPassword = ""
 )
 
+func SetBinTrayURL(URL string) {
+	binTrayURL = URL
+}
+
+func SetBinTrayUser(username string) {
+	binTrayUser = username
+}
+
+func SetBinTrayPassword(password string) {
+	binTrayPassword = password
+}
+
 func BinTrayDeleteFile(subject, repo, filepath string) error {
 	client := EvHTTPNewClient()
 	url := binTrayURL + "/content/" + subject + "/" + repo + "/" + url.QueryEscape(filepath)
