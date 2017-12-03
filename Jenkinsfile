@@ -49,10 +49,8 @@ node('linux-ubuntu-16.04-amd64') {
 						}
 		    	}
 					stage ('run unit tests'){
-						sh("cd tests && chmod +x gen.ssl.client.crt.sh && ./gen.ssl.client.crt.sh")
-						sh("go test -v -race -timeout=5m")
-						sh("go test -coverprofile=dist/coverage.out")
-						sh("cd ${src} && gocov test | gocov-xml > ${dist}/coverage.xml")
+						sh("cd ${src}/tests && chmod +x gen.ssl.client.crt.sh && ./gen.ssl.client.crt.sh")
+						sh("cd ${src} && gocov test -v -race -timeout=5m | gocov-xml > ${dist}/coverage.xml")
 					}
 					stage ('Upload CodeCoverage to codecov.io'){
 						withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: 'codecov', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD']]) {
@@ -161,10 +159,8 @@ node('linux-ubuntu-16.04-amd64') {
 						}
 					}
 					stage ('run unit tests'){
-						sh("cd tests && chmod +x gen.ssl.client.crt.sh && ./gen.ssl.client.crt.sh")
-						sh("go test -v -race -timeout=5m")
-						sh("go test -coverprofile=dist/coverage.out")
-						sh("cd ${src} && gocov test | gocov-xml > ${dist}/coverage.xml")
+						sh("cd ${src}/tests && chmod +x gen.ssl.client.crt.sh && ./gen.ssl.client.crt.sh")
+						sh("cd ${src} && gocov test -v -race -timeout=5m | gocov-xml > ${dist}/coverage.xml")
 					}
 					stage("test build tools :: post to slack") {
 						withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: 'slack', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD']]) {
@@ -244,10 +240,8 @@ node('linux-ubuntu-16.04-amd64') {
 						}
 					}
 					stage ('run unit tests'){
-						sh("cd tests && chmod +x gen.ssl.client.crt.sh && ./gen.ssl.client.crt.sh")
-						sh("go test -v -race -timeout=5m")
-						sh("go test -coverprofile=dist/coverage.out")
-						sh("cd ${src} && gocov test | gocov-xml > ${dist}/coverage.xml")
+						sh("cd ${src}/tests && chmod +x gen.ssl.client.crt.sh && ./gen.ssl.client.crt.sh")
+						sh("cd ${src} && gocov test -v -race -timeout=5m | gocov-xml > ${dist}/coverage.xml")
 					}
 					stage("dev :: post to slack") {
 						withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: 'slack', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD']]) {
