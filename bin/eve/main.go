@@ -409,6 +409,7 @@ func bintray() {
 	if command == "package" {
 		unpublished = 0
 	}
+
 	// download the backend files
 	allFiles, err := getAllBintrayFiles(subject, repo, rpackage, version, unpublished)
 	if err != nil {
@@ -444,153 +445,155 @@ func bintray() {
 			log.Fatal(errors.New("the given command " + command + " is not supported!"))
 		}
 	}
-	// donwload the frontend files
-	webrootFiles, err := getAllBintrayFiles(subject, frepo, fpackage, fversion, unpublished)
-	if err != nil {
-		log.Fatal(err)
-	}
-	if len(packageDarwin) > 0 && len(packageLinux) > 0 && len(packageWindows) > 0 {
-		fmt.Println("packaging requested files for darwin to given target " + target + "...")
-		for _, pFile := range packageDarwin {
-			content, err := eve.BinTrayDownloadFile(subject, repo, pFile)
-			if err != nil {
-				log.Fatal(err)
-			}
-			targetFile := target + string(os.PathSeparator) + "darwin" + string(os.PathSeparator) + strings.Replace(filepath.Base(pFile), "darwin-amd64-"+version+"_", "", 1)
-			root := filepath.Dir(targetFile)
-			err = os.MkdirAll(root, 0777)
-			if err != nil {
-				log.Fatal(err)
-			}
-			fmt.Println("writing file", targetFile, "...")
-			err = ioutil.WriteFile(targetFile, content, 0777)
-			if err != nil {
-				log.Fatal(err)
-			}
-		}
-		err := generateVersionFile(target + string(os.PathSeparator) + "darwin" + string(os.PathSeparator) + "VERSIONS")
+	if command == "package" {
+		// donwload the frontend files
+		webrootFiles, err := getAllBintrayFiles(subject, frepo, fpackage, fversion, unpublished)
 		if err != nil {
 			log.Fatal(err)
 		}
-		err = generateReadmeFile(target + string(os.PathSeparator) + "darwin" + string(os.PathSeparator) + "README.md")
-		if err != nil {
-			log.Fatal(err)
-		}
-		for _, wFile := range webrootFiles {
-			content, err := eve.BinTrayDownloadFile(subject, frepo, wFile)
+		if len(packageDarwin) > 0 && len(packageLinux) > 0 && len(packageWindows) > 0 {
+			fmt.Println("packaging requested files for darwin to given target " + target + "...")
+			for _, pFile := range packageDarwin {
+				content, err := eve.BinTrayDownloadFile(subject, repo, pFile)
+				if err != nil {
+					log.Fatal(err)
+				}
+				targetFile := target + string(os.PathSeparator) + "darwin" + string(os.PathSeparator) + strings.Replace(filepath.Base(pFile), "darwin-amd64-"+version+"_", "", 1)
+				root := filepath.Dir(targetFile)
+				err = os.MkdirAll(root, 0777)
+				if err != nil {
+					log.Fatal(err)
+				}
+				fmt.Println("writing file", targetFile, "...")
+				err = ioutil.WriteFile(targetFile, content, 0777)
+				if err != nil {
+					log.Fatal(err)
+				}
+			}
+			err := generateVersionFile(target + string(os.PathSeparator) + "darwin" + string(os.PathSeparator) + "VERSIONS")
 			if err != nil {
 				log.Fatal(err)
 			}
-			rootFolder := strings.Split(wFile, "/")
-			targetFile := target + string(os.PathSeparator) + "darwin" + string(os.PathSeparator) + strings.Replace(wFile, rootFolder[0], "webroot", 1)
-			root := filepath.Dir(targetFile)
-			err = os.MkdirAll(root, 0777)
+			err = generateReadmeFile(target + string(os.PathSeparator) + "darwin" + string(os.PathSeparator) + "README.md")
 			if err != nil {
 				log.Fatal(err)
 			}
-			fmt.Println("writing file", targetFile, "...")
-			err = ioutil.WriteFile(targetFile, content, 0777)
+			for _, wFile := range webrootFiles {
+				content, err := eve.BinTrayDownloadFile(subject, frepo, wFile)
+				if err != nil {
+					log.Fatal(err)
+				}
+				rootFolder := strings.Split(wFile, "/")
+				targetFile := target + string(os.PathSeparator) + "darwin" + string(os.PathSeparator) + strings.Replace(wFile, rootFolder[0], "webroot", 1)
+				root := filepath.Dir(targetFile)
+				err = os.MkdirAll(root, 0777)
+				if err != nil {
+					log.Fatal(err)
+				}
+				fmt.Println("writing file", targetFile, "...")
+				err = ioutil.WriteFile(targetFile, content, 0777)
+				if err != nil {
+					log.Fatal(err)
+				}
+			}
+			fmt.Println("packaging requested files for linux to given target " + target + "...")
+			for _, pFile := range packageLinux {
+				content, err := eve.BinTrayDownloadFile(subject, repo, pFile)
+				if err != nil {
+					log.Fatal(err)
+				}
+				targetFile := target + string(os.PathSeparator) + "linux" + string(os.PathSeparator) + strings.Replace(filepath.Base(pFile), "linux-amd64-"+version+"_", "", 1)
+				root := filepath.Dir(targetFile)
+				err = os.MkdirAll(root, 0777)
+				if err != nil {
+					log.Fatal(err)
+				}
+				fmt.Println("writing file", targetFile, "...")
+				err = ioutil.WriteFile(targetFile, content, 0777)
+				if err != nil {
+					log.Fatal(err)
+				}
+			}
+			err = generateVersionFile(target + string(os.PathSeparator) + "linux" + string(os.PathSeparator) + "VERSIONS")
 			if err != nil {
 				log.Fatal(err)
 			}
-		}
-		fmt.Println("packaging requested files for linux to given target " + target + "...")
-		for _, pFile := range packageLinux {
-			content, err := eve.BinTrayDownloadFile(subject, repo, pFile)
+			err = generateReadmeFile(target + string(os.PathSeparator) + "linux" + string(os.PathSeparator) + "README.md")
 			if err != nil {
 				log.Fatal(err)
 			}
-			targetFile := target + string(os.PathSeparator) + "linux" + string(os.PathSeparator) + strings.Replace(filepath.Base(pFile), "linux-amd64-"+version+"_", "", 1)
-			root := filepath.Dir(targetFile)
-			err = os.MkdirAll(root, 0777)
+			for _, wFile := range webrootFiles {
+				content, err := eve.BinTrayDownloadFile(subject, frepo, wFile)
+				if err != nil {
+					log.Fatal(err)
+				}
+				rootFolder := strings.Split(wFile, "/")
+				targetFile := target + string(os.PathSeparator) + "linux" + string(os.PathSeparator) + strings.Replace(wFile, rootFolder[0], "webroot", 1)
+				root := filepath.Dir(targetFile)
+				err = os.MkdirAll(root, 0777)
+				if err != nil {
+					log.Fatal(err)
+				}
+				fmt.Println("writing file", targetFile, "...")
+				err = ioutil.WriteFile(targetFile, content, 0777)
+				if err != nil {
+					log.Fatal(err)
+				}
+			}
+			fmt.Println("zipping the linux version...")
+			err = eve.Zip("linux", "linux")
 			if err != nil {
 				log.Fatal(err)
 			}
-			fmt.Println("writing file", targetFile, "...")
-			err = ioutil.WriteFile(targetFile, content, 0777)
+			fmt.Println("packaging requested files for windows to given target " + target + "...")
+			for _, pFile := range packageWindows {
+				content, err := eve.BinTrayDownloadFile(subject, repo, pFile)
+				if err != nil {
+					log.Fatal(err)
+				}
+				targetFile := target + string(os.PathSeparator) + "windows" + string(os.PathSeparator) + strings.Replace(filepath.Base(pFile), "windows-amd64-"+version+"_", "", 1)
+				root := filepath.Dir(targetFile)
+				err = os.MkdirAll(root, 0777)
+				if err != nil {
+					log.Fatal(err)
+				}
+				fmt.Println("writing file", targetFile, "...")
+				err = ioutil.WriteFile(targetFile, content, 0777)
+				if err != nil {
+					log.Fatal(err)
+				}
+			}
+			err = generateVersionFile(target + string(os.PathSeparator) + "windows" + string(os.PathSeparator) + "VERSIONS")
 			if err != nil {
 				log.Fatal(err)
 			}
-		}
-		err = generateVersionFile(target + string(os.PathSeparator) + "linux" + string(os.PathSeparator) + "VERSIONS")
-		if err != nil {
-			log.Fatal(err)
-		}
-		err = generateReadmeFile(target + string(os.PathSeparator) + "linux" + string(os.PathSeparator) + "README.md")
-		if err != nil {
-			log.Fatal(err)
-		}
-		for _, wFile := range webrootFiles {
-			content, err := eve.BinTrayDownloadFile(subject, frepo, wFile)
+			err = generateReadmeFile(target + string(os.PathSeparator) + "windows" + string(os.PathSeparator) + "README.md")
 			if err != nil {
 				log.Fatal(err)
 			}
-			rootFolder := strings.Split(wFile, "/")
-			targetFile := target + string(os.PathSeparator) + "linux" + string(os.PathSeparator) + strings.Replace(wFile, rootFolder[0], "webroot", 1)
-			root := filepath.Dir(targetFile)
-			err = os.MkdirAll(root, 0777)
+			for _, wFile := range webrootFiles {
+				content, err := eve.BinTrayDownloadFile(subject, frepo, wFile)
+				if err != nil {
+					log.Fatal(err)
+				}
+				rootFolder := strings.Split(wFile, "/")
+				targetFile := target + string(os.PathSeparator) + "windows" + string(os.PathSeparator) + strings.Replace(wFile, rootFolder[0], "webroot", 1)
+				root := filepath.Dir(targetFile)
+				err = os.MkdirAll(root, 0777)
+				if err != nil {
+					log.Fatal(err)
+				}
+				fmt.Println("writing file", targetFile, "...")
+				err = ioutil.WriteFile(targetFile, content, 0777)
+				if err != nil {
+					log.Fatal(err)
+				}
+			}
+			fmt.Println("zipping the linux version...")
+			err = eve.Zip("windows", "windows")
 			if err != nil {
 				log.Fatal(err)
 			}
-			fmt.Println("writing file", targetFile, "...")
-			err = ioutil.WriteFile(targetFile, content, 0777)
-			if err != nil {
-				log.Fatal(err)
-			}
-		}
-		fmt.Println("zipping the linux version...")
-		err = eve.Zip("linux", "linux")
-		if err != nil {
-			log.Fatal(err)
-		}
-		fmt.Println("packaging requested files for windows to given target " + target + "...")
-		for _, pFile := range packageWindows {
-			content, err := eve.BinTrayDownloadFile(subject, repo, pFile)
-			if err != nil {
-				log.Fatal(err)
-			}
-			targetFile := target + string(os.PathSeparator) + "windows" + string(os.PathSeparator) + strings.Replace(filepath.Base(pFile), "windows-amd64-"+version+"_", "", 1)
-			root := filepath.Dir(targetFile)
-			err = os.MkdirAll(root, 0777)
-			if err != nil {
-				log.Fatal(err)
-			}
-			fmt.Println("writing file", targetFile, "...")
-			err = ioutil.WriteFile(targetFile, content, 0777)
-			if err != nil {
-				log.Fatal(err)
-			}
-		}
-		err = generateVersionFile(target + string(os.PathSeparator) + "windows" + string(os.PathSeparator) + "VERSIONS")
-		if err != nil {
-			log.Fatal(err)
-		}
-		err = generateReadmeFile(target + string(os.PathSeparator) + "windows" + string(os.PathSeparator) + "README.md")
-		if err != nil {
-			log.Fatal(err)
-		}
-		for _, wFile := range webrootFiles {
-			content, err := eve.BinTrayDownloadFile(subject, frepo, wFile)
-			if err != nil {
-				log.Fatal(err)
-			}
-			rootFolder := strings.Split(wFile, "/")
-			targetFile := target + string(os.PathSeparator) + "windows" + string(os.PathSeparator) + strings.Replace(wFile, rootFolder[0], "webroot", 1)
-			root := filepath.Dir(targetFile)
-			err = os.MkdirAll(root, 0777)
-			if err != nil {
-				log.Fatal(err)
-			}
-			fmt.Println("writing file", targetFile, "...")
-			err = ioutil.WriteFile(targetFile, content, 0777)
-			if err != nil {
-				log.Fatal(err)
-			}
-		}
-		fmt.Println("zipping the linux version...")
-		err = eve.Zip("windows", "windows")
-		if err != nil {
-			log.Fatal(err)
 		}
 	}
 }
