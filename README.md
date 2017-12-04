@@ -28,16 +28,14 @@ The eve pkg contents are:
 [![codecov](https://codecov.io/gh/evalgo/eve-backend/branch/master/graph/badge.svg)](https://codecov.io/gh/evalgo/eve-backend)
 
 ## TOOLS
-* [eve-gen]()
-* [eve-setup]()
-* [eve-bintray]()
-  have a look about the scope and usage for this tool at the bottom of this file
+* [eve]()
 
 ## SERVICES
 * [evauth]()
 * [evbolt]()
 * [evlog]()
 * [evschedule]()
+* [evweb]()
 
 ## SERVICE MODULES/FEATURES
 * debug
@@ -108,7 +106,9 @@ The eve pkg contents are:
 
 ## SETUP
 ```bash
-    go run bin/eve-setup/main.go \
+    go run bin/eve/main.go \
+        setup \
+        evauth \
         http://127.0.0.1:9092/{VERSION}/eve/evbolt  \
         francisc.simon@evalgo.org \
         secret \
@@ -116,20 +116,18 @@ The eve pkg contents are:
         secret.sig.key
 ```
 
-## EVE-BINTRAY SCOPE
-The eve-bintray tool is used for deleting old bintray files before running the jenkins pipeline job which does upload the service and tool executables to bintray
-
-## EVE-BINTRAY USAGE
+## BINTRAY
 ```bash
-    go build -o eve-bintray $GOPATH/src/evalgo.org/eve/bin/eve-bintray/main.go
-    chmod +x eve-bintray
     # all the variables used here are defined in the bintray REST API documentation
     # https://bintray.com/docs/api/
-    ./eve-bintray \
-        ${subject} \
-        ${repo} \
-        ${package} \
-        ${version} \
-        ${user} \
-        ${api_token}
+    go run bin/eve/main.go 
+        delete \
+        bintray \
+        -subject ${subject} \
+        -repo ${repo} \
+        -rpackage ${package} \
+        -version ${version} \
+        -username ${user} \
+        -password ${api_token} \
+        -url https://api.bintray.com
 ```
