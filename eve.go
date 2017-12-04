@@ -10,6 +10,14 @@ import (
 	"strings"
 )
 
+const (
+	EvAuthDefaultAddress     = "127.0.0.1:9093"
+	EvBoltDefaultAddress     = "127.0.0.1:9092"
+	EvLogDefaultAddress      = "127.0.0.1:9091"
+	EvScheduleDefaultAddress = "127.0.0.1:9090"
+	EvWebDefaultAddress      = "127.0.0.1:9089"
+)
+
 type Uses []string
 
 func (c *Uses) String() string {
@@ -58,7 +66,7 @@ func GenEvSchedule(config string, use Uses, filepath string) (string, error) {
 		}
 		vars = map[string]interface{}{
 			"Package":                "main",
-			"DefaultAddress":         "127.0.0.1:9091",
+			"DefaultAddress":         EvScheduleDefaultAddress,
 			"UsageFunc":              "EVUsage",
 			"Version":                VERSION,
 			"Name":                   "EVSchedule",
@@ -72,7 +80,7 @@ func GenEvSchedule(config string, use Uses, filepath string) (string, error) {
 			"TOKEN_STORAGE_DB":       "",
 			"TOKEN_STORAGE_BUCKET":   "",
 			"USE_EVLOG":              true,
-			"EVLOG_URL":              "http://127.0.0.1:9091/" + VERSION + "/eve/evlog",
+			"EVLOG_URL":              "http://" + EvLogDefaultAddress + "/" + VERSION + "/eve/evlog",
 			"USE_EVLOG_API":          false,
 			"USE_EVSESSION":          false,
 			"SESSION_STORAGE_URL":    "",
@@ -155,7 +163,7 @@ func GenEvLog(config string, use Uses, filepath string) (string, error) {
 		}
 		vars = map[string]interface{}{
 			"Package":                "main",
-			"DefaultAddress":         "127.0.0.1:9091",
+			"DefaultAddress":         EvLogDefaultAddress,
 			"UsageFunc":              "EVUsage",
 			"Version":                VERSION,
 			"Name":                   "EVLog",
@@ -247,7 +255,7 @@ func GenEvBolt(config string, use Uses, filepath string) (string, error) {
 			"path",
 		}
 		vars = map[string]interface{}{"Package": "main",
-			"DefaultAddress":         "127.0.0.1:9092",
+			"DefaultAddress":         EvBoltDefaultAddress,
 			"UsageFunc":              "EVUsage",
 			"Version":                VERSION,
 			"Name":                   "EVBolt",
@@ -261,7 +269,7 @@ func GenEvBolt(config string, use Uses, filepath string) (string, error) {
 			"TOKEN_STORAGE_DB":       "",
 			"TOKEN_STORAGE_BUCKET":   "",
 			"USE_EVLOG":              true,
-			"EVLOG_URL":              "http://127.0.0.1:9091/" + VERSION + "/eve/evlog",
+			"EVLOG_URL":              "http://" + EvLogDefaultAddress + "/" + VERSION + "/eve/evlog",
 			"USE_EVLOG_API":          false,
 			"USE_EVSESSION":          false,
 			"SESSION_STORAGE_URL":    "",
@@ -346,7 +354,7 @@ func GenEvAuth(config string, use Uses, filepath string) (string, error) {
 			"path",
 		}
 		vars = map[string]interface{}{"Package": "main",
-			"DefaultAddress":         "127.0.0.1:9093",
+			"DefaultAddress":         EvAuthDefaultAddress,
 			"UsageFunc":              "EVUsage",
 			"Version":                VERSION,
 			"Name":                   "EVAuth",
@@ -356,24 +364,24 @@ func GenEvAuth(config string, use Uses, filepath string) (string, error) {
 			"ENABLE_CROSS_ORIGIN":    true,
 			"USE_PROMETHEUS":         true,
 			"USE_EVTOKEN":            true,
-			"TOKEN_STORAGE_URL":      "http://127.0.0.1:9092/" + VERSION + "/eve/evbolt",
+			"TOKEN_STORAGE_URL":      "http://" + EvBoltDefaultAddress + "/" + VERSION + "/eve/evbolt",
 			"TOKEN_STORAGE_DB":       "tokens.db",
 			"TOKEN_STORAGE_BUCKET":   "tokens",
-			"USE_EVLOG":              false,
-			"EVLOG_URL":              "",
+			"USE_EVLOG":              true,
+			"EVLOG_URL":              "http://" + EvLogDefaultAddress + "/" + VERSION + "/eve/evlog",
 			"USE_EVLOG_API":          false,
 			"USE_EVSESSION":          true,
-			"SESSION_STORAGE_URL":    "http://127.0.0.1:9092/" + VERSION + "/eve/evbolt",
+			"SESSION_STORAGE_URL":    "http://" + EvBoltDefaultAddress + "/" + VERSION + "/eve/evbolt",
 			"SESSION_STORAGE_DB":     "sessions.db",
 			"SESSION_STORAGE_BUCKET": "sessions",
 			"USE_EVSECRET":           true,
-			"SECRET_STORAGE_URL":     "http://127.0.0.1:9092/" + VERSION + "/eve/evbolt",
+			"SECRET_STORAGE_URL":     "http://" + EvBoltDefaultAddress + "/" + VERSION + "/eve/evbolt",
 			"SECRET_STORAGE_DB":      "secrets.db",
 			"SECRET_STORAGE_BUCKET":  "secrets",
 			"SECRET_ENC_KEY":         "TokenKeyEnc",
 			"SECRET_SIG_KEY":         "TokenKeySig",
 			"USE_EVUSER":             true,
-			"USER_STORAGE_URL":       "http://127.0.0.1:9092/" + VERSION + "/eve/evbolt",
+			"USER_STORAGE_URL":       "http://" + EvBoltDefaultAddress + "/" + VERSION + "/eve/evbolt",
 			"USER_STORAGE_DB":        "users.db",
 			"USER_STORAGE_BUCKET":    "users",
 			"USE_EVBOLT_API":         true,
@@ -447,7 +455,7 @@ func GenEvWeb(config string, use Uses, filepath string) (string, error) {
 		}
 		vars = map[string]interface{}{
 			"Package":        "main",
-			"DefaultAddress": "127.0.0.1:9000",
+			"DefaultAddress": EvWebDefaultAddress,
 			"UsageFunc":      "EVUsage",
 			"Version":        VERSION,
 			"Name":           "EVWeb",
@@ -456,7 +464,7 @@ func GenEvWeb(config string, use Uses, filepath string) (string, error) {
 			"DEBUG":          false,
 			"USE_PROMETHEUS": true,
 			"USE_EVLOG":      true,
-			"EVLOG_URL":      "http://127.0.0.1:9091/" + VERSION + "/eve/evlog",
+			"EVLOG_URL":      "http://" + EvLogDefaultAddress + "/" + VERSION + "/eve/evlog",
 			"URLS": []string{
 				"/help",
 				"/evlog",
