@@ -12,7 +12,6 @@ func EVUserPassword(password string) string {
 }
 
 func EVUserValidateCredentials(email, password string) bool {
-    log.Println(email,password)
 	uid := EVUserUid(email)
     res,err := EVUserGet(uid)
     if err != nil{
@@ -38,7 +37,6 @@ func EVUserValidateCredentials(email, password string) bool {
 func EVUserIsAllowed(w http.ResponseWriter, r *http.Request) bool {
     // check for authenticatio token
     if r.Header.Get("Authorization") != "" {
-        log.Println(r.Header.Get("Authorization"))
         sp := new(EVSecretProvider)
         enc, sig, err := sp.SecretGet()
         if err != nil {

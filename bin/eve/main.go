@@ -300,7 +300,7 @@ func generate() {
 }
 
 func setup() {
-	resp, err := eve.EvHTTPSendForm(http.MethodPost, URL, url.Values{"database": {evUserStorageDB}, "bucket": {evUserStorageBucket}, "key": {username}, "message": {password}, "evbolt.msgtype": {"string"}})
+	resp, err := eve.EvHTTPSendForm(http.MethodPost, URL, url.Values{"database": {evUserStorageDB}, "bucket": {evUserStorageBucket}, "key": {eve.Sha1(username)}, "message": {eve.Sha1(password)}, "evbolt.msgtype": {"string"}})
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -495,6 +495,11 @@ func bintray() {
 				if err != nil {
 					log.Fatal(err)
 				}
+			}
+			fmt.Println("zipping the darwin version...")
+			err = eve.Zip("darwin", "darwin")
+			if err != nil {
+				log.Fatal(err)
 			}
 			fmt.Println("packaging requested files for linux to given target " + target + "...")
 			for _, pFile := range packageLinux {

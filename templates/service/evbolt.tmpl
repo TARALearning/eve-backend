@@ -10,9 +10,6 @@
             }
         {{end}}
         res := ""
-        {{if .DEBUG}}
-            log.Println(r.Method, r.RequestURI)
-        {{end}}
         switch r.Method {
         case "GET":
             switch r.FormValue("evbolt.data") {

@@ -97,7 +97,6 @@
         // create token content message
         tokenProps := map[string]string{"u": EVUserUid(email), "c": time.Now().Format("2006-01-02 15:04:05.999999999 -0700 MST"), "e": time.Now().AddDate(0, 0, {{.TOKEN_EXP_DAYS}}).Format("2006-01-02 15:04:05.999999999 -0700 MST"), "t": "", "s": sessId}
         tMessage, err := eve.PlainToken(tokenProps)
-        log.Println(tMessage)
         if err != nil {
             eve.ReturnErrorMessage(w, 500, err, format)
             return
@@ -114,13 +113,11 @@
             eve.ReturnErrorMessage(w, 500, err, format)
             return
         }
-        logg,err := eve.ResponseBodyAll(res)
+        _,err = eve.ResponseBodyAll(res)
         if err != nil {
             eve.ReturnErrorMessage(w, 500, err, format)
             return
         }
-        log.Println("logg ::: ",string(logg))
-
         // write the token into the header
         w.Header().Add("Authorization", "Bearer "+token)
 
@@ -143,18 +140,16 @@
     }
 
      if r.URL.Path == "{{.ROUTE_PATH_PREFIX}}logout" {
-        email := r.FormValue("email")
-        res, err := EVUserDelete(EVUserUid(email))
+        res, err := EVUserDelete(EVUserUid(r.FormValue("email")))
         if err != nil {
             eve.ReturnErrorMessage(w, 500, err, format)
             return
         }
-        logg,err := eve.ResponseBodyAll(res)
+        _,err = eve.ResponseBodyAll(res)
         if err != nil {
             eve.ReturnErrorMessage(w, 500, err, format)
             return
         }
-        log.Println(string(logg))
         eve.ReturnResult(w, 200, "success", format)
         return
     }

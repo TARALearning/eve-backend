@@ -61,10 +61,9 @@ func (hh *RestHttpHandler) ServeHTTP(w http.ResponseWriter, r *http.Request){
         }
     {{end}}
     format := path.Ext(r.URL.Path)
-    log.Println("eve","::","requested format",format)
     r.URL.Path = strings.Replace(r.URL.Path, format, "", -1)
     {{if .DEBUG}}
-        log.Println("eve","::",r.Method, r.URL.Path)
+        log.Println(r.Method, r.URL.Path)
         {{if .USE_EVLOG}}
             // log only to the evlog api if it is not the api call itself
             // otherwise it will create a endless requests loop
