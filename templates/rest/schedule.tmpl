@@ -29,6 +29,8 @@ func (s *Scheduler) RESTAppendCommand(w http.ResponseWriter, r *http.Request) er
 // RESTUpdateCommand will update a running command in the Scheduler Running map
 func (s *Scheduler) RESTUpdateCommand(w http.ResponseWriter, r *http.Request) error {
 	switch r.FormValue("Mode") {
+	case "Append.Process":
+		return s.RESTAppendCommand(w, r)
 	case "Start.Processes":
 		return s.RESTServicesStart(w, r)
 	case "Stop.Processes":
@@ -59,7 +61,13 @@ func (s *Scheduler) RESTServicesStop(w http.ResponseWriter, r *http.Request) err
 
 // RESTServicesStart
 func (s *Scheduler) RESTServicesStart(w http.ResponseWriter, r *http.Request) error {
-	return s.EVSched.ServicesRun(s.EVSched.WaitGroup())
+	err := s.EVSched.ServicesRun(s.EVSched.WaitGroup())
+	if err != nil {
+		return err
+	}
+	w.WriteHeader(200)
+	w.Write([]byte("OK"))
+	return nil
 }
 
 // RESTServiceStop

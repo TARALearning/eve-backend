@@ -15,6 +15,7 @@ import (
 	"path/filepath"
 	"strconv"
 	"strings"
+	"time"
 
 	"evalgo.org/eve"
 )
@@ -255,6 +256,8 @@ func main() {
 		switch subcommand {
 		case "evauth":
 			setup()
+		case "evschedule":
+			schedule()
 		default:
 			fmt.Println("error: the given " + command + "/" + subcommand + " is not supported yet")
 			GenUsage()
@@ -265,6 +268,156 @@ func main() {
 		GenUsage()
 		os.Exit(2)
 	}
+}
+
+func scheduleRegister(srv string) (*bytes.Buffer, error) {
+	buff := bytes.NewBuffer(nil)
+	var vars url.Values
+	switch srv {
+	case "evauth":
+		vars = url.Values{
+			"Mode": []string{"Append.Process"},
+			"Cmd":  []string{"./evauth"},
+			"Args": []string{"http"},
+		}
+	case "evbolt":
+		vars = url.Values{
+			"Mode": []string{"Append.Process"},
+			"Cmd":  []string{"./evbolt"},
+			"Args": []string{"http"},
+		}
+	case "evlog":
+		vars = url.Values{
+			"Mode": []string{"Append.Process"},
+			"Cmd":  []string{"./evlog"},
+			"Args": []string{"http"},
+		}
+	case "evweb":
+		vars = url.Values{
+			"Mode": []string{"Append.Process"},
+			"Cmd":  []string{"./evweb"},
+			"Args": []string{"http,-webroot,webroot"},
+		}
+	case "start":
+		vars = url.Values{
+			"Mode": []string{"Start.Processes"},
+		}
+	}
+	buff.WriteString(vars.Encode())
+	return buff, nil
+}
+
+func schedule() error {
+	client := eve.EvHTTPNewClient()
+	if URL == "" {
+		URL = "http://" + eve.EvScheduleDefaultAddress + "/" + eve.VERSION + "/eve/evschedule"
+	}
+	fmt.Print("appending process evlog...")
+	time.Sleep(time.Second * 3)
+	evlog, err := scheduleRegister("evlog")
+	if err != nil {
+		return err
+	}
+	req, err := http.NewRequest(http.MethodPut, URL, evlog)
+	if err != nil {
+		return err
+	}
+	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+	resp, err := client.Do(req)
+	if err != nil {
+		return err
+	}
+	body, err := ioutil.ReadAll(resp.Body)
+	resp.Body.Close()
+	if err != nil {
+		return err
+	}
+	fmt.Print(string(body) + "\n")
+	fmt.Print("appending process evauth...")
+	time.Sleep(time.Second * 3)
+	evauth, err := scheduleRegister("evauth")
+	if err != nil {
+		return err
+	}
+	req, err = http.NewRequest(http.MethodPut, URL, evauth)
+	if err != nil {
+		return err
+	}
+	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+	resp, err = client.Do(req)
+	if err != nil {
+		return err
+	}
+	body, err = ioutil.ReadAll(resp.Body)
+	resp.Body.Close()
+	if err != nil {
+		return err
+	}
+	fmt.Print(string(body) + "\n")
+	fmt.Print("appending process evbolt...")
+	time.Sleep(time.Second * 3)
+	evbolt, err := scheduleRegister("evbolt")
+	if err != nil {
+		return err
+	}
+	req, err = http.NewRequest(http.MethodPut, URL, evbolt)
+	if err != nil {
+		return err
+	}
+	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+	resp, err = client.Do(req)
+	if err != nil {
+		return err
+	}
+	body, err = ioutil.ReadAll(resp.Body)
+	resp.Body.Close()
+	if err != nil {
+		return err
+	}
+	fmt.Print(string(body) + "\n")
+	fmt.Print("appending process evweb...")
+	time.Sleep(time.Second * 3)
+	evweb, err := scheduleRegister("evweb")
+	if err != nil {
+		return err
+	}
+	req, err = http.NewRequest(http.MethodPut, URL, evweb)
+	if err != nil {
+		return err
+	}
+	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+	resp, err = client.Do(req)
+	if err != nil {
+		return err
+	}
+	body, err = ioutil.ReadAll(resp.Body)
+	resp.Body.Close()
+	if err != nil {
+		return err
+	}
+	fmt.Print(string(body) + "\n")
+	fmt.Print("starting processes...")
+	time.Sleep(time.Second * 3)
+	start, err := scheduleRegister("start")
+	if err != nil {
+		return err
+	}
+	req, err = http.NewRequest(http.MethodPut, URL, start)
+	if err != nil {
+		return err
+	}
+	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+	resp, err = client.Do(req)
+	if err != nil {
+		return err
+	}
+	body, err = ioutil.ReadAll(resp.Body)
+	resp.Body.Close()
+	if err != nil {
+		return err
+	}
+	fmt.Print(string(body) + "\n")
+	return nil
 }
 
 func generate() {
