@@ -92,19 +92,13 @@ The eve pkg contents are:
     done
 ```
 
-## RUN
+## START SERVICES
 ```bash
-    # start the scheduler
-    dist/evschedule http&
-    # register all services
-    curl -X POST -d "Id=evauth&Cmd=dist/evlog&Args=http" http://127.0.0.1:9091/{VERSION}/eve/evschedule
-    curl -X POST -d "Id=evauth&Cmd=dist/evbolt&Args=http" http://127.0.0.1:9091/{VERSION}/eve/evschedule
-    curl -X POST -d "Id=evauth&Cmd=dist/evauth&Args=http" http://127.0.0.1:9091/{VERSION}/eve/evschedule
-    # start all services
-    curl -X PUT -d "Mode=Start.Processes" http://127.0.0.1:9091/{VERSION}/eve/evschedule
+    go run bin/eve/main.go \
+        setup \
+        evschedule
 ```
-
-## SETUP
+## SETUP EVAUTH
 ```bash
     go run bin/eve/main.go \
         setup \
